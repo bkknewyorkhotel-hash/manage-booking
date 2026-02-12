@@ -6,7 +6,7 @@ import { useTranslation } from '@/lib/LanguageContext'
 import {
     Users,
     DoorOpen,
-    Settings as Tool,
+    Settings as ToolIcon,
     AlertCircle,
     TrendingUp,
     CheckCircle2,
@@ -20,18 +20,20 @@ interface StatCardProps {
     value: string | number
     icon: any
     color: string
+    description?: string // Added description
 }
 
-function StatCard({ title, value, icon: Icon, color }: StatCardProps) {
+function StatCard({ title, value, icon: Icon, color, description }: StatCardProps) {
     return (
-        <div className="p-6 bg-card border rounded-xl shadow-sm">
-            <div className="flex items-center justify-between">
+        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm hover:shadow-md transition-all">
+            <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-sm font-medium text-muted-foreground">{title}</p>
-                    <h3 className="mt-1 text-2xl font-bold">{value}</h3>
+                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">{title}</p>
+                    <h3 className="text-4xl font-black tracking-tighter">{value}</h3>
+                    {description && <p className="text-xs font-bold text-muted-foreground mt-2">{description}</p>}
                 </div>
-                <div className={cn("p-2 rounded-lg", color)}>
-                    <Icon className="w-5 h-5" />
+                <div className={cn("p-4 rounded-2xl shadow-sm", color)}>
+                    <Icon size={28} />
                 </div>
             </div>
         </div>
@@ -137,51 +139,114 @@ export default function DashboardPage() {
     return (
         <Shell>
             <div className="max-w-7xl mx-auto space-y-6">
-                {/* Logistics Stats */}
-                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                    <StatCard
-                        title={t('arrivals')}
-                        value={arrivals.length}
-                        icon={DoorOpen}
-                        color="bg-emerald-500/10 text-emerald-600"
-                    />
-                    <StatCard
-                        title={t('departures')}
-                        value={departures.length}
-                        icon={Clock}
-                        color="bg-blue-500/10 text-blue-600"
-                    />
-                    <StatCard
-                        title={t('inHouse')}
-                        value={stats?.occupied || 0}
-                        icon={Users}
-                        color="bg-purple-500/10 text-purple-600"
-                    />
-                    <StatCard
-                        title="Occupancy"
-                        value={`${Math.round(stats?.rate || 0)}%`}
-                        icon={TrendingUp}
-                        color="bg-orange-500/10 text-orange-600"
-                    />
-                </div>
+                <div className="space-y-10">
+                    <header>
+                        <h2 className="text-3xl font-black text-primary uppercase tracking-tight">Hotel Overview</h2>
+                        <p className="text-muted-foreground font-bold">Real-time status and operations summary</p>
+                    </header>
 
-                {/* Room Status Breakdown & Shift History */}
-                <div className="grid grid-cols-1 gap-6 lg:grid-cols-3">
-                    <div className="lg:col-span-2 space-y-6">
-                        <div className="p-6 bg-card border rounded-xl shadow-sm">
-                            <h3 className="text-lg font-bold mb-4">{t('rooms')} - {t('today')}</h3>
-                            <div className="grid grid-cols-2 gap-4 sm:grid-cols-3">
-                                <RoomStatusTile label={t('vacantClean')} count={roomStats['VACANT_CLEAN'] || 0} color="border-emerald-500 text-emerald-600" icon={CheckCircle2} />
-                                <RoomStatusTile label={t('vacantDirty')} count={roomStats['VACANT_DIRTY'] || 0} color="border-amber-500 text-amber-600" icon={AlertCircle} />
-                                <RoomStatusTile label={t('occupied')} count={roomStats['OCCUPIED'] || 0} color="border-blue-500 text-blue-600" icon={Users} />
-                                <RoomStatusTile label={t('reserved')} count={roomStats['RESERVED'] || 0} color="border-purple-500 text-purple-600" icon={Clock} />
-                                <RoomStatusTile label={t('outOfOrder')} count={roomStats['OUT_OF_ORDER'] || 0} color="border-red-500 text-red-600" icon={Ban} />
-                                <RoomStatusTile label={t('inspecting')} count={roomStats['INSPECTING'] || 0} color="border-cyan-500 text-cyan-600" icon={Tool} />
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                        <StatCard
+                            title="Today's Occupancy"
+                            value={`${stats?.rate || 0}%`}
+                            icon={Users}
+                            color="bg-indigo-50 text-indigo-600"
+                            description={`${stats?.occupied || 0} / ${stats?.totalRooms || 0} Rooms occupied`}
+                        />
+                        <StatCard
+                            title="Arrivals"
+                            value={arrivals.length}
+                            icon={DoorOpen}
+                            color="bg-emerald-50 text-emerald-600"
+                            description="Check-ins expected today"
+                        />
+                        <StatCard
+                            title="Departures"
+                            value={departures.length}
+                            icon={Clock}
+                            color="bg-amber-50 text-amber-600"
+                            description="Check-outs expected today"
+                        />
+                        <StatCard
+                            title="Maintenance"
+                            value={roomStats['OUT_OF_ORDER'] || 0}
+                            icon={Ban}
+                            color="bg-rose-50 text-rose-600"
+                            description="Rooms currently out of service"
+                        />
+                    </div>
+
+                    <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                        {/* Arrivals/Departures Grid */}
+                        <div className="lg:col-span-2 space-y-8">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+                                {/* Expected Arrivals */}
+                                <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+                                    <div className="flex items-center space-x-3 mb-8">
+                                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckCircle2 size={24} /></div>
+                                        <h3 className="text-2xl font-black">Arrivals</h3>
+                                    </div>
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {arrivals.map((b: any) => (
+                                            <div key={b.id} className="p-5 bg-secondary/20 border border-transparent hover:border-border rounded-3xl transition-all">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
+                                                        <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
+                                                    </div>
+                                                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-black uppercase">
+                                                        {b.Rooms.length} Room(s)
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {arrivals.length === 0 && (
+                                            <div className="py-10 text-center text-muted-foreground font-bold">No arrivals today</div>
+                                        )}
+                                    </div>
+                                </div>
+
+                                {/* Expected Departures */}
+                                <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+                                    <div className="flex items-center space-x-3 mb-8">
+                                        <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Clock size={24} /></div>
+                                        <h3 className="text-2xl font-black">Departures</h3>
+                                    </div>
+                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                        {departures.map((b: any) => (
+                                            <div key={b.id} className="p-5 bg-secondary/20 border border-transparent hover:border-border rounded-3xl transition-all">
+                                                <div className="flex justify-between items-center">
+                                                    <div>
+                                                        <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
+                                                        <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
+                                                    </div>
+                                                    <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black uppercase">
+                                                        Room {b.Rooms.map((r: any) => r.Room?.roomNo).join(', ')}
+                                                    </span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                        {departures.length === 0 && (
+                                            <div className="py-10 text-center text-muted-foreground font-bold">No departures today</div>
+                                        )}
+                                    </div>
+                                </div>
+                            </div>
+
+                            {/* Quick Actions (Keep as is or polish) */}
+                            <div className="p-8 bg-indigo-600 text-white rounded-[2.5rem] shadow-indigo-200 shadow-xl overflow-hidden relative">
+                                <div className="relative z-10 flex items-center justify-between">
+                                    <div>
+                                        <h3 className="text-3xl font-black tracking-tight mb-2">Need Help?</h3>
+                                        <p className="text-indigo-100 font-bold max-w-[400px]">System is running normally. If you encounter any issues, please check the logs in Settings.</p>
+                                    </div>
+                                    <ToolIcon size={80} className="text-indigo-400 opacity-30 -rotate-12 absolute -right-4 top-0" />
+                                </div>
                             </div>
                         </div>
 
                         {/* Shift History */}
-                        <div className="p-6 bg-card border rounded-[2.5rem] shadow-sm">
+                        <div className="lg:col-span-1 p-6 bg-card border rounded-[2.5rem] shadow-sm">
                             <div className="flex items-center space-x-3 mb-8">
                                 <div className="p-3 bg-[#EEF2FF] text-[#6366F1] rounded-2xl"><Tool size={24} /></div>
                                 <h3 className="text-2xl font-black">Shift History</h3>

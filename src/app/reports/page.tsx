@@ -101,41 +101,41 @@ export default function ReportsPage() {
 
                 {/* Monthly Summary */}
                 {monthlyStats && (
-                    <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                        <div className="p-6 bg-card border rounded-2xl shadow-sm">
-                            <p className="text-xs font-bold uppercase text-muted-foreground mb-1">Monthly Revenue</p>
-                            <p className="text-3xl font-black text-primary">{formatCurrency(monthlyStats.revenue.total)}</p>
-                            <div className="mt-4 space-y-2 text-sm">
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">Rooms</span>
-                                    <span className="font-bold">{formatCurrency(monthlyStats.revenue.room)}</span>
+                    <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
+                        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+                            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest mb-2">Monthly Revenue</p>
+                            <p className="text-4xl font-black text-primary tracking-tighter">{formatCurrency(monthlyStats.revenue.total)}</p>
+                            <div className="mt-6 space-y-3 text-sm">
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground font-black">Rooms</span>
+                                    <span className="font-black text-lg">{formatCurrency(monthlyStats.revenue.room)}</span>
                                 </div>
-                                <div className="flex justify-between">
-                                    <span className="text-muted-foreground">POS</span>
-                                    <span className="font-bold">{formatCurrency(monthlyStats.revenue.pos)}</span>
+                                <div className="flex justify-between items-center">
+                                    <span className="text-muted-foreground font-black">POS</span>
+                                    <span className="font-black text-lg">{formatCurrency(monthlyStats.revenue.pos)}</span>
                                 </div>
                             </div>
                         </div>
-                        <div className="p-6 bg-card border rounded-2xl shadow-sm">
-                            <p className="text-xs font-bold uppercase text-muted-foreground mb-4">Booking Sources (This Month)</p>
-                            <div className="space-y-3">
+                        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+                            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest mb-6">Booking Sources</p>
+                            <div className="space-y-4">
                                 {monthlyStats.sources.map((s: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center">
-                                        <span className="font-medium">{s.name}</span>
-                                        <span className="px-2 py-0.5 bg-secondary rounded text-xs font-bold">{s.count}</span>
+                                        <span className="font-black">{s.name}</span>
+                                        <span className="px-3 py-1 bg-secondary text-secondary-foreground rounded-lg text-xs font-black">{s.count}</span>
                                     </div>
                                 ))}
                             </div>
                         </div>
-                        <div className="p-6 bg-card border rounded-2xl shadow-sm">
-                            <p className="text-xs font-bold uppercase text-muted-foreground mb-4">Top Selling Products</p>
-                            <div className="space-y-3">
+                        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+                            <p className="text-xs font-black uppercase text-muted-foreground tracking-widest mb-6">Top Selling Products</p>
+                            <div className="space-y-4">
                                 {monthlyStats.topProducts.map((p: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center text-sm">
-                                        <span className="truncate max-w-[150px]">{p.name}</span>
+                                        <span className="truncate max-w-[150px] font-black">{p.name}</span>
                                         <div className="text-right">
-                                            <p className="font-bold">{formatCurrency(p.total)}</p>
-                                            <p className="text-xs text-muted-foreground">{p.qty} sold</p>
+                                            <p className="font-black text-lg tracking-tighter">{formatCurrency(p.total)}</p>
+                                            <p className="text-[10px] font-black text-muted-foreground uppercase">{p.qty} sold</p>
                                         </div>
                                     </div>
                                 ))}
@@ -144,7 +144,7 @@ export default function ReportsPage() {
                     </div>
                 )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     {/* Paginated Shift History */}
                     <div className="p-6 bg-card border rounded-[2.5rem] shadow-sm">
                         <div className="flex items-center space-x-3 mb-8">
@@ -214,38 +214,38 @@ export default function ReportsPage() {
                     </div>
 
                     {/* Occupancy & Housekeeping */}
-                    <div className="p-6 bg-card border rounded-2xl shadow-sm space-y-8">
+                    <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm space-y-10">
                         <div>
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2 bg-purple-500/10 text-purple-600 rounded-lg"><PieChart size={20} /></div>
-                                <h3 className="text-lg font-bold">Occupancy Metrics</h3>
+                            <div className="flex items-center space-x-3 mb-8">
+                                <div className="p-3 bg-purple-50 text-purple-600 rounded-2xl"><PieChart size={24} /></div>
+                                <h3 className="text-2xl font-black">Occupancy Metrics</h3>
                             </div>
 
-                            <div className="space-y-6 py-2">
+                            <div className="space-y-8 py-2">
                                 <MetricProgress label="Stay Occupancy" value={occupancy?.rate || 0} color="bg-primary" />
                                 <MetricProgress label="Reserved Load" value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4 border-t pt-6 mt-4">
+                            <div className="grid grid-cols-3 gap-6 border-t border-dashed pt-8 mt-6">
                                 <div className="text-center">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Total Rooms</p>
-                                    <p className="text-xl font-black mt-1">{occupancy?.total || 0}</p>
+                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Total Rooms</p>
+                                    <p className="text-2xl font-black mt-1">{occupancy?.total || 0}</p>
                                 </div>
-                                <div className="text-center border-x">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Occupied</p>
-                                    <p className="text-xl font-black mt-1">{occupancy?.occupied || 0}</p>
+                                <div className="text-center border-x border-dashed">
+                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Occupied</p>
+                                    <p className="text-2xl font-black mt-1">{occupancy?.occupied || 0}</p>
                                 </div>
                                 <div className="text-center">
-                                    <p className="text-[10px] font-bold text-muted-foreground uppercase">Reserved</p>
-                                    <p className="text-xl font-black mt-1">{occupancy?.reserved || 0}</p>
+                                    <p className="text-[10px] font-black text-muted-foreground uppercase tracking-widest">Reserved</p>
+                                    <p className="text-2xl font-black mt-1">{occupancy?.reserved || 0}</p>
                                 </div>
                             </div>
                         </div>
 
-                        <div className="pt-6 border-t">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2 bg-amber-500/10 text-amber-600 rounded-lg"><TrendingUp size={20} /></div>
-                                <h3 className="text-lg font-bold">Housekeeping Status</h3>
+                        <div className="pt-8 border-t border-dashed">
+                            <div className="flex items-center space-x-3 mb-8">
+                                <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><TrendingUp size={24} /></div>
+                                <h3 className="text-2xl font-black">Housekeeping</h3>
                             </div>
 
                             <div className="grid grid-cols-2 gap-4">
@@ -258,7 +258,7 @@ export default function ReportsPage() {
                     </div>
                 </div>
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
                     <ArrivalsReport />
                     <DeparturesReport />
                 </div>
@@ -305,25 +305,25 @@ function ArrivalsReport() {
     }, [])
 
     return (
-        <div className="p-6 bg-card border rounded-2xl shadow-sm h-full">
-            <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2 bg-emerald-100 text-emerald-700 rounded-lg"><div className="w-5 h-5 flex items-center justify-center font-bold">IN</div></div>
-                <h3 className="text-lg font-bold">Expected Arrivals</h3>
+        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm h-full">
+            <div className="flex items-center space-x-3 mb-8">
+                <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><div className="w-6 h-6 flex items-center justify-center font-black">IN</div></div>
+                <h3 className="text-2xl font-black">Expected Arrivals</h3>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {data.map((b: any) => (
-                    <div key={b.id} className="flex justify-between items-center p-3 hover:bg-secondary/50 rounded-lg border border-transparent hover:border-border transition-all">
+                    <div key={b.id} className="flex justify-between items-center p-5 bg-secondary/20 hover:bg-secondary/40 rounded-3xl border border-transparent hover:border-border transition-all">
                         <div>
-                            <p className="font-bold text-sm">{b.PrimaryGuest.name}</p>
-                            <p className="text-xs text-muted-foreground">{b.bookingNo}</p>
+                            <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
+                            <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
                         </div>
                         <div className="text-right">
-                            <p className="font-bold text-xs bg-emerald-100 text-emerald-800 px-2 py-1 rounded">{b.Rooms.length} Room(s)</p>
+                            <p className="font-black text-[10px] bg-emerald-100 text-emerald-800 px-3 py-1 rounded-lg uppercase tracking-wider">{b.Rooms.length} Room(s)</p>
                         </div>
                     </div>
                 ))}
-                {data.length === 0 && <p className="text-center text-sm text-muted-foreground py-4">No arrivals expected today.</p>}
+                {data.length === 0 && <p className="text-center text-sm font-bold text-muted-foreground py-10">No arrivals expected today.</p>}
             </div>
         </div>
     )
@@ -337,25 +337,25 @@ function DeparturesReport() {
     }, [])
 
     return (
-        <div className="p-6 bg-card border rounded-2xl shadow-sm h-full">
-            <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2 bg-red-100 text-red-700 rounded-lg"><div className="w-5 h-5 flex items-center justify-center font-bold">OUT</div></div>
-                <h3 className="text-lg font-bold">Expected Departures</h3>
+        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm h-full">
+            <div className="flex items-center space-x-3 mb-8">
+                <div className="p-3 bg-rose-50 text-rose-600 rounded-2xl"><div className="w-6 h-6 flex items-center justify-center font-black">OUT</div></div>
+                <h3 className="text-2xl font-black">Expected Departures</h3>
             </div>
 
-            <div className="space-y-3">
+            <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
                 {data.map((b: any) => (
-                    <div key={b.id} className="flex justify-between items-center p-3 hover:bg-secondary/50 rounded-lg border border-transparent hover:border-border transition-all">
+                    <div key={b.id} className="flex justify-between items-center p-5 bg-secondary/20 hover:bg-secondary/40 rounded-3xl border border-transparent hover:border-border transition-all">
                         <div>
-                            <p className="font-bold text-sm">{b.PrimaryGuest.name}</p>
-                            <p className="text-xs text-muted-foreground">{b.bookingNo}</p>
+                            <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
+                            <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
                         </div>
                         <div className="text-right">
-                            <p className="font-bold text-xs bg-red-100 text-red-800 px-2 py-1 rounded">Room {b.Rooms.map((r: any) => r.Room?.roomNo).join(', ')}</p>
+                            <p className="font-black text-[10px] bg-rose-100 text-rose-800 px-3 py-1 rounded-lg uppercase tracking-wider">Room {b.Rooms.map((r: any) => r.Room?.roomNo).join(', ')}</p>
                         </div>
                     </div>
                 ))}
-                {data.length === 0 && <p className="text-center text-sm text-muted-foreground py-4">No departures expected today.</p>}
+                {data.length === 0 && <p className="text-center text-sm font-bold text-muted-foreground py-10">No departures expected today.</p>}
             </div>
         </div>
     )
@@ -369,41 +369,41 @@ function RoomStatusReport() {
     }, [])
 
     return (
-        <div className="p-6 bg-card border rounded-2xl shadow-sm">
-            <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2 bg-blue-100 text-blue-700 rounded-lg"><div className="w-5 h-5 flex items-center justify-center font-bold">ST</div></div>
-                <h3 className="text-lg font-bold">Room Status Detail</h3>
+        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
+            <div className="flex items-center space-x-3 mb-8">
+                <div className="p-3 bg-blue-50 text-blue-600 rounded-2xl"><div className="w-6 h-6 flex items-center justify-center font-black text-xs">ST</div></div>
+                <h3 className="text-2xl font-black">Room Status Detail</h3>
             </div>
 
             <div className="overflow-x-auto">
                 <table className="w-full text-left text-sm">
                     <thead>
-                        <tr className="border-b text-muted-foreground text-xs uppercase tracking-wider">
-                            <th className="py-3 px-4">Room</th>
-                            <th className="py-3 px-4">Type</th>
-                            <th className="py-3 px-4">Status</th>
-                            <th className="py-3 px-4">Current Guest</th>
+                        <tr className="border-b border-dashed text-muted-foreground text-[10px] font-black uppercase tracking-widest">
+                            <th className="py-4 px-6">Room</th>
+                            <th className="py-4 px-6">Type</th>
+                            <th className="py-4 px-6">Status</th>
+                            <th className="py-4 px-6">Current Guest</th>
                         </tr>
                     </thead>
-                    <tbody className="divide-y">
+                    <tbody className="divide-y divide-dashed">
                         {data.map((room: any) => {
                             const currentBooking = room.BookingRooms[0]?.Booking
                             return (
-                                <tr key={room.id} className="hover:bg-secondary/20">
-                                    <td className="py-3 px-4 font-black">{room.roomNo}</td>
-                                    <td className="py-3 px-4 text-muted-foreground">{room.RoomType.name}</td>
-                                    <td className="py-3 px-4">
+                                <tr key={room.id} className="hover:bg-secondary/20 transition-all">
+                                    <td className="py-5 px-6 font-black text-lg tracking-tighter">{room.roomNo}</td>
+                                    <td className="py-5 px-6 font-bold text-muted-foreground">{room.RoomType.name}</td>
+                                    <td className="py-5 px-6">
                                         <span className={cn(
-                                            "px-2 py-1 rounded-full text-[10px] font-bold uppercase border",
-                                            room.status === 'VACANT_CLEAN' && "bg-emerald-100 text-emerald-700 border-emerald-200",
-                                            room.status === 'VACANT_DIRTY' && "bg-amber-100 text-amber-700 border-amber-200",
-                                            room.status === 'OCCUPIED' && "bg-blue-100 text-blue-700 border-blue-200",
-                                            room.status === 'OUT_OF_ORDER' && "bg-red-100 text-red-700 border-red-200",
+                                            "px-3 py-1 rounded-lg text-[10px] font-black uppercase border border-transparent",
+                                            room.status === 'VACANT_CLEAN' && "bg-emerald-50 text-emerald-700",
+                                            room.status === 'VACANT_DIRTY' && "bg-amber-50 text-amber-700",
+                                            room.status === 'OCCUPIED' && "bg-blue-50 text-blue-700",
+                                            room.status === 'OUT_OF_ORDER' && "bg-rose-50 text-rose-700",
                                         )}>
                                             {room.status.replace('_', ' ')}
                                         </span>
                                     </td>
-                                    <td className="py-3 px-4 font-medium">
+                                    <td className="py-5 px-6 font-black">
                                         {currentBooking ? currentBooking.PrimaryGuest.name : '-'}
                                     </td>
                                 </tr>
