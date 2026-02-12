@@ -157,42 +157,63 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Shift History */}
-                        <div className="p-6 bg-card border rounded-xl shadow-sm">
-                            <h3 className="text-lg font-bold mb-4">Shift History (Last 7 Days)</h3>
-                            <div className="space-y-4 max-h-[460px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="p-6 bg-card border rounded-2xl shadow-sm">
+                            <h3 className="text-xl font-bold mb-6 flex items-center space-x-2">
+                                <Tool className="text-primary w-5 h-5" />
+                                <span>Shift History (Last 7 Days)</span>
+                            </h3>
+                            <div className="space-y-8 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
                                 {shiftHistory.map((shift: any) => (
-                                    <div key={shift.id} className="p-4 border rounded-xl bg-secondary/10 hover:bg-secondary/20 transition-colors">
-                                        <div className="flex justify-between items-start mb-3">
-                                            <div>
-                                                <p className="text-sm font-black">{new Date(shift.endTime).toLocaleDateString('th-TH', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
-                                                <p className="text-xs text-muted-foreground">
-                                                    {new Date(shift.startTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })} - {new Date(shift.endTime).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
-                                                </p>
-                                            </div>
-                                            <span className="text-[10px] font-black px-2 py-0.5 bg-primary/10 text-primary rounded-full uppercase">
-                                                {shift.user}
-                                            </span>
+                                    <div key={shift.id} className="space-y-4 pb-8 border-b border-dashed last:border-0 last:pb-0">
+                                        <div className="flex items-center justify-between font-black text-sm tracking-tight border-b pb-2">
+                                            <span className="truncate">Shift ID:{shift.id}</span>
+                                            <span className="ml-4 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                         </div>
-                                        <div className="grid grid-cols-2 gap-4 text-sm">
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Room Revenue</span>
-                                                <span className="font-bold">{formatCurrency(shift.roomRevenue)}</span>
-                                            </div>
-                                            <div className="flex flex-col">
-                                                <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">POS Revenue</span>
-                                                <span className="font-bold">{formatCurrency(shift.posRevenue)}</span>
-                                            </div>
+
+                                        <div className="space-y-3">
+                                            {shift.breakdown.map((item: any, idx: number) => (
+                                                <div key={idx} className="p-4 bg-card border rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all cursor-default group">
+                                                    <div>
+                                                        <div className="flex items-center space-x-2 mb-1">
+                                                            <span className={cn(
+                                                                "px-2 py-0.5 rounded text-[10px] font-black uppercase",
+                                                                item.source === 'ROOM' ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
+                                                            )}>
+                                                                {item.source}
+                                                            </span>
+                                                            <span className="text-[10px] font-black text-muted-foreground uppercase">{item.method}</span>
+                                                        </div>
+                                                        <p className="text-2xl font-black tracking-tight">{formatCurrency(item.amount)}</p>
+                                                    </div>
+                                                    <div className={cn(
+                                                        "p-2 rounded-full",
+                                                        item.source === 'ROOM' ? "bg-emerald-50 text-emerald-500" : "bg-blue-50 text-blue-500"
+                                                    )}>
+                                                        <TrendingUp size={20} />
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
-                                        <div className="mt-3 pt-3 border-t border-dashed flex justify-between items-center font-black text-primary">
-                                            <span className="text-xs uppercase">Total Sales</span>
-                                            <span className="text-lg">{formatCurrency(shift.totalRevenue)}</span>
+
+                                        <div className="flex justify-between items-center pt-4">
+                                            <span className="text-lg font-black uppercase tracking-tight">Total Revenue</span>
+                                            <span className="text-3xl font-black text-primary tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
                                         </div>
                                     </div>
                                 ))}
+
+                                {shiftHistory.length > 3 && (
+                                    <div className="pt-4 text-center">
+                                        <button className="w-full py-4 border-2 border-dashed rounded-xl font-black text-muted-foreground hover:bg-secondary/50 transition-all">
+                                            Next: old data
+                                        </button>
+                                    </div>
+                                )}
+
                                 {shiftHistory.length === 0 && (
-                                    <div className="py-12 text-center">
-                                        <Clock className="w-12 h-12 mx-auto text-muted-foreground/20 mb-3" />
-                                        <p className="text-sm text-muted-foreground">No shift history found in the last 7 days.</p>
+                                    <div className="py-20 text-center">
+                                        <Clock className="w-16 h-16 mx-auto text-muted-foreground/10 mb-4" />
+                                        <p className="text-muted-foreground font-bold">No shift history found in the last 7 days.</p>
                                     </div>
                                 )}
                             </div>

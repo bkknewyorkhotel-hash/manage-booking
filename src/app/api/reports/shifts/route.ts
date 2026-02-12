@@ -41,17 +41,35 @@ export async function GET() {
         })
 
         const formattedShifts = shifts.map((shift: any) => {
-            const roomRevenue = shift.Payments.reduce((sum: number, p: any) => sum + p.amount, 0)
-            const posRevenue = shift.Orders.reduce((sum: number, o: any) => sum + o.total, 0)
+            const roomBreakdown = shift.Payments.reduce((acc: any, p: any) => {
+                acc[p.method] = (acc[p.method] || 0) + p.amount
+                return acc
+            }, {})
+
+            const posBreakdown = shift.Orders.reduce((acc: any, o: any) => {
+                acc[o.paymentMethod] = (acc[o.paymentMethod] || 0) + o.total
+                return acc
+            }, {})
+
+            const breakdown: any[] = []
+
+            Object.entries(roomBreakdown).forEach(([method, amount]) => {
+                breakdown.push({ source: 'ROOM', method, amount })
+            })
+
+            Object.entries(posBreakdown).forEach(([method, amount]) => {
+                breakdown.push({ source: 'POS', method, amount })
+            })
+
+            const totalRevenue = breakdown.reduce((sum, item) => sum + item.amount, 0)
 
             return {
                 id: shift.id,
                 startTime: shift.startTime,
                 endTime: shift.endTime,
                 user: shift.User?.name || shift.User?.username || 'Unknown',
-                roomRevenue,
-                posRevenue,
-                totalRevenue: roomRevenue + posRevenue,
+                breakdown,
+                totalRevenue,
                 startCash: shift.startCash,
                 endCash: shift.endCash
             }
