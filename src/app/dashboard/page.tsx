@@ -49,29 +49,53 @@ export default function DashboardPage() {
     const [arrivals, setArrivals] = useState<any[]>([])
     const [departures, setDepartures] = useState<any[]>([])
     const [shiftHistory, setShiftHistory] = useState<any[]>([])
+    const [shiftPage, setShiftPage] = useState(1)
+    const [hasMoreShifts, setHasMoreShifts] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+
+    const fetchShifts = async (page: number) => {
+        try {
+            const res = await fetch(`/api/reports/shifts?page=${page}&limit=7`)
+            const data = await res.json()
+            if (data.length < 7) setHasMoreShifts(false)
+            if (page === 1) {
+                setShiftHistory(data)
+            } else {
+                setShiftHistory(prev => [...prev, ...data])
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     useEffect(() => {
-        // Fetch real stats from our APIs
         const fetchData = async () => {
             try {
-                const [resStats, resRooms, resArr, resDept, resShifts] = await Promise.all([
+                const [resStats, resRooms, resArr, resDept] = await Promise.all([
                     fetch('/api/reports?type=occupancy'),
                     fetch('/api/rooms/stats'),
                     fetch('/api/reports?type=arrivals'),
-                    fetch('/api/reports?type=departures'),
-                    fetch('/api/reports/shifts')
+                    fetch('/api/reports?type=departures')
                 ])
                 setStats(await resStats.json())
                 setRoomStats(await resRooms.json())
                 setArrivals(await resArr.json())
                 setDepartures(await resDept.json())
-                setShiftHistory(await resShifts.json())
+                fetchShifts(1)
             } catch (err) {
                 console.error(err)
             }
         }
         fetchData()
     }, [])
+
+    const handleLoadMoreShifts = async () => {
+        setLoadingMore(true)
+        const nextPage = shiftPage + 1
+        await fetchShifts(nextPage)
+        setShiftPage(nextPage)
+        setLoadingMore(false)
+    }
 
     const alerts = []
 
@@ -202,10 +226,14 @@ export default function DashboardPage() {
                                     </div>
                                 ))}
 
-                                {shiftHistory.length > 3 && (
+                                {hasMoreShifts && (
                                     <div className="pt-4 text-center">
-                                        <button className="w-full py-4 border-2 border-dashed rounded-xl font-black text-muted-foreground hover:bg-secondary/50 transition-all">
-                                            Next: old data
+                                        <button
+                                            onClick={handleLoadMoreShifts}
+                                            disabled={loadingMore}
+                                            className="w-full py-4 border-2 border-dashed rounded-xl font-black text-muted-foreground hover:bg-secondary/50 transition-all disabled:opacity-50"
+                                        >
+                                            {loadingMore ? 'Loading...' : 'Next: old data'}
                                         </button>
                                     </div>
                                 )}

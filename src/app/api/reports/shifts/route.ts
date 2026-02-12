@@ -3,16 +3,16 @@ import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { subDays, startOfDay } from 'date-fns'
 
-export async function GET() {
+export async function GET(request: Request) {
     try {
-        const last7Days = startOfDay(subDays(new Date(), 7))
+        const { searchParams } = new URL(request.url)
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '7')
+        const skip = (page - 1) * limit
 
         const shifts = await prisma.shift.findMany({
             where: {
-                status: 'CLOSED',
-                endTime: {
-                    gte: last7Days
-                }
+                status: 'CLOSED'
             },
             include: {
                 User: {
@@ -23,7 +23,8 @@ export async function GET() {
                 },
                 Payments: {
                     select: {
-                        amount: true
+                        amount: true,
+                        method: true
                     }
                 },
                 Orders: {
@@ -31,13 +32,16 @@ export async function GET() {
                         status: 'COMPLETED'
                     },
                     select: {
-                        total: true
+                        total: true,
+                        paymentMethod: true
                     }
                 }
             },
             orderBy: {
                 endTime: 'desc'
-            }
+            },
+            take: limit,
+            skip: skip
         })
 
         const formattedShifts = shifts.map((shift: any) => {
