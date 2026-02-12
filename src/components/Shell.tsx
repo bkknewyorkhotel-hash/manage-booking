@@ -61,7 +61,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             .catch(err => console.error('Failed to fetch user', err))
     }, [])
 
-    const navItems = [
+    const allNavItems = [
         { icon: LayoutDashboard, label: t('dashboard'), href: '/dashboard' },
         { icon: Bed, label: t('rooms'), href: '/rooms' },
         { icon: CalendarDays, label: t('reservations'), href: '/reservations' },
@@ -69,8 +69,10 @@ export function Shell({ children }: { children: React.ReactNode }) {
         { icon: Hammer, label: t('maintenance'), href: '/maintenance' },
         { icon: FileBarChart, label: t('reports'), href: '/reports' },
         { icon: ShoppingBag, label: t('pos'), href: '/pos' },
-        { icon: Settings, label: t('settings'), href: '/settings' },
+        { icon: Settings, label: t('settings'), href: '/settings', role: 'ADMIN' },
     ]
+
+    const navItems = allNavItems.filter(item => !item.role || user?.role === item.role)
 
     const handleLogout = async () => {
         // Basic logout: clear cookie (would normally call api/auth/logout)

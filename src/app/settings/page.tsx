@@ -7,11 +7,41 @@ import { cn, formatCurrency } from '@/lib/utils'
 
 export default function SettingsPage() {
     const [activeTab, setActiveTab] = useState('general')
+    const [user, setUser] = useState<any>(null)
+    const [loading, setLoading] = useState(true)
+
+    useEffect(() => {
+        fetch('/api/auth/me')
+            .then(res => res.json())
+            .then(json => {
+                setUser(json)
+                setLoading(false)
+            })
+    }, [])
+
+    if (loading) return <Shell><div className="p-8">Loading...</div></Shell>
+
+    if (user?.role !== 'ADMIN') {
+        return (
+            <Shell>
+                <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4">
+                    <div className="p-4 bg-red-50 text-red-500 rounded-full">
+                        <Construction size={48} />
+                    </div>
+                    <h2 className="text-2xl font-black text-red-600 uppercase">Access Denied</h2>
+                    <p className="text-muted-foreground max-w-sm">
+                        You do not have permission to access the system configuration. Please contact the administrator.
+                    </p>
+                </div>
+            </Shell>
+        )
+    }
 
     return (
         <Shell>
             <div className="space-y-6">
                 <h2 className="text-2xl font-black text-primary uppercase tracking-tight">System Configuration</h2>
+                ...
 
                 <div className="flex space-x-2 border-b pb-2 overflow-x-auto">
                     <TabButton active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={Building} label="General" />
