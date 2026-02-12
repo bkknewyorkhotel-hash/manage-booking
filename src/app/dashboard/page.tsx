@@ -181,57 +181,57 @@ export default function DashboardPage() {
                         </div>
 
                         {/* Shift History */}
-                        <div className="p-6 bg-card border rounded-2xl shadow-sm">
-                            <h3 className="text-xl font-bold mb-6 flex items-center space-x-2">
-                                <Tool className="text-primary w-5 h-5" />
-                                <span>Shift History (Last 7 Days)</span>
-                            </h3>
-                            <div className="space-y-8 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                        <div className="p-6 bg-card border rounded-[2.5rem] shadow-sm">
+                            <div className="flex items-center space-x-3 mb-8">
+                                <div className="p-3 bg-[#EEF2FF] text-[#6366F1] rounded-2xl"><Tool size={24} /></div>
+                                <h3 className="text-2xl font-black">Shift History</h3>
+                            </div>
+                            <div className="space-y-12 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                                 {shiftHistory.map((shift: any) => (
-                                    <div key={shift.id} className="space-y-4 pb-8 border-b border-dashed last:border-0 last:pb-0">
-                                        <div className="flex items-center justify-between font-black text-sm tracking-tight border-b pb-2">
+                                    <div key={shift.id} className="space-y-6 pb-12 border-b border-dashed border-gray-200 last:border-0 last:pb-0">
+                                        <div className="flex items-center justify-between text-sm font-black tracking-tight">
                                             <span className="truncate">Shift ID:{shift.id}</span>
                                             <span className="ml-4 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                         </div>
 
-                                        <div className="space-y-3">
+                                        <div className="space-y-4">
                                             {shift.breakdown.map((item: any, idx: number) => (
-                                                <div key={idx} className="p-4 bg-card border rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all cursor-default group">
+                                                <div key={idx} className="p-6 bg-card border rounded-[2rem] flex items-center justify-between hover:border-gray-300 transition-all cursor-default">
                                                     <div>
-                                                        <div className="flex items-center space-x-2 mb-1">
+                                                        <div className="flex items-center space-x-2 mb-2">
                                                             <span className={cn(
-                                                                "px-2 py-0.5 rounded text-[10px] font-black uppercase",
+                                                                "px-3 py-1 rounded-lg text-[10px] font-black uppercase",
                                                                 item.source === 'ROOM' ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
                                                             )}>
                                                                 {item.source}
                                                             </span>
-                                                            <span className="text-[10px] font-black text-muted-foreground uppercase">{item.method}</span>
+                                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{item.method}</span>
                                                         </div>
-                                                        <p className="text-2xl font-black tracking-tight">{formatCurrency(item.amount)}</p>
+                                                        <p className="text-3xl font-black tracking-tighter">{formatCurrency(item.amount)}</p>
                                                     </div>
                                                     <div className={cn(
-                                                        "p-2 rounded-full",
-                                                        item.source === 'ROOM' ? "bg-emerald-50 text-emerald-500" : "bg-blue-50 text-blue-500"
+                                                        "w-12 h-12 rounded-full flex items-center justify-center",
+                                                        item.source === 'ROOM' ? "bg-emerald-50 text-emerald-400" : "bg-blue-50 text-blue-400"
                                                     )}>
-                                                        <TrendingUp size={20} />
+                                                        <TrendingUp size={24} />
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="flex justify-between items-center pt-4">
-                                            <span className="text-lg font-black uppercase tracking-tight">Total Revenue</span>
-                                            <span className="text-3xl font-black text-primary tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
+                                        <div className="flex justify-between items-center px-2">
+                                            <span className="text-xl font-black uppercase tracking-tight text-gray-900">Total Revenue</span>
+                                            <span className="text-4xl font-black text-[#6366F1] tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
                                         </div>
                                     </div>
                                 ))}
 
                                 {hasMoreShifts && (
-                                    <div className="pt-4 text-center">
+                                    <div className="pt-8 text-center">
                                         <button
                                             onClick={handleLoadMoreShifts}
                                             disabled={loadingMore}
-                                            className="w-full py-4 border-2 border-dashed rounded-xl font-black text-muted-foreground hover:bg-secondary/50 transition-all disabled:opacity-50"
+                                            className="w-full py-6 border-4 border-dashed rounded-[2rem] font-black text-gray-900 text-lg hover:bg-gray-50 transition-all disabled:opacity-50"
                                         >
                                             {loadingMore ? 'Loading...' : 'Next: old data'}
                                         </button>
@@ -239,9 +239,9 @@ export default function DashboardPage() {
                                 )}
 
                                 {shiftHistory.length === 0 && (
-                                    <div className="py-20 text-center">
-                                        <Clock className="w-16 h-16 mx-auto text-muted-foreground/10 mb-4" />
-                                        <p className="text-muted-foreground font-bold">No shift history found in the last 7 days.</p>
+                                    <div className="py-24 text-center">
+                                        <Clock className="w-20 h-20 mx-auto text-gray-200 mb-6" />
+                                        <p className="text-gray-400 text-xl font-black">No shift history found.</p>
                                     </div>
                                 )}
                             </div>
