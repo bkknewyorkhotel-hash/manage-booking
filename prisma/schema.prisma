@@ -1,0 +1,318 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "sqlite"
+  url      = "file:/Users/administrator/Sanrue/BookingNewyork/prisma/dev.db"
+}
+
+model User {
+  id               String            @id @default(cuid())
+  username         String            @unique
+  password         String
+  name             String
+  role             Role              @default(RECEPTION)
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  AuditLogs        AuditLog[]
+  HousekeepingLogs HousekeepingLog[]
+  Shifts           Shift[]
+}
+
+model RoomType {
+  id           String        @id @default(cuid())
+  name         String
+  capacity     Int
+  baseRate     Float
+  amenities    String
+  BookingRooms BookingRoom[]
+  Rooms        Room[]
+}
+
+model Floor {
+  id      String @id @default(cuid())
+  floorNo Int    @unique
+  Rooms   Room[]
+}
+
+model Room {
+  id                 String              @id @default(cuid())
+  roomNo             String              @unique
+  floorId            String
+  roomTypeId         String
+  status             RoomStatus          @default(VACANT_CLEAN)
+  BookingRooms       BookingRoom[]
+  HousekeepingLogs   HousekeepingLog[]
+  MaintenanceTickets MaintenanceTicket[]
+  RoomType           RoomType            @relation(fields: [roomTypeId], references: [id])
+  Floor              Floor               @relation(fields: [floorId], references: [id])
+}
+
+model Guest {
+  id          String    @id @default(cuid())
+  guestType   GuestType @default(PERSON)
+  name        String
+  taxId       String?
+  branch      String?
+  phone       String?
+  email       String?
+  address     String?
+  nationality String?
+  Bookings    Booking[]
+  Invoices    Invoice[]
+  Stays       Stay[]
+}
+
+model Booking {
+  id             String        @id @default(cuid())
+  bookingNo      String        @unique
+  source         String?
+  status         BookingStatus @default(CONFIRMED)
+  checkInDate    DateTime
+  checkOutDate   DateTime
+  nights         Int
+  specialRequest String?
+  primaryGuestId String
+  createdAt      DateTime      @default(now())
+  updatedAt      DateTime      @updatedAt
+  PrimaryGuest   Guest         @relation(fields: [primaryGuestId], references: [id])
+  Rooms          BookingRoom[]
+  Stays          Stay[]
+}
+
+model BookingRoom {
+  id           String   @id @default(cuid())
+  bookingId    String
+  roomTypeId   String
+  roomId       String?
+  ratePerNight Float
+  adults       Int
+  children     Int
+  Room         Room?    @relation(fields: [roomId], references: [id])
+  RoomType     RoomType @relation(fields: [roomTypeId], references: [id])
+  Booking      Booking  @relation(fields: [bookingId], references: [id])
+}
+
+model Stay {
+  id             String       @id @default(cuid())
+  bookingId      String
+  primaryGuestId String
+  status         StayStatus   @default(IN_HOUSE)
+  checkInTime    DateTime     @default(now())
+  checkOutTime   DateTime?
+  notes          String?
+  ChargeItems    ChargeItem[]
+  Deposits       Deposit[]
+  Invoices       Invoice[]
+  PrimaryGuest   Guest        @relation(fields: [primaryGuestId], references: [id])
+  Booking        Booking      @relation(fields: [bookingId], references: [id])
+}
+
+model ChargeItem {
+  id          String   @id @default(cuid())
+  stayId      String
+  type        String
+  description String
+  qty         Int      @default(1)
+  unitPrice   Float
+  amount      Float
+  createdAt   DateTime @default(now())
+  Stay        Stay     @relation(fields: [stayId], references: [id])
+}
+
+model Invoice {
+  id            String        @id @default(cuid())
+  invoiceNo     String        @unique
+  stayId        String
+  buyerGuestId  String
+  subtotal      Float
+  discount      Float         @default(0)
+  serviceCharge Float         @default(0)
+  vatRate       Float         @default(0.07)
+  vatAmount     Float
+  total         Float
+  status        InvoiceStatus @default(ISSUED)
+  issuedAt      DateTime      @default(now())
+  voidReason    String?
+  voidedBy      String?
+  BuyerGuest    Guest         @relation(fields: [buyerGuestId], references: [id])
+  Stay          Stay          @relation(fields: [stayId], references: [id])
+  Payments      Payment[]
+}
+
+model Payment {
+  id        String        @id @default(cuid())
+  invoiceId String
+  method    PaymentMethod
+  amount    Float
+  paidAt    DateTime      @default(now())
+  reference String?
+  metaJson  String?
+  shiftId   String?
+  Invoice   Invoice       @relation(fields: [invoiceId], references: [id])
+  Shift     Shift?        @relation(fields: [shiftId], references: [id])
+}
+
+model Deposit {
+  id         String        @id @default(cuid())
+  stayId     String
+  amount     Float
+  method     PaymentMethod
+  status     String
+  receivedAt DateTime      @default(now())
+  appliedAt  DateTime?
+  Stay       Stay          @relation(fields: [stayId], references: [id])
+}
+
+model HousekeepingLog {
+  id        String     @id @default(cuid())
+  roomId    String
+  status    RoomStatus
+  note      String?
+  userId    String
+  createdAt DateTime   @default(now())
+  User      User       @relation(fields: [userId], references: [id])
+  Room      Room       @relation(fields: [roomId], references: [id])
+}
+
+model MaintenanceTicket {
+  id         String              @id @default(cuid())
+  roomId     String
+  issue      String
+  priority   MaintenancePriority @default(MEDIUM)
+  status     MaintenanceStatus   @default(PENDING)
+  createdAt  DateTime            @default(now())
+  resolvedAt DateTime?
+  Room       Room                @relation(fields: [roomId], references: [id])
+}
+
+model AuditLog {
+  id        String   @id @default(cuid())
+  action    String
+  entity    String
+  entityId  String
+  oldValue  String?
+  newValue  String?
+  userId    String
+  createdAt DateTime @default(now())
+  User      User     @relation(fields: [userId], references: [id])
+}
+
+model Product {
+  id         String         @id @default(cuid())
+  name       String
+  category   String
+  price      Float
+  cost       Float          @default(0)
+  stock      Int            @default(0)
+  barcode    String?
+  isActive   Boolean        @default(true)
+  createdAt  DateTime       @default(now())
+  updatedAt  DateTime       @updatedAt
+  OrderItems PosOrderItem[]
+}
+
+model PosOrder {
+  id            String         @id @default(cuid())
+  orderNo       String         @unique
+  total         Float
+  paymentMethod PaymentMethod  @default(CASH)
+  status        String         @default("COMPLETED")
+  guestId       String?
+  shiftId       String?
+  createdAt     DateTime       @default(now())
+  createdBy     String?
+  Shift         Shift?         @relation(fields: [shiftId], references: [id])
+  Items         PosOrderItem[]
+}
+
+model Shift {
+  id         String     @id @default(cuid())
+  userId     String
+  startTime  DateTime   @default(now())
+  endTime    DateTime?
+  startCash  Float      @default(0)
+  endCash    Float?
+  totalSales Float      @default(0)
+  status     String     @default("OPEN")
+  Orders     PosOrder[]
+  Payments   Payment[]
+  User       User       @relation(fields: [userId], references: [id])
+}
+
+model PosOrderItem {
+  id        String   @id @default(cuid())
+  orderId   String
+  productId String
+  name      String
+  price     Float
+  qty       Int
+  total     Float
+  Product   Product  @relation(fields: [productId], references: [id])
+  Order     PosOrder @relation(fields: [orderId], references: [id])
+}
+
+enum Role {
+  ADMIN
+  SUPERVISOR
+  RECEPTION
+  HOUSEKEEPING
+}
+
+enum RoomStatus {
+  VACANT_CLEAN
+  VACANT_DIRTY
+  OCCUPIED
+  RESERVED
+  OUT_OF_ORDER
+  INSPECTING
+  CLEANING
+}
+
+enum BookingStatus {
+  CONFIRMED
+  CANCELLED
+  CHECKED_IN
+  CHECKED_OUT
+}
+
+enum StayStatus {
+  IN_HOUSE
+  CHECKED_OUT
+}
+
+enum GuestType {
+  PERSON
+  COMPANY
+}
+
+enum PaymentMethod {
+  CASH
+  BANK_TRANSFER
+  CARD
+  QR
+  ROOM_CHARGE
+}
+
+enum InvoiceStatus {
+  ISSUED
+  VOID
+}
+
+enum MaintenancePriority {
+  LOW
+  MEDIUM
+  HIGH
+}
+
+enum MaintenanceStatus {
+  PENDING
+  IN_PROGRESS
+  RESOLVED
+}
+
+model Setting {
+  key   String @id
+  value String
+}
