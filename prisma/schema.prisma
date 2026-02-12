@@ -45,6 +45,7 @@ model Room {
   BookingRooms       BookingRoom[]
   HousekeepingLogs   HousekeepingLog[]
   MaintenanceTickets MaintenanceTicket[]
+  PosOrders          PosOrder[]
   RoomType           RoomType            @relation(fields: [roomTypeId], references: [id])
   Floor              Floor               @relation(fields: [floorId], references: [id])
 }
@@ -220,9 +221,11 @@ model PosOrder {
   paymentMethod PaymentMethod  @default(CASH)
   status        String         @default("COMPLETED")
   guestId       String?
+  roomId        String?
   shiftId       String?
   createdAt     DateTime       @default(now())
   createdBy     String?
+  Room          Room?          @relation(fields: [roomId], references: [id])
   Shift         Shift?         @relation(fields: [shiftId], references: [id])
   Items         PosOrderItem[]
 }
