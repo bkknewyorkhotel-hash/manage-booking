@@ -4,7 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { useTranslation } from '@/lib/LanguageContext'
 import { cn, formatCurrency } from '@/lib/utils'
-import { TrendingUp, Wallet, PieChart, Download } from 'lucide-react'
+import { TrendingUp, Wallet, PieChart, Download, Clock, Settings as ToolIcon } from 'lucide-react'
 
 export default function ReportsPage() {
     const { t } = useTranslation()
@@ -13,6 +13,27 @@ export default function ReportsPage() {
     const [monthlyStats, setMonthlyStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [generating, setGenerating] = useState(false)
+
+    // Shift History State
+    const [shiftHistory, setShiftHistory] = useState<any[]>([])
+    const [shiftPage, setShiftPage] = useState(1)
+    const [hasMoreShifts, setHasMoreShifts] = useState(true)
+    const [loadingMore, setLoadingMore] = useState(false)
+
+    const fetchShifts = async (page: number) => {
+        try {
+            const res = await fetch(`/api/reports/shifts?page=${page}&limit=7`)
+            const data = await res.json()
+            if (data.length < 7) setHasMoreShifts(false)
+            if (page === 1) {
+                setShiftHistory(data)
+            } else {
+                setShiftHistory(prev => [...prev, ...data])
+            }
+        } catch (err) {
+            console.error(err)
+        }
+    }
 
     const fetchData = async () => {
         try {
@@ -25,9 +46,18 @@ export default function ReportsPage() {
             setOccupancy(await resOcc.json())
             setMonthlyStats(await resMonth.json())
             setLoading(false)
+            fetchShifts(1)
         } catch (err) {
             console.error(err)
         }
+    }
+
+    const handleLoadMoreShifts = async () => {
+        setLoadingMore(true)
+        const nextPage = shiftPage + 1
+        await fetchShifts(nextPage)
+        setShiftPage(nextPage)
+        setLoadingMore(false)
     }
 
     useEffect(() => {
@@ -115,43 +145,71 @@ export default function ReportsPage() {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-                    {/* Revenue Breakdown */}
+                    {/* Paginated Shift History */}
                     <div className="p-6 bg-card border rounded-2xl shadow-sm">
                         <div className="flex items-center space-x-3 mb-6">
-                            <div className="p-2 bg-primary/10 text-primary rounded-lg"><Wallet size={20} /></div>
-                            <h3 className="text-lg font-bold">Daily Revenue</h3>
+                            <div className="p-2 bg-primary/10 text-primary rounded-lg"><ToolIcon size={20} /></div>
+                            <h3 className="text-lg font-bold">Shift History</h3>
                         </div>
 
-                        <div className="space-y-4">
-                            {revenue.map((item: any, idx: number) => (
-                                <div key={idx} className="flex items-center justify-between p-4 bg-secondary/20 rounded-xl border border-border/50">
-                                    <div>
-                                        <div className="flex items-center space-x-2">
-                                            <span className={cn(
-                                                "px-1.5 py-0.5 rounded text-[10px] font-bold uppercase",
-                                                item.type === 'POS' ? "bg-blue-100 text-blue-700" : "bg-orange-100 text-orange-700"
-                                            )}>
-                                                {item.type}
-                                            </span>
-                                            <p className="text-[10px] font-black uppercase text-muted-foreground tracking-widest">{item.method.replace('ROOM_', '').replace('POS_', '').replace('_', ' ')}</p>
-                                        </div>
-                                        <p className="text-xl font-black mt-1">{formatCurrency(item.amount)}</p>
+                        <div className="space-y-8 max-h-[600px] overflow-y-auto pr-2 custom-scrollbar">
+                            {shiftHistory.map((shift: any) => (
+                                <div key={shift.id} className="space-y-4 pb-8 border-b border-dashed last:border-0 last:pb-0">
+                                    <div className="flex items-center justify-between font-black text-[10px] sm:text-xs tracking-tight border-b pb-2">
+                                        <span className="truncate">Shift ID:{shift.id}</span>
+                                        <span className="ml-2 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                     </div>
-                                    <div className="h-10 w-10 bg-white dark:bg-black/20 rounded-full flex items-center justify-center border shadow-sm">
-                                        <TrendingUp size={16} className={item.type === 'POS' ? "text-blue-500" : "text-emerald-500"} />
+
+                                    <div className="space-y-3">
+                                        {shift.breakdown.map((item: any, idx: number) => (
+                                            <div key={idx} className="p-4 bg-card border rounded-2xl flex items-center justify-between hover:border-primary/30 transition-all cursor-default group">
+                                                <div>
+                                                    <div className="flex items-center space-x-2 mb-1">
+                                                        <span className={cn(
+                                                            "px-2 py-0.5 rounded text-[10px] font-black uppercase",
+                                                            item.source === 'ROOM' ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
+                                                        )}>
+                                                            {item.source}
+                                                        </span>
+                                                        <span className="text-[10px] font-black text-muted-foreground uppercase">{item.method}</span>
+                                                    </div>
+                                                    <p className="text-xl sm:text-2xl font-black tracking-tight">{formatCurrency(item.amount)}</p>
+                                                </div>
+                                                <div className={cn(
+                                                    "p-2 rounded-full",
+                                                    item.source === 'ROOM' ? "bg-emerald-50 text-emerald-500" : "bg-blue-50 text-blue-500"
+                                                )}>
+                                                    <TrendingUp size={20} />
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    <div className="flex justify-between items-center pt-4">
+                                        <span className="text-sm sm:text-lg font-black uppercase tracking-tight">Total Revenue</span>
+                                        <span className="text-2xl sm:text-3xl font-black text-primary tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
                                     </div>
                                 </div>
                             ))}
-                            {revenue.length === 0 && <p className="text-center py-8 text-muted-foreground">No revenue recorded today</p>}
-                        </div>
 
-                        <div className="mt-6 pt-6 border-t">
-                            <div className="flex justify-between items-center">
-                                <span className="font-bold">Total Revenue</span>
-                                <span className="text-2xl font-black text-primary">
-                                    {formatCurrency(revenue.reduce((sum, item) => sum + Number(item.amount), 0))}
-                                </span>
-                            </div>
+                            {hasMoreShifts && (
+                                <div className="pt-4 text-center">
+                                    <button
+                                        onClick={handleLoadMoreShifts}
+                                        disabled={loadingMore}
+                                        className="w-full py-4 border-2 border-dashed rounded-xl font-black text-muted-foreground hover:bg-secondary/50 transition-all disabled:opacity-50"
+                                    >
+                                        {loadingMore ? 'Loading...' : 'Next: old data'}
+                                    </button>
+                                </div>
+                            )}
+
+                            {shiftHistory.length === 0 && (
+                                <div className="py-20 text-center">
+                                    <Clock className="w-16 h-16 mx-auto text-muted-foreground/10 mb-4" />
+                                    <p className="text-muted-foreground font-bold">No shift history found.</p>
+                                </div>
+                            )}
                         </div>
                     </div>
 
