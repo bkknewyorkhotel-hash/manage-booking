@@ -39,12 +39,15 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
         if (isOpen) {
             Promise.all([
                 fetch('/api/rooms').then(res => res.json()),
-                fetch('/api/bookings?status=CONFIRMED').then(res => res.json()),
-                fetch('/api/bookings?status=CHECKED_IN').then(res => res.json()),
+                fetch('/api/bookings?status=CONFIRMED&limit=1000').then(res => res.json()),
+                fetch('/api/bookings?status=CHECKED_IN&limit=1000').then(res => res.json()),
             ]).then(([roomsData, confirmedData, checkedInData]) => {
                 const flatRooms = roomsData.flatMap((f: any) => f.Rooms)
                 setAllRooms(flatRooms)
-                setExistingBookings([...confirmedData, ...checkedInData])
+                setExistingBookings([
+                    ...(confirmedData.bookings || []),
+                    ...(checkedInData.bookings || [])
+                ])
 
                 // Extract unique room types
                 const types = new Map()
