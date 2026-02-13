@@ -76,6 +76,20 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                             shiftId: activeShift.id
                         }
                     })
+
+                    // NEW: Create Cash Transaction for record keeping
+                    if (keyDepositMethod === 'CASH') {
+                        await tx.cashTransaction.create({
+                            data: {
+                                type: 'INCOME',
+                                category: 'PETTY_CASH',
+                                description: `Key Deposit: ${booking.bookingNo} (${booking.Rooms.map(r => r.Room?.roomNo).join(', ')})`,
+                                amount: Number(keyDeposit),
+                                referenceNo: booking.bookingNo,
+                                shiftId: activeShift.id
+                            }
+                        })
+                    }
                 }
 
                 // 2. Create Charge Items for Rooms
@@ -153,7 +167,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                 // 1. Process refunds if any
                 if (refunds && Array.isArray(refunds)) {
                     for (const r of refunds) {
-                        await tx.deposit.update({
+                        const deposit = await tx.deposit.update({
                             where: { id: r.depositId },
                             data: {
                                 refundedAmount: Number(r.amount),
@@ -162,6 +176,20 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                                 status: 'REFUNDED'
                             }
                         })
+
+                        // NEW: Create Cash Transaction for refund record
+                        if (deposit.method === 'CASH' && Number(r.amount) > 0) {
+                            await tx.cashTransaction.create({
+                                data: {
+                                    type: 'EXPENSE',
+                                    category: 'REFUND',
+                                    description: `คืนมัดจำห้อง ${booking.Rooms.map(r => r.Room?.roomNo).join(', ')} (${booking.bookingNo})`,
+                                    amount: Number(r.amount),
+                                    referenceNo: booking.bookingNo,
+                                    shiftId: activeShift.id
+                                }
+                            })
+                        }
                     }
                 }
 
