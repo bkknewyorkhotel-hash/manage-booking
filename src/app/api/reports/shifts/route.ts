@@ -46,12 +46,12 @@ export async function GET(request: Request) {
 
         const formattedShifts = shifts.map((shift: any) => {
             const roomBreakdown = shift.Payments.reduce((acc: any, p: any) => {
-                acc[p.method] = (acc[p.method] || 0) + p.amount
+                acc[p.method] = (Number(acc[p.method]) || 0) + Number(p.amount)
                 return acc
             }, {})
 
             const posBreakdown = shift.Orders.reduce((acc: any, o: any) => {
-                acc[o.paymentMethod] = (acc[o.paymentMethod] || 0) + o.total
+                acc[o.paymentMethod] = (Number(acc[o.paymentMethod]) || 0) + Number(o.total)
                 return acc
             }, {})
 
@@ -65,7 +65,7 @@ export async function GET(request: Request) {
                 breakdown.push({ source: 'POS', method, amount })
             })
 
-            const totalRevenue = breakdown.reduce((sum, item) => sum + item.amount, 0)
+            const totalRevenue = breakdown.reduce((sum, item) => sum + Number(item.amount), 0)
 
             return {
                 id: shift.id,

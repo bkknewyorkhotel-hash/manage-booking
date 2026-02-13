@@ -58,9 +58,10 @@ export async function GET(request: Request) {
 
         return NextResponse.json({
             revenue: {
-                room: payments.reduce((acc, curr) => acc + (curr._sum.amount || 0), 0),
-                pos: posOrders.reduce((acc, curr) => acc + (curr._sum.total || 0), 0),
-                total: payments.reduce((acc, curr) => acc + (curr._sum.amount || 0), 0) + posOrders.reduce((acc, curr) => acc + (curr._sum.total || 0), 0)
+                room: payments.reduce((acc, curr) => acc + Number(curr._sum.amount || 0), 0),
+                pos: posOrders.reduce((acc, curr) => acc + Number(curr._sum.total || 0), 0),
+                total: payments.reduce((acc, curr) => acc + Number(curr._sum.amount || 0), 0) +
+                    posOrders.reduce((acc, curr) => acc + Number(curr._sum.total || 0), 0)
             },
             sources: sources.map(s => ({ name: s.source, count: s._count.id })),
             topProducts: topProducts.map(p => ({
