@@ -96,6 +96,7 @@ export async function POST(request: Request) {
             data: {
                 bookingNo,
                 source,
+                paymentMethod: body.paymentMethod || 'CASH', // Added
                 checkInDate: new Date(checkInDate),
                 checkOutDate: new Date(checkOutDate),
                 nights,
@@ -115,6 +116,20 @@ export async function POST(request: Request) {
                 Rooms: true,
             },
         })
+
+        // 4. If booking is for today, update room status to RESERVED
+        const isToday = startOfDay(new Date(checkInDate)).getTime() === startOfDay(new Date()).getTime()
+        if (isToday) {
+            for (const r of rooms) {
+                if (r.roomId) {
+                    await prisma.room.update({
+                        where: { id: r.roomId },
+                        data: { status: 'RESERVED' }
+                    })
+                }
+            }
+        }
+
 
         return NextResponse.json(booking)
     } catch (error) {

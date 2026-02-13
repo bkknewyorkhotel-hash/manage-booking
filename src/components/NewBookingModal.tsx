@@ -23,6 +23,8 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
     const [checkOut, setCheckOut] = useState(new Date(Date.now() + 86400000).toISOString().split('T')[0])
     const [guestName, setGuestName] = useState('')
     const [guestPhone, setGuestPhone] = useState('')
+    const [source, setSource] = useState('WALK_IN') // Added
+    const [paymentMethod, setPaymentMethod] = useState('CASH') // Added
     const [selectedRooms, setSelectedRooms] = useState<any[]>([])
 
     // Data for selection
@@ -127,7 +129,8 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                     },
                     checkInDate: checkIn,
                     checkOutDate: checkOut,
-                    source: 'WALK_IN',
+                    source: source, // Updated
+                    paymentMethod: paymentMethod, // Added
                     rooms: selectedRooms.map(r => ({
                         roomTypeId: r.roomTypeId,
                         roomId: r.roomId || undefined,
@@ -153,6 +156,9 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                 // Reset form
                 setStep(1)
                 setGuestName('')
+                setGuestPhone('')
+                setSource('WALK_IN')
+                setPaymentMethod('CASH')
                 setSelectedRooms([])
                 setShowSuccess(false)
             }, 1500)
@@ -185,7 +191,6 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                 <X size={20} />
                             </button>
                         </div>
-                        {/* Body contents ... */}
 
                         {/* Body */}
                         <div className="p-6 space-y-6 max-h-[70vh] overflow-y-auto">
@@ -249,6 +254,38 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                     />
                                 </div>
                             </div>
+
+                            {/* Source and Payment Method */}
+                            <div className="grid grid-cols-2 gap-4">
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-muted-foreground">Source (Channel)</label>
+                                    <select
+                                        value={source}
+                                        onChange={(e) => setSource(e.target.value)}
+                                        className="w-full px-4 py-2 bg-card border rounded-xl"
+                                    >
+                                        <option value="WALK_IN">Walk-in</option>
+                                        <option value="BOOKING_COM">Booking.com</option>
+                                        <option value="AGODA">Agoda</option>
+                                        <option value="AGENT">Agent (นายหน้า)</option>
+                                        <option value="OTHER">Other</option>
+                                    </select>
+                                </div>
+                                <div className="space-y-2">
+                                    <label className="text-xs font-bold uppercase text-muted-foreground">Payment Method</label>
+                                    <select
+                                        value={paymentMethod}
+                                        onChange={(e) => setPaymentMethod(e.target.value)}
+                                        className="w-full px-4 py-2 bg-card border rounded-xl"
+                                    >
+                                        <option value="CASH">Cash (เงินสด)</option>
+                                        <option value="BANK_TRANSFER">Bank Transfer (โอนเงิน)</option>
+                                        <option value="CARD">Credit/Debit Card</option>
+                                        <option value="QR">QR PromptPay</option>
+                                    </select>
+                                </div>
+                            </div>
+
 
                             {/* Rooms */}
                             <div className="space-y-4">

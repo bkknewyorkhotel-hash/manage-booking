@@ -28,6 +28,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
 
         // Specific logic per status
         if (status === 'CHECKED_IN' && booking.status !== 'CHECKED_IN') {
+            const { idCardNumber, keyDeposit, keyDepositMethod, guestName } = body // Added keyDepositMethod
+
             // Find active shift
             const activeShift = await prisma.shift.findFirst({
                 where: { userId: 'user_admin', status: 'OPEN' }
@@ -40,6 +42,17 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             }
 
             await prisma.$transaction(async (tx) => {
+                // 0. Update Guest Info (ID Card)
+                if (idCardNumber || guestName) {
+                    await tx.guest.update({
+                        where: { id: booking.primaryGuestId },
+                        data: {
+                            idCardNumber: idCardNumber,
+                            name: guestName || undefined
+                        }
+                    })
+                }
+
                 // 1. Create Stay
                 const stay = await tx.stay.create({
                     data: {
@@ -47,8 +60,22 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                         primaryGuestId: booking.primaryGuestId,
                         status: 'IN_HOUSE',
                         checkInTime: new Date(),
+                        keyDeposit: Number(keyDeposit) || 0, // Store amount for display
                     }
                 })
+
+                // 1.5 Create Deposit record for key deposit (if amount > 0)
+                if (Number(keyDeposit) > 0) {
+                    await tx.deposit.create({
+                        data: {
+                            stayId: stay.id,
+                            amount: Number(keyDeposit),
+                            method: (keyDepositMethod as any) || 'CASH',
+                            status: 'HELD', // Not refunded yet
+                            receivedAt: new Date()
+                        }
+                    })
+                }
 
                 // 2. Create Charge Items for Rooms
                 let subtotal = 0
@@ -87,7 +114,7 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                         status: 'ISSUED',
                         Payments: {
                             create: [{
-                                method: 'CASH',
+                                method: (booking.paymentMethod as any) || 'CASH', // Use booking preference
                                 amount: grandTotal,
                                 paidAt: new Date(),
                                 shiftId: activeShift?.id
@@ -106,7 +133,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                     }
                 }
             })
-        } else if (status === 'CHECKED_OUT') {
+        }
+        else if (status === 'CHECKED_OUT') {
             // Update Room status to DIRTY (VACANT_DIRTY)
             for (const r of booking.Rooms) {
                 if (r.roomId) {

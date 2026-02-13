@@ -5,17 +5,26 @@ async function main() {
   console.log('Start seeding...')
 
   // Clean up existing data to avoid unique constraint errors
+  await prisma.posOrderItem.deleteMany()
+  await prisma.posOrder.deleteMany()
+  await prisma.payment.deleteMany()
+  await prisma.invoice.deleteMany()
+  await prisma.deposit.deleteMany()
+  await prisma.chargeItem.deleteMany()
+  await prisma.stay.deleteMany()
   await prisma.bookingRoom.deleteMany()
   await prisma.booking.deleteMany()
   await prisma.guest.deleteMany()
+  await prisma.housekeepingLog.deleteMany()
+  await prisma.maintenanceTicket.deleteMany()
+  await prisma.cashTransaction.deleteMany()
+  await prisma.auditLog.deleteMany()
   await prisma.room.deleteMany()
   await prisma.floor.deleteMany()
   await prisma.roomType.deleteMany()
-  // Users are upserted, so no need to delete
-
-  // Create Initial Users
-  // Delete existing admin to ensure we can set the static ID 'user_admin'
-  await prisma.user.deleteMany({ where: { username: 'admin' } })
+  await prisma.product.deleteMany()
+  await prisma.shift.deleteMany()
+  await prisma.user.deleteMany()
 
   await prisma.user.create({
     data: {

@@ -25,15 +25,15 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon: Icon, color, description }: StatCardProps) {
     return (
-        <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm hover:shadow-md transition-all">
+        <div className="p-6 bg-card border rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 group">
             <div className="flex items-start justify-between">
                 <div>
-                    <p className="text-xs font-black text-muted-foreground uppercase tracking-widest mb-2">{title}</p>
-                    <h3 className="text-4xl font-black tracking-tighter">{value}</h3>
-                    {description && <p className="text-xs font-bold text-muted-foreground mt-2">{description}</p>}
+                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 opacity-60">{title}</p>
+                    <h3 className="text-3xl font-bold tracking-tight text-foreground">{value}</h3>
+                    {description && <p className="text-[10px] font-semibold text-primary mt-2 bg-primary/5 px-1.5 py-0.5 rounded inline-block uppercase">{description}</p>}
                 </div>
-                <div className={cn("p-4 rounded-2xl shadow-sm", color)}>
-                    <Icon size={28} />
+                <div className={cn("p-4 rounded-xl shadow-md transition-all group-hover:scale-105", color)}>
+                    <Icon size={24} />
                 </div>
             </div>
         </div>
@@ -46,24 +46,22 @@ function cn(...classes: string[]) {
 
 export default function DashboardPage() {
     const { t } = useTranslation()
-    const [stats, setStats] = useState<any>(null)
-    const [roomStats, setRoomStats] = useState<any>({})
-    const [arrivals, setArrivals] = useState<any[]>([])
-    const [departures, setDepartures] = useState<any[]>([])
+    const [data, setData] = useState<any>(null)
     const [shiftHistory, setShiftHistory] = useState<any[]>([])
     const [shiftPage, setShiftPage] = useState(1)
     const [hasMoreShifts, setHasMoreShifts] = useState(true)
+    const [loading, setLoading] = useState(true)
     const [loadingMore, setLoadingMore] = useState(false)
 
     const fetchShifts = async (page: number) => {
         try {
             const res = await fetch(`/api/reports/shifts?page=${page}&limit=7`)
-            const data = await res.json()
-            if (data.length < 7) setHasMoreShifts(false)
+            const shifts = await res.json()
+            if (shifts.length < 7) setHasMoreShifts(false)
             if (page === 1) {
-                setShiftHistory(data)
+                setShiftHistory(shifts)
             } else {
-                setShiftHistory(prev => [...prev, ...data])
+                setShiftHistory(prev => [...prev, ...shifts])
             }
         } catch (err) {
             console.error(err)
@@ -71,24 +69,19 @@ export default function DashboardPage() {
     }
 
     useEffect(() => {
-        const fetchData = async () => {
+        const fetchDashboardData = async () => {
             try {
-                const [resStats, resRooms, resArr, resDept] = await Promise.all([
-                    fetch('/api/reports?type=occupancy'),
-                    fetch('/api/rooms/stats'),
-                    fetch('/api/reports?type=arrivals'),
-                    fetch('/api/reports?type=departures')
-                ])
-                setStats(await resStats.json())
-                setRoomStats(await resRooms.json())
-                setArrivals(await resArr.json())
-                setDepartures(await resDept.json())
+                const res = await fetch('/api/dashboard/stats')
+                const dashboardData = await res.json()
+                setData(dashboardData)
+                setLoading(false)
                 fetchShifts(1)
             } catch (err) {
                 console.error(err)
+                setLoading(false)
             }
         }
-        fetchData()
+        fetchDashboardData()
     }, [])
 
     const handleLoadMoreShifts = async () => {
@@ -98,6 +91,13 @@ export default function DashboardPage() {
         setShiftPage(nextPage)
         setLoadingMore(false)
     }
+
+    if (loading) return <Shell><div className="p-8">Loading dashboard...</div></Shell>
+
+    const stats = data?.occupancy
+    const arrivals = data?.arrivals || []
+    const departures = data?.departures || []
+    const roomStats = data?.occupancy?.details || {}
 
     const alerts = []
 
@@ -109,24 +109,22 @@ export default function DashboardPage() {
         })
     }
 
-    if (roomStats['VACANT_DIRTY'] > 0) {
+    if (roomStats.dirty > 0) {
         alerts.push({
             type: 'warning',
             title: 'Housekeeping Needed',
-            message: `${roomStats['VACANT_DIRTY']} rooms are currently dirty and need cleaning.`
+            message: `${roomStats.dirty} rooms are currently dirty and need cleaning.`
         })
     }
 
-    if (roomStats['OUT_OF_ORDER'] > 0) {
+    if (roomStats.outOfOrder > 0) {
         alerts.push({
             type: 'error',
             title: 'Maintenance',
-            message: `${roomStats['OUT_OF_ORDER']} rooms are out of order.`
+            message: `${roomStats.outOfOrder} rooms are out of order.`
         })
     }
 
-    // Example logic for "Unassigned" - in a real app this would check bookings
-    // For now we can show "No critical alerts" if empty
     if (alerts.length === 0) {
         alerts.push({
             type: 'success',
@@ -151,28 +149,28 @@ export default function DashboardPage() {
                             value={`${stats?.rate || 0}%`}
                             icon={Users}
                             color="bg-indigo-50 text-indigo-600"
-                            description={`${stats?.occupied || 0} / ${stats?.totalRooms || 0} Rooms occupied`}
+                            description={`${stats?.occupied || 0} / ${stats?.total || 0} Rooms occupied (${roomStats.dirty || 0} dirty)`}
                         />
                         <StatCard
                             title="Arrivals"
                             value={arrivals.length}
                             icon={DoorOpen}
                             color="bg-emerald-50 text-emerald-600"
-                            description="Check-ins expected today"
+                            description={`${arrivals.length} expected today`}
                         />
                         <StatCard
                             title="Departures"
                             value={departures.length}
                             icon={Clock}
                             color="bg-amber-50 text-amber-600"
-                            description="Check-outs expected today"
+                            description={`${departures.length} expected today`}
                         />
                         <StatCard
                             title="Maintenance"
-                            value={roomStats['OUT_OF_ORDER'] || 0}
+                            value={roomStats.outOfOrder || 0}
                             icon={Ban}
                             color="bg-rose-50 text-rose-600"
-                            description="Rooms currently out of service"
+                            description="Rooms currently OOO"
                         />
                     </div>
 
@@ -186,22 +184,25 @@ export default function DashboardPage() {
                                         <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckCircle2 size={24} /></div>
                                         <h3 className="text-2xl font-black">Arrivals</h3>
                                     </div>
-                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {arrivals.map((b: any) => (
-                                            <div key={b.id} className="p-5 bg-secondary/20 border border-transparent hover:border-border rounded-3xl transition-all">
+                                            <div key={b.id} className="p-4 bg-secondary/10 border border-transparent hover:border-primary/20 rounded-2xl transition-all hover:bg-card hover:shadow-soft group cursor-pointer">
                                                 <div className="flex justify-between items-center">
                                                     <div>
-                                                        <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
-                                                        <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
+                                                        <p className="font-bold text-base text-foreground">{b.PrimaryGuest.name}</p>
+                                                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">{b.bookingNo}</p>
                                                     </div>
-                                                    <span className="px-3 py-1 bg-emerald-100 text-emerald-700 rounded-lg text-[10px] font-black uppercase">
+                                                    <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
                                                         {b.Rooms.length} Room(s)
                                                     </span>
                                                 </div>
                                             </div>
                                         ))}
                                         {arrivals.length === 0 && (
-                                            <div className="py-10 text-center text-muted-foreground font-bold">No arrivals today</div>
+                                            <div className="py-12 text-center">
+                                                <CheckCircle2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">No arrivals today</p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -212,22 +213,25 @@ export default function DashboardPage() {
                                         <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Clock size={24} /></div>
                                         <h3 className="text-2xl font-black">Departures</h3>
                                     </div>
-                                    <div className="space-y-4 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
+                                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {departures.map((b: any) => (
-                                            <div key={b.id} className="p-5 bg-secondary/20 border border-transparent hover:border-border rounded-3xl transition-all">
+                                            <div key={b.id} className="p-4 bg-secondary/10 border border-transparent hover:border-primary/20 rounded-2xl transition-all hover:bg-card hover:shadow-soft group cursor-pointer">
                                                 <div className="flex justify-between items-center">
                                                     <div>
-                                                        <p className="font-black text-lg">{b.PrimaryGuest.name}</p>
-                                                        <p className="text-xs font-bold text-muted-foreground">{b.bookingNo}</p>
+                                                        <p className="font-bold text-base text-foreground">{b.PrimaryGuest.name}</p>
+                                                        <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">{b.bookingNo}</p>
                                                     </div>
-                                                    <span className="px-3 py-1 bg-amber-100 text-amber-700 rounded-lg text-[10px] font-black uppercase">
-                                                        Room {b.Rooms.map((r: any) => r.Room?.roomNo).join(', ')}
+                                                    <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-amber-100 group-hover:bg-amber-500 group-hover:text-white transition-colors">
+                                                        Rooms: {b.Rooms.map((r: any) => r.Room?.roomNo).filter(Boolean).join(', ') || 'N/A'}
                                                     </span>
                                                 </div>
                                             </div>
                                         ))}
                                         {departures.length === 0 && (
-                                            <div className="py-10 text-center text-muted-foreground font-bold">No departures today</div>
+                                            <div className="py-12 text-center">
+                                                <Clock className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
+                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">No departures today</p>
+                                            </div>
                                         )}
                                     </div>
                                 </div>
@@ -248,7 +252,7 @@ export default function DashboardPage() {
                         {/* Shift History */}
                         <div className="lg:col-span-1 p-6 bg-card border rounded-[2.5rem] shadow-sm">
                             <div className="flex items-center space-x-3 mb-8">
-                                <div className="p-3 bg-[#EEF2FF] text-[#6366F1] rounded-2xl"><Tool size={24} /></div>
+                                <div className="p-3 bg-[#EEF2FF] text-[#6366F1] rounded-2xl"><ToolIcon size={24} /></div>
                                 <h3 className="text-2xl font-black">Shift History</h3>
                             </div>
                             <div className="space-y-12 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">

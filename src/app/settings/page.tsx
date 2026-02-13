@@ -396,8 +396,9 @@ function RoomSettings() {
 
     const handleSave = async (e: React.FormEvent) => {
         e.preventDefault()
+        const method = formData.id ? 'PUT' : 'POST'
         const res = await fetch('/api/rooms', {
-            method: 'POST',
+            method,
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify(formData)
         })
@@ -406,7 +407,8 @@ function RoomSettings() {
             setFormData({})
             fetchData()
         } else {
-            alert('Error creating room')
+            const json = await res.json()
+            alert(json.error || 'Error saving room')
         }
     }
 
@@ -444,7 +446,7 @@ function RoomSettings() {
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-muted-foreground">Floor Number</label>
-                                <input required type="number" placeholder="e.g. 1" value={formData.floorNo || ''} onChange={e => setFormData({ ...formData, floorNo: e.target.value })} className="w-full p-2 border rounded-lg" />
+                                <input required type="number" placeholder="e.g. 1" value={formData.floorNo || (formData.Floor?.floorNo) || ''} onChange={e => setFormData({ ...formData, floorNo: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
                                 <label className="text-sm font-bold text-muted-foreground">Room Type</label>
@@ -458,7 +460,9 @@ function RoomSettings() {
                         </div>
                         <div className="flex space-x-2">
                             <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">Cancel</button>
-                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">Create Room</button>
+                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">
+                                {formData.id ? 'Save Changes' : 'Create Room'}
+                            </button>
                         </div>
                     </form>
                 </div>
@@ -476,12 +480,20 @@ function RoomSettings() {
                                 <div key={room.id} className="p-3 border rounded-lg bg-card relative group hover:shadow-md transition-all">
                                     <div className="font-black text-lg">{room.roomNo}</div>
                                     <div className="text-xs text-muted-foreground truncate">{room.RoomType?.name}</div>
-                                    <button
-                                        onClick={() => handleDelete(room.id)}
-                                        className="absolute top-2 right-2 p-1 bg-red-50 text-red-500 rounded opacity-0 group-hover:opacity-100 transition-opacity hover:bg-red-100"
-                                    >
-                                        <Trash2 size={14} />
-                                    </button>
+                                    <div className="absolute top-2 right-2 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                                        <button
+                                            onClick={() => { setFormData(room); setIsFormOpen(true) }}
+                                            className="p-1 bg-blue-50 text-blue-500 rounded hover:bg-blue-100"
+                                        >
+                                            <Construction size={14} />
+                                        </button>
+                                        <button
+                                            onClick={() => handleDelete(room.id)}
+                                            className="p-1 bg-red-50 text-red-500 rounded hover:bg-red-100"
+                                        >
+                                            <Trash2 size={14} />
+                                        </button>
+                                    </div>
                                 </div>
                             ))}
                             {(!floor.Rooms || floor.Rooms.length === 0) && (

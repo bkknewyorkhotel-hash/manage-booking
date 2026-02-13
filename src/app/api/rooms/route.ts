@@ -1,5 +1,6 @@
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
+import { startOfDay } from 'date-fns'
 
 export async function GET() {
     try {
@@ -19,8 +20,42 @@ export async function GET() {
             },
         })
 
-        return NextResponse.json(floors)
+        // Dynamic status check: if room has a CONFIRMED booking today, mark as RESERVED
+        const today = startOfDay(new Date())
+        const bookingsToday = await prisma.booking.findMany({
+            where: {
+                status: 'CONFIRMED',
+                checkInDate: {
+                    gte: today,
+                    lt: new Date(today.getTime() + 86400000)
+                }
+            },
+            include: {
+                Rooms: true
+            }
+        })
+
+        const reservedRoomIds = new Set()
+        bookingsToday.forEach(b => {
+            b.Rooms.forEach(br => {
+                if (br.roomId) reservedRoomIds.add(br.roomId)
+            })
+        })
+
+        // Update response data without mutating DB (just for UI)
+        const floorsWithDynamicStatus = floors.map(floor => ({
+            ...floor,
+            Rooms: floor.Rooms.map(room => {
+                if (reservedRoomIds.has(room.id) && room.status === 'VACANT_CLEAN') {
+                    return { ...room, status: 'RESERVED' }
+                }
+                return room
+            })
+        }))
+
+        return NextResponse.json(floorsWithDynamicStatus)
     } catch (error) {
+        console.error(error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }
@@ -28,24 +63,35 @@ export async function GET() {
 export async function PUT(request: Request) {
     try {
         const body = await request.json()
-        const { id, status, roomTypeId, note } = body
+        const { id, roomNo, floorNo, roomTypeId, status } = body
 
         if (!id) {
             return NextResponse.json({ error: 'Room ID is required' }, { status: 400 })
         }
 
         const updateData: any = {}
-        if (status) updateData.status = status
+        if (roomNo) updateData.roomNo = roomNo
         if (roomTypeId) updateData.roomTypeId = roomTypeId
+        if (status) updateData.status = status
+
+        if (floorNo) {
+            let floor = await prisma.floor.findUnique({
+                where: { floorNo: Number(floorNo) }
+            })
+
+            if (!floor) {
+                floor = await prisma.floor.create({
+                    data: { floorNo: Number(floorNo) }
+                })
+            }
+            updateData.floorId = floor.id
+        }
 
         const room = await prisma.room.update({
             where: { id },
             data: updateData,
-            include: { RoomType: true }
+            include: { RoomType: true, Floor: true }
         })
-
-        // Log the action (Optional: create AuditLog if schema supports it, for now just console)
-        console.log(`Room ${room.roomNo} updated:`, updateData)
 
         return NextResponse.json(room)
     } catch (error) {

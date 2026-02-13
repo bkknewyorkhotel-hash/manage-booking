@@ -24,7 +24,7 @@ model RoomType {
   id           String        @id @default(cuid())
   name         String
   capacity     Int
-  baseRate     Float
+  baseRate     Decimal
   amenities    String
   BookingRooms BookingRoom[]
   Rooms        Room[]
@@ -51,24 +51,26 @@ model Room {
 }
 
 model Guest {
-  id          String    @id @default(cuid())
-  guestType   GuestType @default(PERSON)
-  name        String
-  taxId       String?
-  branch      String?
-  phone       String?
-  email       String?
-  address     String?
-  nationality String?
-  Bookings    Booking[]
-  Invoices    Invoice[]
+  id           String    @id @default(cuid())
+  guestType    GuestType @default(PERSON)
+  name         String
+  taxId        String?
+  idCardNumber String?
+  branch       String?
+  phone        String?
+  email        String?
+  address      String?
+  nationality  String?
+  Bookings     Booking[]
+  Invoices     Invoice[]
   Stays       Stay[]
 }
 
 model Booking {
   id             String        @id @default(cuid())
   bookingNo      String        @unique
-  source         String?
+  source         String?       @default("WALK_IN")
+  paymentMethod  String?       @default("CASH")
   status         BookingStatus @default(CONFIRMED)
   checkInDate    DateTime
   checkOutDate   DateTime
@@ -87,7 +89,7 @@ model BookingRoom {
   bookingId    String
   roomTypeId   String
   roomId       String?
-  ratePerNight Float
+  ratePerNight Decimal
   adults       Int
   children     Int
   Room         Room?    @relation(fields: [roomId], references: [id])
@@ -102,6 +104,7 @@ model Stay {
   status         StayStatus   @default(IN_HOUSE)
   checkInTime    DateTime     @default(now())
   checkOutTime   DateTime?
+  keyDeposit     Decimal      @default(0)
   notes          String?
   ChargeItems    ChargeItem[]
   Deposits       Deposit[]
@@ -116,8 +119,8 @@ model ChargeItem {
   type        String
   description String
   qty         Int      @default(1)
-  unitPrice   Float
-  amount      Float
+  unitPrice   Decimal
+  amount      Decimal
   createdAt   DateTime @default(now())
   Stay        Stay     @relation(fields: [stayId], references: [id])
 }
@@ -127,12 +130,12 @@ model Invoice {
   invoiceNo     String        @unique
   stayId        String
   buyerGuestId  String
-  subtotal      Float
-  discount      Float         @default(0)
-  serviceCharge Float         @default(0)
-  vatRate       Float         @default(0.07)
-  vatAmount     Float
-  total         Float
+  subtotal      Decimal
+  discount      Decimal       @default(0)
+  serviceCharge Decimal       @default(0)
+  vatRate       Decimal       @default(0.07)
+  vatAmount     Decimal
+  total         Decimal
   status        InvoiceStatus @default(ISSUED)
   issuedAt      DateTime      @default(now())
   voidReason    String?
@@ -146,7 +149,7 @@ model Payment {
   id        String        @id @default(cuid())
   invoiceId String
   method    PaymentMethod
-  amount    Float
+  amount    Decimal
   paidAt    DateTime      @default(now())
   reference String?
   metaJson  String?
@@ -158,7 +161,7 @@ model Payment {
 model Deposit {
   id         String        @id @default(cuid())
   stayId     String
-  amount     Float
+  amount     Decimal
   method     PaymentMethod
   status     String
   receivedAt DateTime      @default(now())
@@ -204,8 +207,8 @@ model Product {
   id         String         @id @default(cuid())
   name       String
   category   String
-  price      Float
-  cost       Float          @default(0)
+  price      Decimal
+  cost       Decimal        @default(0)
   stock      Int            @default(0)
   barcode    String?
   isActive   Boolean        @default(true)
@@ -217,7 +220,7 @@ model Product {
 model PosOrder {
   id            String         @id @default(cuid())
   orderNo       String         @unique
-  total         Float
+  total         Decimal
   paymentMethod PaymentMethod  @default(CASH)
   status        String         @default("COMPLETED")
   guestId       String?
@@ -231,17 +234,18 @@ model PosOrder {
 }
 
 model Shift {
-  id         String     @id @default(cuid())
-  userId     String
-  startTime  DateTime   @default(now())
-  endTime    DateTime?
-  startCash  Float      @default(0)
-  endCash    Float?
-  totalSales Float      @default(0)
-  status     String     @default("OPEN")
-  Orders     PosOrder[]
-  Payments   Payment[]
-  User       User       @relation(fields: [userId], references: [id])
+  id               String            @id @default(cuid())
+  userId           String
+  startTime        DateTime          @default(now())
+  endTime          DateTime?
+  startCash        Decimal           @default(0)
+  endCash          Decimal?
+  totalSales       Decimal           @default(0)
+  status           String            @default("OPEN")
+  Orders           PosOrder[]
+  Payments         Payment[]
+  CashTransactions CashTransaction[]
+  User             User              @relation(fields: [userId], references: [id])
 }
 
 model PosOrderItem {
@@ -249,9 +253,9 @@ model PosOrderItem {
   orderId   String
   productId String
   name      String
-  price     Float
+  price     Decimal
   qty       Int
-  total     Float
+  total     Decimal
   Product   Product  @relation(fields: [productId], references: [id])
   Order     PosOrder @relation(fields: [orderId], references: [id])
 }
@@ -318,4 +322,22 @@ enum MaintenanceStatus {
 model Setting {
   key   String @id
   value String
+}
+
+model CashTransaction {
+  id          String          @id @default(cuid())
+  type        TransactionType
+  category    String          // e.g., "PETTY_CASH", "REFUND", "MAINTENANCE"
+  description String
+  amount      Decimal
+  referenceNo String?         // Related Booking # or Invoice #
+  createdAt   DateTime        @default(now())
+  createdBy     String?
+  shiftId     String?
+  Shift       Shift?          @relation(fields: [shiftId], references: [id])
+}
+
+enum TransactionType {
+  INCOME
+  EXPENSE
 }

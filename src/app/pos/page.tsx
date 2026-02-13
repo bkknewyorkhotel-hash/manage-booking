@@ -446,12 +446,20 @@ export default function PosPage() {
                                         <span className="font-medium">Room Revenue</span>
                                         <span className="font-bold text-lg">{formatCurrency(shiftData.roomTotal || 0)}</span>
                                     </div>
+                                    <div className="flex justify-between items-center p-3 border rounded-lg bg-blue-50 text-blue-700">
+                                        <span className="font-medium">Cash In (เบิกเข้า)</span>
+                                        <span className="font-bold text-lg">+{formatCurrency(shiftData.cashIn || 0)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-3 border rounded-lg bg-red-50 text-red-700">
+                                        <span className="font-medium">Cash Out (เบิกจ่าย/ค่าน้ำ)</span>
+                                        <span className="font-bold text-lg">-{formatCurrency(shiftData.cashOut || 0)}</span>
+                                    </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">Total Cash</span>
+                                        <span className="font-medium">Net Cash in Drawer</span>
                                         <span className="font-bold text-green-600 text-lg">{formatCurrency(shiftData.cashSales)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">Total Other</span>
+                                        <span className="font-medium">Total Other (Non-Cash)</span>
                                         <span className="font-bold text-blue-600 text-lg">{formatCurrency(shiftData.otherSales)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl">

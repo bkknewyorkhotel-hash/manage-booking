@@ -31,7 +31,8 @@ export async function GET(request: Request) {
             },
             include: {
                 Orders: true,
-                Payments: true
+                Payments: true,
+                CashTransactions: true
             }
         })
 
@@ -39,7 +40,7 @@ export async function GET(request: Request) {
             return NextResponse.json(null) // No open shift
         }
 
-        const shift = openShift as unknown as ExtendedShift
+        const shift = openShift as any
 
         // Calculate real-time stats for the open shift
         // POS Sales
@@ -50,10 +51,14 @@ export async function GET(request: Request) {
         const roomTotal = shift.Payments.reduce((sum: number, p: any) => sum + p.amount, 0)
         const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + p.amount, 0)
 
+        // Cash In/Out (Petty Cash, Expenses)
+        const cashIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + t.amount, 0)
+        const cashOut = shift.CashTransactions.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + t.amount, 0)
+
         // Totals
         const totalSales = posTotal + roomTotal
-        const cashSales = posCash + roomCash
-        const otherSales = totalSales - cashSales
+        const cashSales = (posCash + roomCash + cashIn) - cashOut
+        const otherSales = totalSales - (posCash + roomCash) // Other sales are non-cash payments for products/rooms
         const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length
 
         return NextResponse.json({
@@ -61,6 +66,8 @@ export async function GET(request: Request) {
             stats: {
                 posTotal,
                 roomTotal,
+                cashIn,
+                cashOut,
                 totalSales,
                 cashSales,
                 otherSales,

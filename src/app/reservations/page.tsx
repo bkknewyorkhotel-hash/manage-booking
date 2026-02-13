@@ -6,6 +6,7 @@ import { useTranslation } from '@/lib/LanguageContext'
 import { Plus, Search, Calendar, User, MoreVertical, CreditCard } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { NewBookingModal } from '@/components/NewBookingModal'
+import { CheckInModal } from '@/components/CheckInModal'
 
 export default function ReservationsPage() {
     const { t } = useTranslation()
@@ -13,6 +14,8 @@ export default function ReservationsPage() {
     const [search, setSearch] = useState('')
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [isCheckInOpen, setIsCheckInOpen] = useState(false)
+    const [selectedBooking, setSelectedBooking] = useState<any>(null)
 
     const [updating, setUpdating] = useState<string | null>(null)
 
@@ -49,6 +52,11 @@ export default function ReservationsPage() {
         } finally {
             setUpdating(null)
         }
+    }
+
+    const handleCheckInClick = (booking: any) => {
+        setSelectedBooking(booking)
+        setIsCheckInOpen(true)
     }
 
     useEffect(() => {
@@ -144,9 +152,8 @@ export default function ReservationsPage() {
                                                 {booking.status === 'CONFIRMED' && (
                                                     <>
                                                         <button
-                                                            onClick={() => updateStatus(booking.id, 'CHECKED_IN')}
-                                                            disabled={updating === booking.id}
-                                                            className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600 disabled:opacity-50"
+                                                            onClick={() => handleCheckInClick(booking)}
+                                                            className="px-3 py-1 bg-blue-500 text-white text-xs font-bold rounded hover:bg-blue-600 shadow-md shadow-blue-500/20 active:scale-95 transition-all"
                                                         >
                                                             Check In
                                                         </button>
@@ -189,7 +196,15 @@ export default function ReservationsPage() {
                 onClose={() => setIsModalOpen(false)}
                 onSuccess={refreshData}
             />
+
+            <CheckInModal
+                isOpen={isCheckInOpen}
+                booking={selectedBooking}
+                onClose={() => setIsCheckInOpen(false)}
+                onSuccess={refreshData}
+            />
         </Shell >
+
     )
 }
 
