@@ -59,13 +59,48 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: 'Primary guest information missing' }, { status: 400 })
         }
 
-        // 2. Overlap check logic (Level: Room)
-        // For each room assigned, check if there's any overlapping booking
+        // 2. Room Assignment and Overlap check logic
+        const finalRooms = []
         for (const r of rooms) {
-            if (r.roomId) {
+            let selectedRoomId = r.roomId
+
+            if (!selectedRoomId) {
+                // Find an available room of this type
+                const allTypeRooms = await prisma.room.findMany({
+                    where: { roomTypeId: r.roomTypeId },
+                    select: { id: true }
+                })
+
+                const occupiedRooms = await prisma.bookingRoom.findMany({
+                    where: {
+                        roomTypeId: r.roomTypeId,
+                        Booking: {
+                            status: { in: ['CONFIRMED', 'CHECKED_IN'] },
+                            OR: [
+                                {
+                                    checkInDate: { lt: new Date(checkOutDate) },
+                                    checkOutDate: { gt: new Date(checkInDate) },
+                                },
+                            ],
+                        },
+                    },
+                    select: { roomId: true }
+                })
+
+                const occupiedIds = new Set(occupiedRooms.map(o => o.roomId).filter(id => !!id))
+                const availableRoom = allTypeRooms.find(room => !occupiedIds.has(room.id))
+
+                if (!availableRoom) {
+                    return NextResponse.json({
+                        error: `No rooms of this type available for selected dates.`
+                    }, { status: 400 })
+                }
+                selectedRoomId = availableRoom.id
+            } else {
+                // Check if specific room is overlapping
                 const overlap = await prisma.bookingRoom.findFirst({
                     where: {
-                        roomId: r.roomId,
+                        roomId: selectedRoomId,
                         Booking: {
                             status: { in: ['CONFIRMED', 'CHECKED_IN'] },
                             OR: [
@@ -80,10 +115,11 @@ export async function POST(request: Request) {
 
                 if (overlap) {
                     return NextResponse.json({
-                        error: `Room ${overlap.roomId} is already booked for the selected dates.`
+                        error: `Room is already booked for the selected dates.`
                     }, { status: 400 })
                 }
             }
+            finalRooms.push({ ...r, roomId: selectedRoomId })
         }
 
         // 3. Create Booking and BookingRooms in a transaction
@@ -103,7 +139,7 @@ export async function POST(request: Request) {
                 specialRequest,
                 primaryGuestId: guestId,
                 Rooms: {
-                    create: rooms.map((r: any) => ({
+                    create: finalRooms.map((r: any) => ({
                         roomTypeId: r.roomTypeId,
                         roomId: r.roomId,
                         ratePerNight: r.ratePerNight,
@@ -120,7 +156,7 @@ export async function POST(request: Request) {
         // 4. If booking is for today, update room status to RESERVED
         const isToday = startOfDay(new Date(checkInDate)).getTime() === startOfDay(new Date()).getTime()
         if (isToday) {
-            for (const r of rooms) {
+            for (const r of finalRooms) {
                 if (r.roomId) {
                     await prisma.room.update({
                         where: { id: r.roomId },

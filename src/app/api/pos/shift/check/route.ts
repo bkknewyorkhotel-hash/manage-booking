@@ -32,7 +32,8 @@ export async function GET(request: Request) {
             include: {
                 Orders: true,
                 Payments: true,
-                CashTransactions: true
+                CashTransactions: true,
+                Deposits: true
             }
         })
 
@@ -51,15 +52,21 @@ export async function GET(request: Request) {
         const roomTotal = shift.Payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0)
         const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + Number(p.amount), 0)
 
+        // Deposits (e.g. Key Deposit)
+        const depositTotal = shift.Deposits.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
+        const depositCash = shift.Deposits.filter((d: any) => d.method === 'CASH').reduce((sum: number, d: any) => sum + Number(d.amount), 0)
+
         // Cash In/Out (Petty Cash, Expenses)
-        const cashIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+        const txIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
         const cashOut = shift.CashTransactions.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+
+        const cashIn = txIn + depositCash
 
         // Totals
         const totalSales = posTotal + roomTotal
         const cashSales = (posCash + roomCash + cashIn) - cashOut
-        const otherSales = totalSales - (posCash + roomCash) // Other sales are non-cash payments for products/rooms
-        const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length
+        const otherSales = totalSales - (posCash + roomCash)
+        const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length + shift.Deposits.length
 
         return NextResponse.json({
             ...openShift,

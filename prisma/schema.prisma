@@ -166,7 +166,9 @@ model Deposit {
   status     String
   receivedAt DateTime      @default(now())
   appliedAt  DateTime?
+  shiftId    String?
   Stay       Stay          @relation(fields: [stayId], references: [id])
+  Shift      Shift?        @relation(fields: [shiftId], references: [id])
 }
 
 model HousekeepingLog {
@@ -245,6 +247,7 @@ model Shift {
   Orders           PosOrder[]
   Payments         Payment[]
   CashTransactions CashTransaction[]
+  Deposits         Deposit[]
   User             User              @relation(fields: [userId], references: [id])
 }
 

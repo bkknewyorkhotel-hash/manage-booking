@@ -144,7 +144,7 @@ export function CheckInModal({ isOpen, onClose, booking, onSuccess }: CheckInMod
                             ))}
                             <div className="pt-2 mt-2 border-t border-dashed flex justify-between font-black text-primary">
                                 <span>Total to be charged</span>
-                                <span>{formatCurrency(booking.Rooms.reduce((acc: number, r: any) => acc + (r.ratePerNight * booking.nights), 0))}</span>
+                                <span>{formatCurrency(booking.Rooms.reduce((acc: number, r: any) => acc + (Number(r.ratePerNight) * booking.nights), 0) + Number(keyDeposit || 0))}</span>
                             </div>
                             <p className="text-[10px] text-muted-foreground mt-1">* Payment will be recorded using {booking.paymentMethod || 'CASH'}</p>
                         </div>

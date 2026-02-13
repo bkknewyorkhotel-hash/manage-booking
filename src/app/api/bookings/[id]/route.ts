@@ -72,7 +72,8 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                             amount: Number(keyDeposit),
                             method: (keyDepositMethod as any) || 'CASH',
                             status: 'HELD', // Not refunded yet
-                            receivedAt: new Date()
+                            receivedAt: new Date(),
+                            shiftId: activeShift.id
                         }
                     })
                 }
