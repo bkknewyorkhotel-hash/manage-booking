@@ -22,8 +22,8 @@ export async function POST(request: Request) {
             }
         })
 
-        const posTotal = orders.reduce((sum, order) => sum + order.total, 0)
-        const roomTotal = payments.reduce((sum, payment) => sum + payment.amount, 0)
+        const posTotal = orders.reduce((sum, order) => sum + Number(order.total), 0)
+        const roomTotal = payments.reduce((sum, payment) => sum + Number(payment.amount), 0)
         const totalSales = posTotal + roomTotal
 
         const updatedShift = await prisma.shift.update({
@@ -31,7 +31,7 @@ export async function POST(request: Request) {
             data: {
                 endTime: new Date(),
                 endCash: Number(endCash || 0),
-                totalSales,
+                totalSales: Number(totalSales),
                 status: 'CLOSED'
             }
         })

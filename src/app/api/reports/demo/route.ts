@@ -37,7 +37,7 @@ export async function POST() {
 
             const room = rooms[randomInt(0, rooms.length - 1)]
             const type = roomTypes.find(t => t.id === room.roomTypeId) || roomTypes[0]
-            const total = type.baseRate * nights
+            const total = Number(type.baseRate) * nights
 
             // Create Booking, Stay, Invoice, Payment
             const booking = await prisma.booking.create({
@@ -98,8 +98,9 @@ export async function POST() {
             for (let j = 0; j < itemCount; j++) {
                 const p = products[randomInt(0, products.length - 1)]
                 const qty = randomInt(1, 3)
-                total += p.price * qty
-                items.push({ productId: p.id, name: p.name, price: p.price, qty, total: p.price * qty })
+                const price = Number(p.price)
+                total += price * qty
+                items.push({ productId: p.id, name: p.name, price: price, qty, total: price * qty })
             }
 
             await prisma.posOrder.create({

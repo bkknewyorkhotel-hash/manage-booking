@@ -44,16 +44,16 @@ export async function GET(request: Request) {
 
         // Calculate real-time stats for the open shift
         // POS Sales
-        const posTotal = shift.Orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + o.total, 0)
-        const posCash = shift.Orders.filter((o: any) => o.status === 'COMPLETED' && o.paymentMethod === 'CASH').reduce((sum: number, o: any) => sum + o.total, 0)
+        const posTotal = shift.Orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + Number(o.total), 0)
+        const posCash = shift.Orders.filter((o: any) => o.status === 'COMPLETED' && o.paymentMethod === 'CASH').reduce((sum: number, o: any) => sum + Number(o.total), 0)
 
         // Room Revenue (Payments)
-        const roomTotal = shift.Payments.reduce((sum: number, p: any) => sum + p.amount, 0)
-        const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + p.amount, 0)
+        const roomTotal = shift.Payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+        const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + Number(p.amount), 0)
 
         // Cash In/Out (Petty Cash, Expenses)
-        const cashIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + t.amount, 0)
-        const cashOut = shift.CashTransactions.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + t.amount, 0)
+        const cashIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
+        const cashOut = shift.CashTransactions.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
 
         // Totals
         const totalSales = posTotal + roomTotal

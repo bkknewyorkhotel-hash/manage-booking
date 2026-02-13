@@ -18,8 +18,8 @@ export async function GET() {
             }
         })
 
-        const totalSales = orders.reduce((sum, order) => sum + order.total, 0)
-        const cashSales = orders.filter(o => o.paymentMethod === 'CASH').reduce((sum, order) => sum + order.total, 0)
+        const totalSales = orders.reduce((sum, order) => sum + Number(order.total), 0)
+        const cashSales = orders.filter(o => o.paymentMethod === 'CASH').reduce((sum, order) => sum + Number(order.total), 0)
         const otherSales = totalSales - cashSales
         const orderCount = orders.length
 
