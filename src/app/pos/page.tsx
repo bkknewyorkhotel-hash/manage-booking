@@ -2,7 +2,7 @@
 
 import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
-import { Search, ShoppingCart, Plus, Minus, Trash2, CreditCard, Banknote, Wallet } from 'lucide-react'
+import { Search, ShoppingCart, Plus, Minus, Trash2, CreditCard, Banknote, Wallet, X } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useToast } from '@/lib/ToastContext'
 import { ConfirmationModal } from '@/components/ConfirmationModal'
@@ -415,8 +415,8 @@ export default function PosPage() {
                     <div className="bg-card w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6">
                         <div className="flex justify-between items-center border-b pb-4">
                             <h2 className="text-xl font-black">Shift Summary</h2>
-                            <button onClick={() => setShowShiftModal(false)} className="p-1 hover:bg-secondary rounded-full">
-                                <Minus size={20} className="rotate-45" />
+                            <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors">
+                                <X size={20} className="text-muted-foreground" />
                             </button>
                         </div>
 
