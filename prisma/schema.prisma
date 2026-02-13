@@ -159,16 +159,20 @@ model Payment {
 }
 
 model Deposit {
-  id         String        @id @default(cuid())
-  stayId     String
-  amount     Decimal
-  method     PaymentMethod
-  status     String
-  receivedAt DateTime      @default(now())
-  appliedAt  DateTime?
-  shiftId    String?
-  Stay       Stay          @relation(fields: [stayId], references: [id])
-  Shift      Shift?        @relation(fields: [shiftId], references: [id])
+  id             String        @id @default(cuid())
+  stayId         String
+  amount         Decimal
+  method         PaymentMethod
+  status         String
+  receivedAt     DateTime      @default(now())
+  appliedAt      DateTime?
+  shiftId        String?
+  refundedAmount Decimal?
+  refundedAt     DateTime?
+  refundShiftId  String?
+  Stay           Stay          @relation(fields: [stayId], references: [id])
+  Shift          Shift?        @relation(fields: [shiftId], references: [id])
+  RefundShift    Shift?        @relation("RefundShift", fields: [refundShiftId], references: [id])
 }
 
 model HousekeepingLog {
@@ -248,6 +252,7 @@ model Shift {
   Payments         Payment[]
   CashTransactions CashTransaction[]
   Deposits         Deposit[]
+  RefundedDeposits Deposit[]         @relation("RefundShift")
   User             User              @relation(fields: [userId], references: [id])
 }
 

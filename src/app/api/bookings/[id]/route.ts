@@ -136,16 +136,61 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             })
         }
         else if (status === 'CHECKED_OUT') {
-            // Update Room status to DIRTY (VACANT_DIRTY)
-            for (const r of booking.Rooms) {
-                if (r.roomId) {
-                    await prisma.room.update({
-                        where: { id: r.roomId },
-                        data: { status: 'VACANT_DIRTY' }
+            const { refunds } = body // [{ depositId, amount }]
+
+            // Find active shift
+            const activeShift = await prisma.shift.findFirst({
+                where: { userId: 'user_admin', status: 'OPEN' }
+            })
+
+            if (!activeShift) {
+                return NextResponse.json({
+                    error: 'Please open a shift before checking out (กรุณาเปิดกะก่อนทำการเช็คอิน)'
+                }, { status: 400 })
+            }
+
+            await prisma.$transaction(async (tx) => {
+                // 1. Process refunds if any
+                if (refunds && Array.isArray(refunds)) {
+                    for (const r of refunds) {
+                        await tx.deposit.update({
+                            where: { id: r.depositId },
+                            data: {
+                                refundedAmount: Number(r.amount),
+                                refundedAt: new Date(),
+                                refundShiftId: activeShift.id,
+                                status: 'REFUNDED'
+                            }
+                        })
+                    }
+                }
+
+                // 2. Update Room status to DIRTY (VACANT_DIRTY)
+                for (const r of booking.Rooms) {
+                    if (r.roomId) {
+                        await tx.room.update({
+                            where: { id: r.roomId },
+                            data: { status: 'VACANT_DIRTY' }
+                        })
+                    }
+                }
+
+                // 3. Update Stay status
+                const stay = await tx.stay.findFirst({
+                    where: { bookingId: id, status: 'IN_HOUSE' }
+                })
+                if (stay) {
+                    await tx.stay.update({
+                        where: { id: stay.id },
+                        data: {
+                            status: 'CHECKED_OUT',
+                            checkOutTime: new Date()
+                        }
                     })
                 }
-            }
-        } else if (status === 'CANCELLED') {
+            })
+        }
+        else if (status === 'CANCELLED') {
             // Release rooms (VACANT_CLEAN or keep current if separate logic, but usually just release)
             // For simplicity, if it was CONFIRMED, rooms were just "Reserved" in schedule, not physically occupied status.
             // But if we want to reflect on Room Board, we might not need to touch Room table if we only visualize based on Booking time.

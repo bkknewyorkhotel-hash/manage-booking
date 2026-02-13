@@ -7,6 +7,7 @@ import { Plus, Search, Calendar, User, MoreVertical, CreditCard } from 'lucide-r
 import { cn, formatCurrency } from '@/lib/utils'
 import { NewBookingModal } from '@/components/NewBookingModal'
 import { CheckInModal } from '@/components/CheckInModal'
+import { CheckOutModal } from '@/components/CheckOutModal'
 
 export default function ReservationsPage() {
     const { t } = useTranslation()
@@ -15,6 +16,7 @@ export default function ReservationsPage() {
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [isCheckInOpen, setIsCheckInOpen] = useState(false)
+    const [isCheckOutOpen, setIsCheckOutOpen] = useState(false)
     const [selectedBooking, setSelectedBooking] = useState<any>(null)
 
     const [updating, setUpdating] = useState<string | null>(null)
@@ -57,6 +59,11 @@ export default function ReservationsPage() {
     const handleCheckInClick = (booking: any) => {
         setSelectedBooking(booking)
         setIsCheckInOpen(true)
+    }
+
+    const handleCheckOutClick = (booking: any) => {
+        setSelectedBooking(booking)
+        setIsCheckOutOpen(true)
     }
 
     useEffect(() => {
@@ -168,7 +175,7 @@ export default function ReservationsPage() {
                                                 )}
                                                 {booking.status === 'CHECKED_IN' && (
                                                     <button
-                                                        onClick={() => updateStatus(booking.id, 'CHECKED_OUT')}
+                                                        onClick={() => handleCheckOutClick(booking)}
                                                         disabled={updating === booking.id}
                                                         className="px-3 py-1 bg-amber-500 text-white text-xs font-bold rounded hover:bg-amber-600 disabled:opacity-50"
                                                     >
@@ -201,6 +208,13 @@ export default function ReservationsPage() {
                 isOpen={isCheckInOpen}
                 booking={selectedBooking}
                 onClose={() => setIsCheckInOpen(false)}
+                onSuccess={refreshData}
+            />
+
+            <CheckOutModal
+                isOpen={isCheckOutOpen}
+                booking={selectedBooking}
+                onClose={() => setIsCheckOutOpen(false)}
                 onSuccess={refreshData}
             />
         </Shell >
