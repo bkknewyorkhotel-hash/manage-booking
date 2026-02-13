@@ -88,30 +88,30 @@ export default function ReservationsPage() {
     return (
         <Shell>
             <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="relative flex-1 w-full max-w-md">
+                <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
                         <input
                             type="text"
                             placeholder="Search booking #, guest name..."
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
+                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm md:text-base"
                         />
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform"
+                        className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform shrink-0"
                     >
                         <Plus size={20} />
-                        <span>New Booking</span>
+                        <span className="text-sm md:text-base">New Booking</span>
                     </button>
                 </div>
 
                 {/* Booking Table */}
                 <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto scrollbar-hide">
+                        <table className="w-full text-left border-collapse min-w-[900px]">
                             <thead className="bg-secondary/50 border-b">
                                 <tr>
                                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Booking #</th>

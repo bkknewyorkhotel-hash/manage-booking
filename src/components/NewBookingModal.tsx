@@ -204,7 +204,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                             )}
 
                             {/* Dates */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase text-muted-foreground">Check-in</label>
                                     <div className="relative">
@@ -213,7 +213,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                             type="date"
                                             value={checkIn}
                                             onChange={(e) => setCheckIn(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl"
+                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                         />
                                     </div>
                                 </div>
@@ -225,14 +225,14 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                             type="date"
                                             value={checkOut}
                                             onChange={(e) => setCheckOut(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl"
+                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                         />
                                     </div>
                                 </div>
                             </div>
 
                             {/* Guest */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase text-muted-foreground">Guest Name</label>
                                     <div className="relative">
@@ -242,7 +242,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                             placeholder="Full Name"
                                             value={guestName}
                                             onChange={(e) => setGuestName(e.target.value)}
-                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl"
+                                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                         />
                                     </div>
                                 </div>
@@ -253,19 +253,19 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                         placeholder="+66..."
                                         value={guestPhone}
                                         onChange={(e) => setGuestPhone(e.target.value)}
-                                        className="w-full px-4 py-2 bg-card border rounded-xl"
+                                        className="w-full px-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                     />
                                 </div>
                             </div>
 
                             {/* Source and Payment Method */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                                 <div className="space-y-2">
                                     <label className="text-xs font-bold uppercase text-muted-foreground">Source (Channel)</label>
                                     <select
                                         value={source}
                                         onChange={(e) => setSource(e.target.value)}
-                                        className="w-full px-4 py-2 bg-card border rounded-xl"
+                                        className="w-full px-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                     >
                                         <option value="WALK_IN">Walk-in</option>
                                         <option value="BOOKING_COM">Booking.com</option>
@@ -279,7 +279,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                     <select
                                         value={paymentMethod}
                                         onChange={(e) => setPaymentMethod(e.target.value)}
-                                        className="w-full px-4 py-2 bg-card border rounded-xl"
+                                        className="w-full px-4 py-2 bg-card border rounded-xl text-sm md:text-base"
                                     >
                                         <option value="CASH">Cash (เงินสด)</option>
                                         <option value="BANK_TRANSFER">Bank Transfer (โอนเงิน)</option>
@@ -317,7 +317,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                             <Trash2 size={16} />
                                         </button>
 
-                                        <div className="grid grid-cols-2 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[10px] font-bold uppercase text-muted-foreground">Room Type</label>
                                                 <select
@@ -349,7 +349,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                             </div>
                                         </div>
 
-                                        <div className="grid grid-cols-3 gap-4">
+                                        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
                                             <div className="space-y-1">
                                                 <label className="text-[10px] font-bold uppercase text-muted-foreground">Rate (Night)</label>
                                                 <input
@@ -359,23 +359,25 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                                     className="w-full px-3 py-2 bg-white border rounded-lg text-sm"
                                                 />
                                             </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[10px] font-bold uppercase text-muted-foreground">Adults</label>
-                                                <input
-                                                    type="number"
-                                                    value={room.adults}
-                                                    onChange={(e) => updateRoom(idx, 'adults', e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white border rounded-lg text-sm"
-                                                />
-                                            </div>
-                                            <div className="space-y-1">
-                                                <label className="text-[10px] font-bold uppercase text-muted-foreground">Children</label>
-                                                <input
-                                                    type="number"
-                                                    value={room.children}
-                                                    onChange={(e) => updateRoom(idx, 'children', e.target.value)}
-                                                    className="w-full px-3 py-2 bg-white border rounded-lg text-sm"
-                                                />
+                                            <div className="grid grid-cols-2 sm:grid-cols-2 col-span-1 sm:col-span-2 gap-4">
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Adults</label>
+                                                    <input
+                                                        type="number"
+                                                        value={room.adults}
+                                                        onChange={(e) => updateRoom(idx, 'adults', e.target.value)}
+                                                        className="w-full px-3 py-2 bg-white border rounded-lg text-sm"
+                                                    />
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[10px] font-bold uppercase text-muted-foreground">Children</label>
+                                                    <input
+                                                        type="number"
+                                                        value={room.children}
+                                                        onChange={(e) => updateRoom(idx, 'children', e.target.value)}
+                                                        className="w-full px-3 py-2 bg-white border rounded-lg text-sm"
+                                                    />
+                                                </div>
                                             </div>
                                         </div>
                                     </div>

@@ -25,15 +25,15 @@ interface StatCardProps {
 
 function StatCard({ title, value, icon: Icon, color, description }: StatCardProps) {
     return (
-        <div className="p-6 bg-card border rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 group">
+        <div className="p-4 md:p-6 bg-card border rounded-2xl md:rounded-3xl shadow-soft hover:shadow-lg transition-all duration-300 group">
             <div className="flex items-start justify-between">
-                <div>
-                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-2 opacity-60">{title}</p>
-                    <h3 className="text-3xl font-bold tracking-tight text-foreground">{value}</h3>
-                    {description && <p className="text-[10px] font-semibold text-primary mt-2 bg-primary/5 px-1.5 py-0.5 rounded inline-block uppercase">{description}</p>}
+                <div className="flex-1 min-w-0">
+                    <p className="text-[8px] md:text-[9px] font-bold text-muted-foreground uppercase tracking-widest mb-1 md:mb-2 opacity-60 truncate">{title}</p>
+                    <h3 className="text-2xl md:text-3xl font-bold tracking-tight text-foreground">{value}</h3>
+                    {description && <p className="text-[9px] md:text-[10px] font-semibold text-primary mt-1 md:mt-2 bg-primary/5 px-1.5 py-0.5 rounded inline-block uppercase truncate max-w-full">{description}</p>}
                 </div>
-                <div className={cn("p-4 rounded-xl shadow-md transition-all group-hover:scale-105", color)}>
-                    <Icon size={24} />
+                <div className={cn("p-3 md:p-4 rounded-xl shadow-md transition-all group-hover:scale-105 shrink-0 ml-3", color)}>
+                    <Icon size={20} className="md:size-6" />
                 </div>
             </div>
         </div>
@@ -137,13 +137,13 @@ export default function DashboardPage() {
     return (
         <Shell>
             <div className="max-w-7xl mx-auto space-y-6">
-                <div className="space-y-10">
+                <div className="space-y-6 md:space-y-10">
                     <header>
-                        <h2 className="text-3xl font-black text-primary uppercase tracking-tight">Hotel Overview</h2>
-                        <p className="text-muted-foreground font-bold">Real-time status and operations summary</p>
+                        <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">Hotel Overview</h2>
+                        <p className="text-xs md:text-sm text-muted-foreground font-bold italic opacity-70">Real-time status and operations summary</p>
                     </header>
 
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
+                    <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         <StatCard
                             title="Today's Occupancy"
                             value={`${stats?.rate || 0}%`}
@@ -179,12 +179,12 @@ export default function DashboardPage() {
                         <div className="lg:col-span-2 space-y-8">
                             <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
                                 {/* Expected Arrivals */}
-                                <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
-                                    <div className="flex items-center space-x-3 mb-8">
-                                        <div className="p-3 bg-emerald-50 text-emerald-600 rounded-2xl"><CheckCircle2 size={24} /></div>
-                                        <h3 className="text-2xl font-black">Arrivals</h3>
+                                <div className="p-5 md:p-8 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
+                                    <div className="flex items-center space-x-3 mb-6 md:mb-8">
+                                        <div className="p-2.5 md:p-3 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl"><CheckCircle2 size={20} className="md:size-6" /></div>
+                                        <h3 className="text-xl md:text-2xl font-black italic">Arrivals</h3>
                                     </div>
-                                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
+                                    <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {arrivals.map((b: any) => (
                                             <div key={b.id} className="p-4 bg-secondary/10 border border-transparent hover:border-primary/20 rounded-2xl transition-all hover:bg-card hover:shadow-soft group cursor-pointer">
                                                 <div className="flex justify-between items-center">
@@ -208,12 +208,12 @@ export default function DashboardPage() {
                                 </div>
 
                                 {/* Expected Departures */}
-                                <div className="p-8 bg-card border rounded-[2.5rem] shadow-sm">
-                                    <div className="flex items-center space-x-3 mb-8">
-                                        <div className="p-3 bg-amber-50 text-amber-600 rounded-2xl"><Clock size={24} /></div>
-                                        <h3 className="text-2xl font-black">Departures</h3>
+                                <div className="p-5 md:p-8 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
+                                    <div className="flex items-center space-x-3 mb-6 md:mb-8">
+                                        <div className="p-2.5 md:p-3 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl"><Clock size={20} className="md:size-6" /></div>
+                                        <h3 className="text-xl md:text-2xl font-black italic">Departures</h3>
                                     </div>
-                                    <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
+                                    <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {departures.map((b: any) => (
                                             <div key={b.id} className="p-4 bg-secondary/10 border border-transparent hover:border-primary/20 rounded-2xl transition-all hover:bg-card hover:shadow-soft group cursor-pointer">
                                                 <div className="flex justify-between items-center">
@@ -238,24 +238,24 @@ export default function DashboardPage() {
                             </div>
 
                             {/* Quick Actions (Keep as is or polish) */}
-                            <div className="p-8 bg-indigo-600 text-white rounded-[2.5rem] shadow-indigo-200 shadow-xl overflow-hidden relative">
+                            <div className="p-6 md:p-8 bg-indigo-600 text-white rounded-[1.5rem] md:rounded-[2.5rem] shadow-indigo-200 shadow-xl overflow-hidden relative min-h-[120px] md:min-h-0">
                                 <div className="relative z-10 flex items-center justify-between">
-                                    <div>
-                                        <h3 className="text-3xl font-black tracking-tight mb-2">Need Help?</h3>
-                                        <p className="text-indigo-100 font-bold max-w-[400px]">System is running normally. If you encounter any issues, please check the logs in Settings.</p>
+                                    <div className="max-w-[80%] md:max-w-[400px]">
+                                        <h3 className="text-xl md:text-3xl font-black tracking-tight mb-1 md:mb-2 italic">Need Help?</h3>
+                                        <p className="text-indigo-100 font-bold text-xs md:text-base">System is running normally. Check logs in Settings.</p>
                                     </div>
-                                    <ToolIcon size={80} className="text-indigo-400 opacity-30 -rotate-12 absolute -right-4 top-0" />
+                                    <ToolIcon size={60} className="text-indigo-400 opacity-30 -rotate-12 absolute -right-2 top-0 md:size-20 md:-right-4" />
                                 </div>
                             </div>
                         </div>
 
                         {/* Shift History */}
-                        <div className="lg:col-span-1 p-6 bg-card border rounded-[2.5rem] shadow-sm">
-                            <div className="flex items-center space-x-3 mb-8">
-                                <div className="p-3 bg-[#EEF2FF] text-[#6366F1] rounded-2xl"><ToolIcon size={24} /></div>
-                                <h3 className="text-2xl font-black">Shift History</h3>
+                        <div className="lg:col-span-1 p-5 md:p-6 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
+                            <div className="flex items-center space-x-3 mb-6 md:mb-8">
+                                <div className="p-2.5 md:p-3 bg-[#EEF2FF] text-[#6366F1] rounded-xl md:rounded-2xl"><ToolIcon size={20} className="md:size-6" /></div>
+                                <h3 className="text-xl md:text-2xl font-black italic">Shift History</h3>
                             </div>
-                            <div className="space-y-12 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
+                            <div className="space-y-8 md:space-y-12 max-h-[500px] md:max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                                 {shiftHistory.map((shift: any) => (
                                     <div key={shift.id} className="space-y-6 pb-12 border-b border-dashed border-gray-200 last:border-0 last:pb-0">
                                         <div className="flex items-center justify-between text-sm font-black tracking-tight">
@@ -263,34 +263,34 @@ export default function DashboardPage() {
                                             <span className="ml-4 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                         </div>
 
-                                        <div className="space-y-4">
+                                        <div className="space-y-3 md:space-y-4">
                                             {shift.breakdown.map((item: any, idx: number) => (
-                                                <div key={idx} className="p-6 bg-card border rounded-[2rem] flex items-center justify-between hover:border-gray-300 transition-all cursor-default">
-                                                    <div>
-                                                        <div className="flex items-center space-x-2 mb-2">
+                                                <div key={idx} className="p-4 md:p-6 bg-card border rounded-[1.25rem] md:rounded-[2rem] flex items-center justify-between hover:border-gray-300 transition-all cursor-default group">
+                                                    <div className="min-w-0 flex-1">
+                                                        <div className="flex items-center flex-wrap gap-2 mb-1 md:mb-2">
                                                             <span className={cn(
-                                                                "px-3 py-1 rounded-lg text-[10px] font-black uppercase",
+                                                                "px-2 md:px-3 py-0.5 md:py-1 rounded-lg text-[8px] md:text-[10px] font-black uppercase shrink-0",
                                                                 item.source === 'ROOM' ? "bg-orange-100 text-orange-600" : "bg-blue-100 text-blue-600"
                                                             )}>
                                                                 {item.source}
                                                             </span>
-                                                            <span className="text-[10px] font-black text-gray-400 uppercase tracking-widest">{item.method}</span>
+                                                            <span className="text-[8px] md:text-[10px] font-black text-gray-400 uppercase tracking-widest truncate">{item.method}</span>
                                                         </div>
-                                                        <p className="text-3xl font-black tracking-tighter">{formatCurrency(item.amount)}</p>
+                                                        <p className="text-xl md:text-3xl font-black tracking-tighter truncate">{formatCurrency(item.amount)}</p>
                                                     </div>
                                                     <div className={cn(
-                                                        "w-12 h-12 rounded-full flex items-center justify-center",
+                                                        "w-10 h-10 md:w-12 md:h-12 rounded-full flex items-center justify-center shrink-0 ml-3",
                                                         item.source === 'ROOM' ? "bg-emerald-50 text-emerald-400" : "bg-blue-50 text-blue-400"
                                                     )}>
-                                                        <TrendingUp size={24} />
+                                                        <TrendingUp size={20} className="md:size-6" />
                                                     </div>
                                                 </div>
                                             ))}
                                         </div>
 
-                                        <div className="flex justify-between items-center px-2">
-                                            <span className="text-xl font-black uppercase tracking-tight text-gray-900">Total Revenue</span>
-                                            <span className="text-4xl font-black text-[#6366F1] tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
+                                        <div className="flex justify-between items-center px-1 md:px-2 pt-4 border-t border-gray-100">
+                                            <span className="text-base md:text-xl font-black uppercase tracking-tight text-gray-900">Total Revenue</span>
+                                            <span className="text-2xl md:text-4xl font-black text-[#6366F1] tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
                                         </div>
                                     </div>
                                 ))}

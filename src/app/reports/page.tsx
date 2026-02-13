@@ -212,18 +212,18 @@ export default function ReportsPage() {
                                 <MetricProgress label="Reserved Load" value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
                             </div>
 
-                            <div className="grid grid-cols-3 gap-4 border-t border-dashed pt-6 mt-6">
-                                <div className="text-center">
+                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 border-t border-dashed pt-6 mt-6">
+                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
                                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Total</p>
-                                    <p className="text-xl font-bold mt-0.5">{occupancy?.total || 0}</p>
+                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.total || 0}</p>
                                 </div>
-                                <div className="text-center border-x border-dashed">
+                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0 sm:border-x sm:border-dashed">
                                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Occupied</p>
-                                    <p className="text-xl font-bold mt-0.5">{occupancy?.occupied || 0}</p>
+                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.occupied || 0}</p>
                                 </div>
-                                <div className="text-center">
+                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
                                     <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Reserved</p>
-                                    <p className="text-xl font-bold mt-0.5">{occupancy?.reserved || 0}</p>
+                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.reserved || 0}</p>
                                 </div>
                             </div>
                         </div>
@@ -361,8 +361,8 @@ function RoomStatusReport() {
                 <h3 className="text-xl font-bold">Room Status Detail</h3>
             </div>
 
-            <div className="overflow-x-auto">
-                <table className="w-full text-left text-sm">
+            <div className="overflow-x-auto scrollbar-hide">
+                <table className="w-full text-left text-sm min-w-[500px]">
                     <thead>
                         <tr className="border-b text-muted-foreground text-[10px] font-bold uppercase tracking-widest opacity-60">
                             <th className="py-4 px-4 font-bold">Room</th>

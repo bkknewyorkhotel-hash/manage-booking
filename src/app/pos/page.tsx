@@ -36,6 +36,7 @@ export default function PosPage() {
     const [confirmCloseOpen, setConfirmCloseOpen] = useState(false)
     const [confirmPaymentOpen, setConfirmPaymentOpen] = useState(false)
     const [pendingPaymentMethod, setPendingPaymentMethod] = useState('')
+    const [isCartOpen, setIsCartOpen] = useState(false) // Mobile cart toggle
 
     // 1. Check for Active Shift on Load
     useEffect(() => {
@@ -261,28 +262,28 @@ export default function PosPage() {
 
     return (
         <Shell>
-            <div className="flex h-[calc(100vh-100px)] gap-6">
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative">
                 {/* Left: Product Catalog */}
-                <div className="flex-1 flex flex-col space-y-4">
+                <div className="flex-1 flex flex-col space-y-3 md:space-y-4 min-h-0">
                     {/* Filters */}
-                    <div className="flex space-x-4 bg-card p-4 rounded-xl border shadow-sm">
+                    <div className="flex flex-col md:flex-row gap-3 bg-card p-3 md:p-4 rounded-xl border shadow-sm">
                         <div className="relative flex-1">
-                            <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
+                            <Search className="absolute left-3 top-2.5 md:top-3 text-muted-foreground" size={18} />
                             <input
                                 type="text"
                                 placeholder="Search products..."
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-10 pr-4 py-2 bg-secondary/50 border-none rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                                className="w-full pl-9 pr-4 py-2 bg-secondary/50 border-none rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-sm md:text-base"
                             />
                         </div>
-                        <div className="flex space-x-2 overflow-x-auto pb-1">
+                        <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
                             {categories.map(c => (
                                 <button
                                     key={c}
                                     onClick={() => setCategory(c)}
                                     className={cn(
-                                        "px-4 py-2 rounded-lg text-sm font-bold whitespace-nowrap transition-colors",
+                                        "px-3 md:px-4 py-1.5 md:py-2 rounded-lg text-xs md:text-sm font-bold whitespace-nowrap transition-colors",
                                         category === c
                                             ? "bg-primary text-white shadow-lg shadow-primary/20"
                                             : "bg-secondary text-muted-foreground hover:bg-secondary/80"
@@ -295,22 +296,22 @@ export default function PosPage() {
                     </div>
 
                     {/* Grid */}
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 overflow-y-auto pr-2">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
                         {filteredProducts.map(product => (
                             <button
                                 key={product.id}
                                 onClick={() => addToCart(product)}
                                 disabled={product.stock <= 0}
-                                className="bg-card border rounded-xl p-4 flex flex-col items-center text-center space-y-3 hover:border-primary/50 hover:shadow-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
+                                className="bg-card border rounded-xl p-3 md:p-4 flex flex-col items-center text-center space-y-2 md:space-y-3 hover:border-primary/50 hover:shadow-lg transition-all group disabled:opacity-50 disabled:cursor-not-allowed"
                             >
-                                <div className="w-20 h-20 bg-secondary rounded-full flex items-center justify-center text-2xl font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
+                                <div className="w-16 h-16 md:w-20 md:h-20 bg-secondary rounded-full flex items-center justify-center text-xl md:text-2xl font-bold text-muted-foreground group-hover:bg-primary/10 group-hover:text-primary transition-colors">
                                     {product.name.charAt(0)}
                                 </div>
-                                <div>
-                                    <h3 className="font-bold text-foreground line-clamp-1">{product.name}</h3>
-                                    <p className="text-xs text-muted-foreground">{product.stock} in stock</p>
+                                <div className="min-w-0 w-full">
+                                    <h3 className="font-bold text-foreground text-sm md:text-base truncate">{product.name}</h3>
+                                    <p className="text-[10px] md:text-xs text-muted-foreground italic">{product.stock} in stock</p>
                                 </div>
-                                <div className="font-black text-lg text-primary">
+                                <div className="font-black text-base md:text-lg text-primary">
                                     {formatCurrency(product.price)}
                                 </div>
                             </button>
@@ -318,50 +319,69 @@ export default function PosPage() {
                     </div>
                 </div>
 
+                {/* Mobile Cart Overlay */}
+                {isCartOpen && (
+                    <div
+                        className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] lg:hidden animate-in fade-in duration-300"
+                        onClick={() => setIsCartOpen(false)}
+                    />
+                )}
+
                 {/* Right: Cart */}
-                <div className="w-96 flex flex-col bg-card border rounded-2xl shadow-xl overflow-hidden">
-                    <div className="p-4 border-b bg-secondary/30 flex justify-between items-center">
-                        <h2 className="font-black text-lg flex items-center">
-                            <ShoppingCart className="mr-2" size={20} /> Current Order
-                        </h2>
-                        {activeShift && (
-                            <span className="text-xs font-mono bg-green-100 text-green-700 px-2 py-1 rounded">
-                                Shift #{activeShift.id?.slice(-4)}
-                            </span>
-                        )}
+                <div className={cn(
+                    "fixed lg:relative inset-x-0 bottom-0 lg:bottom-auto lg:inset-x-auto h-[80vh] lg:h-full lg:w-96 flex flex-col bg-card border-t lg:border-l rounded-t-[2rem] lg:rounded-2xl shadow-2xl lg:shadow-xl overflow-hidden z-[160] lg:z-10 transition-transform duration-300 transform",
+                    isCartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0"
+                )}>
+                    <div className="p-4 border-b bg-secondary/30 flex justify-between items-center shrink-0">
+                        <div className="flex flex-col">
+                            <h2 className="font-black text-lg flex items-center">
+                                <ShoppingCart className="mr-2" size={20} /> Current Order
+                            </h2>
+                            {activeShift && (
+                                <span className="text-[10px] font-mono text-muted-foreground">
+                                    Shift #{activeShift.id?.slice(-8)}
+                                </span>
+                            )}
+                        </div>
+                        <button
+                            onClick={() => setIsCartOpen(false)}
+                            className="p-2 hover:bg-secondary rounded-full lg:hidden"
+                        >
+                            <X size={20} />
+                        </button>
                     </div>
 
-                    <div className="flex-1 overflow-y-auto p-4 space-y-4">
+                    <div className="flex-1 overflow-y-auto p-4 space-y-3 custom-scrollbar">
                         {cart.length === 0 ? (
-                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 opacity-50">
-                                <ShoppingCart size={48} />
-                                <p>Cart is empty</p>
+                            <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 opacity-50 italic">
+                                <ShoppingCart size={40} className="md:size-12" />
+                                <p className="text-sm md:text-base">Cart is empty</p>
                             </div>
                         ) : (
                             cart.map(item => (
-                                <div key={item.id} className="flex justify-between items-center bg-secondary/20 p-3 rounded-lg">
-                                    <div>
-                                        <p className="font-bold text-sm">{item.name}</p>
-                                        <p className="text-xs text-muted-foreground">{formatCurrency(item.price)} x {item.qty}</p>
+                                <div key={item.id} className="flex justify-between items-center bg-secondary/20 p-2 md:p-3 rounded-xl border border-transparent hover:border-gray-200 transition-all">
+                                    <div className="min-w-0 flex-1 mr-2">
+                                        <p className="font-bold text-xs md:text-sm truncate">{item.name}</p>
+                                        <p className="text-[10px] md:text-xs text-muted-foreground font-medium">{formatCurrency(item.price)} x {item.qty}</p>
                                     </div>
-                                    <div className="flex items-center space-x-3">
-                                        <div className="flex items-center space-x-1 bg-background rounded-lg border">
+                                    <div className="flex items-center space-x-2 md:space-x-3 shrink-0">
+                                        <div className="flex items-center space-x-1 bg-card rounded-lg border shadow-sm">
                                             <button
                                                 onClick={() => updateQty(item.id, -1)}
                                                 className="p-1 hover:bg-secondary rounded-l transition-colors"
                                             >
-                                                <Minus size={14} />
+                                                <Minus size={12} className="md:size-[14px]" />
                                             </button>
-                                            <span className="w-8 text-center text-sm font-bold">{item.qty}</span>
+                                            <span className="w-6 md:w-8 text-center text-xs md:text-sm font-bold">{item.qty}</span>
                                             <button
                                                 onClick={() => updateQty(item.id, 1)}
                                                 className="p-1 hover:bg-secondary rounded-r transition-colors"
                                             >
-                                                <Plus size={14} />
+                                                <Plus size={12} className="md:size-[14px]" />
                                             </button>
                                         </div>
-                                        <div className="text-right w-16">
-                                            <p className="font-bold text-sm">{formatCurrency(item.price * item.qty)}</p>
+                                        <div className="text-right w-14 md:w-16">
+                                            <p className="font-bold text-xs md:text-sm">{formatCurrency(item.price * item.qty)}</p>
                                         </div>
                                     </div>
                                 </div>
@@ -369,44 +389,60 @@ export default function PosPage() {
                         )}
                     </div>
 
-                    <div className="p-6 bg-secondary/30 space-y-4">
-                        <div className="flex justify-between items-center text-xl font-black">
+                    <div className="p-4 md:p-6 bg-secondary/30 space-y-3 md:space-y-4 shrink-0 pb-8 lg:pb-6">
+                        <div className="flex justify-between items-center text-lg md:text-xl font-black italic">
                             <span>Total</span>
                             <span className="text-primary">{formatCurrency(total)}</span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-3">
+                        <div className="grid grid-cols-2 gap-2 md:gap-3">
                             <button
                                 onClick={() => initiateCheckout('CASH')}
                                 disabled={cart.length === 0 || processing}
-                                className="flex flex-col items-center justify-center p-3 bg-green-500 text-white rounded-xl hover:bg-green-600 transition-colors disabled:opacity-50"
+                                className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-emerald-500 text-white rounded-xl md:rounded-2xl hover:bg-emerald-600 transition-colors disabled:opacity-50 shadow-md shadow-emerald-500/20 active:scale-95"
                             >
-                                <Banknote size={24} className="mb-1" />
-                                <span className="text-xs font-bold uppercase">Cash</span>
+                                <Banknote size={20} className="mb-0.5 md:mb-1 md:size-6" />
+                                <span className="text-[10px] md:text-xs font-bold uppercase">Cash</span>
                             </button>
                             <button
                                 onClick={() => initiateCheckout('QR')}
                                 disabled={cart.length === 0 || processing}
-                                className="flex flex-col items-center justify-center p-3 bg-blue-500 text-white rounded-xl hover:bg-blue-600 transition-colors disabled:opacity-50"
+                                className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-blue-500 text-white rounded-xl md:rounded-2xl hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-95"
                             >
-                                <CreditCard size={24} className="mb-1" />
-                                <span className="text-xs font-bold uppercase">QR Payment</span>
+                                <CreditCard size={20} className="mb-0.5 md:mb-1 md:size-6" />
+                                <span className="text-[10px] md:text-xs font-bold uppercase">QR Pay</span>
                             </button>
                         </div>
 
-                        <div className="pt-4 border-t">
+                        <div className="pt-3 md:pt-4 border-t border-gray-200">
                             <button
                                 onClick={() => {
                                     checkActiveShift() // Refresh stats before showing modal
                                     setShowShiftModal(true)
                                 }}
-                                className="w-full py-3 bg-zinc-800 text-white rounded-xl font-bold hover:bg-zinc-700 transition-colors"
+                                className="w-full py-2.5 md:py-3 bg-zinc-800 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-zinc-700 shadow-lg active:scale-95 transition-all"
                             >
                                 Close Shift / Summary
                             </button>
                         </div>
                     </div>
                 </div>
+
+                {/* Mobile Cart Floating Button */}
+                <button
+                    onClick={() => setIsCartOpen(true)}
+                    className="fixed bottom-4 right-4 z-[140] lg:hidden bg-primary text-white p-4 rounded-full shadow-2xl flex items-center space-x-2 animate-bounce-subtle"
+                >
+                    <div className="relative">
+                        <ShoppingCart size={24} />
+                        {cart.length > 0 && (
+                            <span className="absolute -top-2 -right-2 bg-red-500 text-white text-[10px] font-black w-5 h-5 rounded-full flex items-center justify-center border-2 border-white">
+                                {cart.reduce((s, i) => s + i.qty, 0)}
+                            </span>
+                        )}
+                    </div>
+                    <span className="font-black italic text-sm">{formatCurrency(total)}</span>
+                </button>
             </div>
 
             {/* Shift Summary Modal */}

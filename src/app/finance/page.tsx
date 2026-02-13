@@ -145,22 +145,22 @@ export default function FinancePage() {
                 </div>
 
                 {/* Stats */}
-                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-                    <div className="bg-card p-6 rounded-3xl border border-primary/10 shadow-sm relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform">
-                            <Wallet size={80} />
+                <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4 md:gap-6">
+                    <div className="bg-card p-5 md:p-6 rounded-2xl md:rounded-3xl border border-primary/10 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform hidden sm:block">
+                            <Wallet size={64} />
                         </div>
-                        <p className="text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">
+                        <p className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">
                             {userRole === 'ADMIN' ? 'Total Balance' : 'Current Shift Balance'}
                         </p>
-                        <h3 className={cn("text-3xl font-black", netBalance >= 0 ? "text-emerald-600" : "text-red-600")}>
+                        <h3 className={cn("text-2xl md:text-3xl font-black truncate", netBalance >= 0 ? "text-emerald-600" : "text-red-600")}>
                             {formatCurrency(netBalance)}
                         </h3>
                     </div>
                 </div>
 
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <div className="relative flex-1 w-full max-w-md">
+                <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
+                    <div className="relative flex-1">
                         <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
                         <input
                             type="text"
@@ -168,23 +168,23 @@ export default function FinancePage() {
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             disabled={userRole === 'RECEPTION' && !activeShift}
-                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50"
+                            className="w-full pl-10 pr-4 py-2.5 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 text-sm md:text-base"
                         />
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         disabled={userRole === 'RECEPTION' && !activeShift}
-                        className="flex items-center space-x-2 px-6 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:grayscale disabled:scale-100"
+                        className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:grayscale disabled:scale-100"
                     >
                         <Plus size={20} />
-                        <span>Record Cash In/Out</span>
+                        <span className="text-sm md:text-base">Record Cash In/Out</span>
                     </button>
                 </div>
 
                 {/* Transactions Table */}
                 <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
-                    <div className="overflow-x-auto">
-                        <table className="w-full text-left border-collapse">
+                    <div className="overflow-x-auto scrollbar-hide">
+                        <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead className="bg-secondary/50 border-b">
                                 <tr>
                                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</th>

@@ -71,7 +71,7 @@ export default function RoomBoardPage() {
                         ))}
                     </div>
                 ) : (
-                    <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-4">
+                    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-3 md:gap-4">
                         {currentFloor?.Rooms.map((room: any) => (
                             <RoomCard key={room.id} room={room} onAction={() => handleAction(room)} />
                         ))}
@@ -142,12 +142,12 @@ function RoomCard({ room, onAction }: { room: any, onAction: () => void }) {
                 </p>
             </div>
 
-            <div className="mt-4 flex space-x-1 opacity-0 group-hover:opacity-100 transition-opacity">
+            <div className="mt-4 flex space-x-1 opacity-100 lg:opacity-0 lg:group-hover:opacity-100 transition-opacity">
                 <button onClick={(e) => {
                     e.stopPropagation()
                     onAction()
-                }} className="flex-1 py-1 text-[10px] font-bold bg-white/50 hover:bg-white rounded border border-current">
-                    Action
+                }} className="flex-1 py-1.5 text-[10px] font-bold bg-white/80 lg:bg-white/50 hover:bg-white rounded-lg border border-current shadow-sm active:scale-95 transition-all">
+                    Update Status
                 </button>
             </div>
 

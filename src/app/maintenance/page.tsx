@@ -101,11 +101,11 @@ export default function MaintenancePage() {
     return (
         <Shell>
             <div className="space-y-6">
-                <div className="flex justify-between items-center">
-                    <h2 className="text-2xl font-black text-primary uppercase tracking-tight">Maintenance Tickets</h2>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tight">Maintenance Tickets</h2>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center space-x-2 px-4 py-2 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
                     >
                         <Plus size={18} />
                         <span>Report Issue</span>
@@ -137,7 +137,7 @@ export default function MaintenancePage() {
                                 </div>
                             </div>
 
-                            <div className="mt-6 flex gap-2">
+                            <div className="mt-6 flex flex-col sm:flex-row gap-2">
                                 {ticket.status !== 'RESOLVED' ? (
                                     <>
                                         <button

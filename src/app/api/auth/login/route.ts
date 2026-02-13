@@ -44,22 +44,14 @@ export async function POST(request: Request) {
 
         console.log('6. Returning response')
         return response
-    } catch (error) {
+    } catch (error: any) {
         console.error('Login API Error:', error)
         const errorMessage = error instanceof Error ? error.message : String(error)
 
-        // Check for common connection errors
-        let detail = errorMessage
-        if (errorMessage.includes('PrismaClientInitializationError')) {
-            detail = 'Database connection failed. Please check DATABASE_URL in Vercel.'
-        } else if (errorMessage.includes('Invalid credentials')) {
-            detail = 'Invalid username or password.'
-        }
-
         return NextResponse.json({
-            error: 'Internal Server Error',
-            details: detail,
-            code: error instanceof Error && 'code' in error ? error.code : undefined
+            error: errorMessage,
+            details: error.stack || 'No stack trace',
+            code: error.code || 'UNKNOWN'
         }, { status: 500 })
     }
 }
