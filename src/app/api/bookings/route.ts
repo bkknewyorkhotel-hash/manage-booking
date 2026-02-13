@@ -21,6 +21,14 @@ export async function GET(request: Request) {
                         Room: true,
                     },
                 },
+                Stays: {
+                    include: {
+                        Deposits: true
+                    },
+                    orderBy: {
+                        checkInTime: 'desc'
+                    }
+                }
             },
             orderBy: {
                 createdAt: 'desc',
