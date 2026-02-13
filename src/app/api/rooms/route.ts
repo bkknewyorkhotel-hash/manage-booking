@@ -20,7 +20,7 @@ export async function GET() {
             },
         })
 
-        // Dynamic status check: if room has a CONFIRMED booking today, mark as RESERVED
+        const reservedRoomIds = new Set()
         const today = startOfDay(new Date())
         const bookingsToday = await prisma.booking.findMany({
             where: {
@@ -30,12 +30,15 @@ export async function GET() {
                     lt: new Date(today.getTime() + 86400000)
                 }
             },
-            include: {
-                Rooms: true
+            select: {
+                Rooms: {
+                    select: {
+                        roomId: true
+                    }
+                }
             }
         })
 
-        const reservedRoomIds = new Set()
         bookingsToday.forEach(b => {
             b.Rooms.forEach(br => {
                 if (br.roomId) reservedRoomIds.add(br.roomId)

@@ -7,36 +7,58 @@ export async function GET(request: Request) {
         const { searchParams } = new URL(request.url)
         const status = searchParams.get('status')
         const primaryGuestId = searchParams.get('guestId')
+        const page = parseInt(searchParams.get('page') || '1')
+        const limit = parseInt(searchParams.get('limit') || '50')
+        const skip = (page - 1) * limit
 
-        const bookings = await prisma.booking.findMany({
-            where: {
-                ...(status ? { status: status as any } : {}),
-                ...(primaryGuestId ? { primaryGuestId } : {}),
-            },
-            include: {
-                PrimaryGuest: true,
-                Rooms: {
-                    include: {
-                        RoomType: true,
-                        Room: true,
-                    },
+        const [bookings, total] = await Promise.all([
+            prisma.booking.findMany({
+                where: {
+                    ...(status ? { status: status as any } : {}),
+                    ...(primaryGuestId ? { primaryGuestId } : {}),
                 },
-                Stays: {
-                    include: {
-                        Deposits: true
+                take: limit,
+                skip: skip,
+                include: {
+                    PrimaryGuest: true,
+                    Rooms: {
+                        include: {
+                            RoomType: true,
+                            Room: true,
+                        },
                     },
-                    orderBy: {
-                        checkInTime: 'desc'
+                    Stays: {
+                        include: {
+                            Deposits: true
+                        },
+                        orderBy: {
+                            checkInTime: 'desc'
+                        }
                     }
+                },
+                orderBy: {
+                    createdAt: 'desc',
+                },
+            }),
+            prisma.booking.count({
+                where: {
+                    ...(status ? { status: status as any } : {}),
+                    ...(primaryGuestId ? { primaryGuestId } : {}),
                 }
-            },
-            orderBy: {
-                createdAt: 'desc',
-            },
-        })
+            })
+        ])
 
-        return NextResponse.json(bookings)
+        return NextResponse.json({
+            bookings,
+            pagination: {
+                total,
+                page,
+                limit,
+                totalPages: Math.ceil(total / limit)
+            }
+        })
     } catch (error) {
+        console.error(error)
         return NextResponse.json({ error: 'Internal Server Error' }, { status: 500 })
     }
 }

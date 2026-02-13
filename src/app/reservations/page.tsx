@@ -12,6 +12,7 @@ import { CheckOutModal } from '@/components/CheckOutModal'
 export default function ReservationsPage() {
     const { t } = useTranslation()
     const [bookings, setBookings] = useState<any[]>([])
+    const [pagination, setPagination] = useState<any>({ page: 1, totalPages: 1 })
     const [search, setSearch] = useState('')
     const [loading, setLoading] = useState(true)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -21,15 +22,24 @@ export default function ReservationsPage() {
 
     const [updating, setUpdating] = useState<string | null>(null)
 
-    const refreshData = () => {
+    const refreshData = (pageNum = 1) => {
         setLoading(true)
-        fetch('/api/bookings')
+        fetch(`/api/bookings?page=${pageNum}&limit=20`)
             .then(res => res.json())
-            .then(json => {
-                setBookings(json)
+            .then(data => {
+                setBookings(data.bookings || [])
+                setPagination(data.pagination || { page: 1, totalPages: 1 })
+                setLoading(false)
+            })
+            .catch(err => {
+                console.error(err)
                 setLoading(false)
             })
     }
+
+    useEffect(() => {
+        refreshData()
+    }, [])
 
     const updateStatus = async (id: string, status: string) => {
         if (!confirm(`Are you sure you want to change status to ${status}?`)) return
@@ -195,28 +205,50 @@ export default function ReservationsPage() {
                             </tbody>
                         </table>
                     </div>
+                    {/* Pagination Controls */}
+                    {!loading && pagination.totalPages > 1 && (
+                        <div className="flex justify-center items-center gap-4 py-4">
+                            <button
+                                disabled={pagination.page <= 1}
+                                onClick={() => refreshData(pagination.page - 1)}
+                                className="px-4 py-2 border rounded-xl font-bold hover:bg-secondary disabled:opacity-50"
+                            >
+                                Previous
+                            </button>
+                            <span className="text-sm font-bold text-muted-foreground">
+                                Page {pagination.page} of {pagination.totalPages}
+                            </span>
+                            <button
+                                disabled={pagination.page >= pagination.totalPages}
+                                onClick={() => refreshData(pagination.page + 1)}
+                                className="px-4 py-2 border rounded-xl font-bold hover:bg-secondary disabled:opacity-50"
+                            >
+                                Next
+                            </button>
+                        </div>
+                    )}
                 </div>
+
+                <NewBookingModal
+                    isOpen={isModalOpen}
+                    onClose={() => setIsModalOpen(false)}
+                    onSuccess={refreshData}
+                />
+
+                <CheckInModal
+                    isOpen={isCheckInOpen}
+                    booking={selectedBooking}
+                    onClose={() => setIsCheckInOpen(false)}
+                    onSuccess={refreshData}
+                />
+
+                <CheckOutModal
+                    isOpen={isCheckOutOpen}
+                    booking={selectedBooking}
+                    onClose={() => setIsCheckOutOpen(false)}
+                    onSuccess={refreshData}
+                />
             </div>
-
-            <NewBookingModal
-                isOpen={isModalOpen}
-                onClose={() => setIsModalOpen(false)}
-                onSuccess={refreshData}
-            />
-
-            <CheckInModal
-                isOpen={isCheckInOpen}
-                booking={selectedBooking}
-                onClose={() => setIsCheckInOpen(false)}
-                onSuccess={refreshData}
-            />
-
-            <CheckOutModal
-                isOpen={isCheckOutOpen}
-                booking={selectedBooking}
-                onClose={() => setIsCheckOutOpen(false)}
-                onSuccess={refreshData}
-            />
         </Shell >
 
     )
