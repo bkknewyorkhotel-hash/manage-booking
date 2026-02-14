@@ -546,12 +546,6 @@ export default function POSPage() {
 
                                     <div className="space-y-4">
                                         <div className="flex justify-between items-center">
-                                            <span>{t('cashOpenClose')}</span>
-                                            <span className="font-bold">
-                                                {Number(shiftData.cashFlow?.startCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {Number(shiftData.cashFlow?.netCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
-                                            </span>
-                                        </div>
-                                        <div className="flex justify-between items-center">
                                             <span>{t('actualCashValue')}</span>
                                             <span className="font-bold">{Number(shiftData.cashFlow?.netCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
