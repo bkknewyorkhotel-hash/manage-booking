@@ -458,74 +458,92 @@ export default function POSPage() {
                         </div>
 
                         {shiftData ? (
-                            <div className="space-y-4">
-                                <div className="p-4 bg-secondary/30 rounded-xl space-y-2">
+                            <div className="space-y-6 text-sm font-medium">
+                                <div className="space-y-1 text-[11px] font-mono text-muted-foreground">
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">{t('shiftId')}</span>
+                                        <span>Shift ID:</span>
                                         <span className="font-bold">{activeShift?.id}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">{t('date')}</span>
-                                        <span className="font-bold">{new Date().toLocaleDateString()}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span className="text-muted-foreground">{t('totalOrders')}</span>
-                                        <span className="font-bold">{shiftData.orderCount}</span>
+                                        <span>{t('date')}:</span>
+                                        <span className="font-bold">{new Date().toLocaleDateString('th-TH')}</span>
                                     </div>
                                 </div>
 
-                                <div className="space-y-2">
-                                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">{t('posSales')}</span>
-                                        <span className="font-bold text-lg">{formatCurrency(shiftData.posTotal || 0)}</span>
+                                {/* Sales Overview Table */}
+                                <div className="border-t border-b py-4 space-y-2">
+                                    <div className="flex justify-between items-center pr-1">
+                                        <span>{t('totalSales')}</span>
+                                        <div className="flex space-x-12">
+                                            <span className="w-12 text-center">{shiftData.orderCount}</span>
+                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.totalSales)}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center p-3 border rounded-lg bg-emerald-50 text-emerald-700">
-                                        <span className="font-medium">{t('roomRevenue')}</span>
-                                        <span className="font-bold text-lg">{formatCurrency(shiftData.roomTotal || 0)}</span>
+                                    <div className="flex justify-between items-center pr-1 opacity-70">
+                                        <span>{t('totalDiscount')}</span>
+                                        <div className="flex space-x-12">
+                                            <span className="w-12 text-center">0</span>
+                                            <span className="w-24 text-right">{formatCurrency(shiftData.totalDiscount || 0)}</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center p-3 border rounded-lg bg-blue-50 text-blue-700">
-                                        <span className="font-medium">{t('cashIn')}</span>
-                                        <span className="font-bold text-lg">+{formatCurrency(shiftData.cashIn || 0)}</span>
+                                    <div className="flex justify-between items-center pr-1 pt-2 border-t font-black">
+                                        <span>{t('saleAfterDisc')}</span>
+                                        <span className="text-right w-24">{formatCurrency(shiftData.saleAfterDisc)}</span>
                                     </div>
-                                    <div className="flex justify-between items-center p-3 border rounded-lg bg-red-50 text-red-700">
-                                        <span className="font-medium">{t('cashOut')}</span>
-                                        <span className="font-bold text-lg">-{formatCurrency(shiftData.cashOut || 0)}</span>
+                                </div>
+
+                                {/* Payment Breakdown Section */}
+                                <div className="space-y-3">
+                                    <div className="flex justify-between text-[11px] font-black uppercase text-muted-foreground border-b pb-1">
+                                        <span>{t('payment')}</span>
+                                        <div className="flex space-x-12">
+                                            <span className="w-12 text-center">Count</span>
+                                            <span className="w-24 text-right">Amount</span>
+                                        </div>
                                     </div>
-                                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">{t('netCashInDrawer')}</span>
-                                        <span className="font-bold text-green-600 text-lg">{formatCurrency(shiftData.cashSales)}</span>
+                                    <div className="space-y-2">
+                                        {Object.entries(shiftData.paymentBreakdown || {}).map(([method, data]: any) => (
+                                            <div key={method} className="flex justify-between items-center pr-1">
+                                                <span className="capitalize">{method.toLowerCase().replace('_', ' ')}</span>
+                                                <div className="flex space-x-12 italic">
+                                                    <span className="w-12 text-center">{data.count}</span>
+                                                    <span className="w-24 text-right font-bold">{formatCurrency(data.amount)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
                                     </div>
-                                    <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">{t('totalOtherNonCash')}</span>
-                                        <span className="font-bold text-blue-600 text-lg">{formatCurrency(shiftData.otherSales)}</span>
+                                </div>
+
+                                {/* Detailed Totals & Averages */}
+                                <div className="space-y-2 pt-4 border-t">
+                                    <div className="flex justify-between pr-1">
+                                        <span>{t('totalBills')}</span>
+                                        <span className="font-bold">{shiftData.orderCount}</span>
                                     </div>
-                                    <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl">
+                                    <div className="flex justify-between pr-1">
+                                        <span>{t('avgBill')}</span>
+                                        <span className="font-bold">{formatCurrency(shiftData.avgBill)}</span>
+                                    </div>
+                                    <div className="flex justify-between pr-1 opacity-70">
+                                        <span>{t('vat')}</span>
+                                        <span className="">{formatCurrency(shiftData.vat || 0)}</span>
+                                    </div>
+                                    <div className="flex justify-between pr-1 opacity-70">
+                                        <span>{t('serviceCharge')}</span>
+                                        <span className="">{formatCurrency(shiftData.serviceCharge || 0)}</span>
+                                    </div>
+                                </div>
+
+                                {/* Cash Drawer Summary (Crucial for closing) */}
+                                <div className="mt-8 pt-6 border-t-2 border-dashed space-y-3">
+                                    <div className="flex justify-between items-center p-3 bg-secondary/20 rounded-xl">
+                                        <span className="font-bold">{t('netCashInDrawer')}</span>
+                                        <span className="font-black text-xl text-emerald-600">{formatCurrency(shiftData.cashSales)}</span>
+                                    </div>
+                                    <div className="flex justify-between items-center p-3 bg-primary/10 rounded-xl">
                                         <span className="font-black text-lg">{t('totalRevenue')}</span>
                                         <span className="font-black text-2xl text-primary">{formatCurrency(shiftData.totalSales)}</span>
                                     </div>
-                                </div>
-
-                                <div className="flex flex-col gap-3 pt-4">
-                                    <div className="flex space-x-3">
-                                        <button
-                                            onClick={() => window.print()}
-                                            className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
-                                        >
-                                            {t('printReport')}
-                                        </button>
-                                        <button
-                                            onClick={() => setIsCloseModalOpen(true)}
-                                            className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
-                                        >
-                                            {t('confirmClose')}
-                                        </button>
-                                    </div>
-                                    <button
-                                        onClick={() => setShowShiftModal(false)}
-                                        className="w-full py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-colors"
-                                    >
-                                        {t('cancel')}
-                                    </button>
                                 </div>
                             </div>
                         ) : (
@@ -533,6 +551,29 @@ export default function POSPage() {
                                 <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
                             </div>
                         )}
+
+                        <div className="flex flex-col gap-3 pt-4">
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => window.print()}
+                                    className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
+                                >
+                                    {t('printReport')}
+                                </button>
+                                <button
+                                    onClick={() => setIsCloseModalOpen(true)}
+                                    className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
+                                >
+                                    {t('confirmClose')}
+                                </button>
+                            </div>
+                            <button
+                                onClick={() => setShowShiftModal(false)}
+                                className="w-full py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-colors"
+                            >
+                                {t('cancel')}
+                            </button>
+                        </div>
                     </div>
                 </div>
             )}

@@ -70,11 +70,26 @@ export async function GET(request: Request) {
         const cashIn = txIn
         const cashOut = txOut
 
+        // Payment Breakdown (Combined POS + Room + Deposit)
+        const paymentStats: Record<string, { count: number, amount: number }> = {}
+        const updatePaymentStats = (method: string, amount: number) => {
+            if (!paymentStats[method]) paymentStats[method] = { count: 0, amount: 0 }
+            paymentStats[method].count += 1
+            paymentStats[method].amount += amount
+        }
+
+        shift.Orders.filter((o: any) => o.status === 'COMPLETED').forEach((o: any) => updatePaymentStats(o.paymentMethod, Number(o.total)))
+        shift.Payments.forEach((p: any) => updatePaymentStats(p.method, Number(p.amount)))
+        shift.Deposits.forEach((d: any) => updatePaymentStats(d.method, Number(d.amount)))
+
         // Totals
         const totalSales = posTotal + roomTotal
         const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + cashIn) - cashOut
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
         const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length + shift.Deposits.length
+        const totalDiscount = 0 // Placeholder as explicit discount isn't tracked yet
+        const saleAfterDisc = totalSales - totalDiscount
+        const avgBill = orderCount > 0 ? (totalSales / orderCount) : 0
 
         return NextResponse.json({
             ...openShift,
@@ -86,7 +101,13 @@ export async function GET(request: Request) {
                 totalSales,
                 cashSales,
                 otherSales,
-                orderCount
+                orderCount,
+                paymentBreakdown: paymentStats,
+                totalDiscount,
+                saleAfterDisc,
+                avgBill,
+                vat: 0,
+                serviceCharge: 0
             }
         })
     } catch (error) {
