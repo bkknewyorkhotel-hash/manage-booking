@@ -131,18 +131,10 @@ export async function GET(request: Request) {
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
 
         // Detailed Transactions - use CashTransactions directly as it already includes labeled deposits/refunds
-        // Also add a summary line for Cash Sales so the subtotals add up
-        const detailedTransactions = [
-            ...(posCash + roomCash > 0 ? [{
-                label: 'Cash Revenue (POS/Rooms)',
-                labelKey: 'totalCashRevenue',
-                amount: posCash + roomCash
-            }] : []),
-            ...shift.CashTransactions.map((t: any) => ({
-                label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
-                amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
-            }))
-        ]
+        const detailedTransactions = shift.CashTransactions.map((t: any) => ({
+            label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
+            amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
+        }))
 
         const totalPaymentCount = completedOrders.length + shift.Payments.length + shift.Deposits.length
 
@@ -179,9 +171,9 @@ export async function GET(request: Request) {
                 // Section 3: Cash In-Out (Refined to match image)
                 cashFlow: {
                     startCash: Number(shift.startCash || 0),
-                    cashIn: txIn + posCash + roomCash,
+                    cashIn: txIn,
                     cashOut: txOut,
-                    netFlow: (txIn + posCash + roomCash) - txOut,
+                    netFlow: txIn - txOut,
                     netCash: cashSales, // This is the "Actual Cash"
                     totalRevenue: totalSales,
                     transactions: detailedTransactions,

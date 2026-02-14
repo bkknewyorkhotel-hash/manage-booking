@@ -12,6 +12,7 @@ interface LanguageContextType {
 
 const translations = {
     TH: {
+        hotelName: 'BookingNewyork Hotel',
         dashboard: 'แดชบอร์ด',
         rooms: 'ห้องพัก',
         reservations: 'การจอง',
