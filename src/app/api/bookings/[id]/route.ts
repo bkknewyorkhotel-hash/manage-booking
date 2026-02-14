@@ -1,6 +1,8 @@
 
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
+import { verifyJWT } from '@/lib/auth'
 
 export async function PATCH(request: Request, context: { params: Promise<{ id: string }> }) {
     try {
@@ -31,8 +33,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             const { idCardNumber, keyDeposit, keyDepositMethod, guestName } = body // Added keyDepositMethod
 
             // Find active shift
+            const cookieStore = await cookies()
+            const token = cookieStore.get('token')?.value
+            const payload: any = token ? await verifyJWT(token) : null
+            const userId = payload?.userId
+
             const activeShift = await prisma.shift.findFirst({
-                where: { userId: 'user_admin', status: 'OPEN' }
+                where: { userId: userId, status: 'OPEN' }
             })
 
             if (!activeShift) {
@@ -153,8 +160,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
             const { refunds } = body // [{ depositId, amount }]
 
             // Find active shift
+            const cookieStore = await cookies()
+            const token = cookieStore.get('token')?.value
+            const payload: any = token ? await verifyJWT(token) : null
+            const userId = payload?.userId
+
             const activeShift = await prisma.shift.findFirst({
-                where: { userId: 'user_admin', status: 'OPEN' }
+                where: { userId: userId, status: 'OPEN' }
             })
 
             if (!activeShift) {

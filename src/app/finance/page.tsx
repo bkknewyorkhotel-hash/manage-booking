@@ -6,6 +6,7 @@ import { Plus, Wallet, Search, ArrowUpCircle, ArrowDownCircle, Clock } from 'luc
 import { cn, formatCurrency } from '@/lib/utils'
 import { useTranslation } from '@/lib/LanguageContext'
 import { useToast } from '@/lib/ToastContext'
+import { useAuth } from '@/lib/AuthContext'
 
 export default function FinancePage() {
     const { t } = useTranslation()
@@ -15,7 +16,7 @@ export default function FinancePage() {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [search, setSearch] = useState('')
     const [activeShift, setActiveShift] = useState<any>(null)
-    const [userRole, setUserRole] = useState<string | null>(null)
+    const { user } = useAuth()
     const [error, setError] = useState<string | null>(null)
 
     // Form states
@@ -40,7 +41,6 @@ export default function FinancePage() {
                     setTransactions(json.transactions || [])
                     setActiveShift(json.activeShift)
                 }
-                setUserRole(json.role)
                 setLoading(false)
             })
             .catch(err => {
@@ -130,7 +130,7 @@ export default function FinancePage() {
                     <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">{t('financeTransactions')}</h2>
                     <p className="text-xs md:text-sm text-muted-foreground font-bold italic opacity-70">{t('financeDesc')}</p>
                 </div>
-                {userRole === 'ADMIN' && (
+                {user?.role === 'ADMIN' && (
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
@@ -150,7 +150,7 @@ export default function FinancePage() {
                                     {t('activeShift')}: {activeShift.id.slice(-6)}
                                 </span>
                             )}
-                            {userRole === 'ADMIN' && (
+                            {user?.role === 'ADMIN' && (
                                 <span className="bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-purple-200">
                                     {t('adminViewAllData')}
                                 </span>
@@ -191,13 +191,13 @@ export default function FinancePage() {
                             placeholder={t('searchTransactionsRef')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
-                            disabled={userRole === 'RECEPTION' && !activeShift}
+                            disabled={user?.role === 'RECEPTION' && !activeShift}
                             className="w-full pl-10 pr-4 py-2.5 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 disabled:opacity-50 text-sm md:text-base"
                         />
                     </div>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        disabled={userRole === 'RECEPTION' && !activeShift}
+                        disabled={user?.role === 'RECEPTION' && !activeShift}
                         className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:grayscale disabled:scale-100"
                     >
                         <Plus size={20} />

@@ -7,6 +7,7 @@ import { useTranslation } from '@/lib/LanguageContext'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useToast } from '@/lib/ToastContext'
 import { ConfirmationModal } from '@/components/ConfirmationModal'
+import { useAuth } from '@/lib/AuthContext'
 
 interface Product {
     id: string
@@ -23,6 +24,7 @@ interface CartItem extends Product {
 export default function POSPage() {
     const { t } = useTranslation()
     const { showToast } = useToast()
+    const { user } = useAuth()
     const [products, setProducts] = useState<Product[]>([])
     const [cart, setCart] = useState<CartItem[]>([])
     const [search, setSearch] = useState('')
@@ -129,7 +131,7 @@ export default function POSPage() {
             const res = await fetch('/api/pos/shift/open', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: 'user_admin', startCash: Number(startingCash) })
+                body: JSON.stringify({ userId: user?.id, startCash: Number(startingCash) })
             })
             if (res.ok) {
                 const shift = await res.json()
@@ -193,7 +195,7 @@ export default function POSPage() {
                     items: cart.map(i => ({ productId: i.id, name: i.name, price: i.price, qty: i.qty })),
                     total,
                     paymentMethod: paymentMethod,
-                    userId: 'user_admin', // TODO: Get from session
+                    userId: user?.id,
                     shiftId: activeShift.id
                 })
             })

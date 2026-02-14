@@ -4,6 +4,7 @@ import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { useTranslation } from '@/lib/LanguageContext'
 import { useToast } from '@/lib/ToastContext'
+import { useAuth } from '@/lib/AuthContext'
 import { cn } from '@/lib/utils'
 import { Brush, CheckCircle2, Search, Clock, ShieldAlert } from 'lucide-react'
 
@@ -11,23 +12,16 @@ export default function HousekeepingPage() {
     const { t } = useTranslation()
     const { showToast } = useToast()
     const [rooms, setRooms] = useState<any[]>([])
-    const [user, setUser] = useState<any>(null)
+    const { user } = useAuth()
     const [loading, setLoading] = useState(true)
 
     useEffect(() => {
         const fetchData = async () => {
             try {
-                const [roomsRes, userRes] = await Promise.all([
-                    fetch('/api/rooms'),
-                    fetch('/api/auth/me')
-                ])
-
-                const roomsJson = await roomsRes.json()
-                const userJson = await userRes.json()
-
+                const res = await fetch('/api/rooms')
+                const roomsJson = await res.json()
                 const allRooms = roomsJson.flatMap((f: any) => f.Rooms)
                 setRooms(allRooms)
-                setUser(userJson)
                 setLoading(false)
             } catch (err) {
                 console.error(err)

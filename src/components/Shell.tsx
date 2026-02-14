@@ -3,6 +3,7 @@
 import React, { useState } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from '@/lib/LanguageContext'
+import { useAuth } from '@/lib/AuthContext'
 import {
     LayoutDashboard,
     Bed,
@@ -57,18 +58,9 @@ export function Shell({ children }: { children: React.ReactNode }) {
     const { lang, setLang, t } = useTranslation()
     const [collapsed, setCollapsed] = useState(false)
     const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
-    const [user, setUser] = useState<any>(null)
+    const { user } = useAuth()
     const pathname = usePathname()
     const router = useRouter()
-
-    React.useEffect(() => {
-        fetch('/api/auth/me')
-            .then(res => res.json())
-            .then(json => {
-                if (!json.error) setUser(json)
-            })
-            .catch(err => console.error('Failed to fetch user', err))
-    }, [])
 
     const allNavItems = [
         { icon: LayoutDashboard, label: t('dashboard'), href: '/dashboard' },

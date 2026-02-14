@@ -7,8 +7,8 @@ export async function GET() {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get('token')?.value
-        const payload = token ? await verifyJWT(token) : null
-        const role = (payload as any)?.role
+        const payload: any = token ? await verifyJWT(token) : null
+        const role = payload?.role
 
         let where = {}
 
@@ -57,8 +57,8 @@ export async function POST(request: Request) {
     try {
         const cookieStore = await cookies()
         const token = cookieStore.get('token')?.value
-        const payload = token ? await verifyJWT(token) : null
-        const role = (payload as any)?.role
+        const payload: any = token ? await verifyJWT(token) : null
+        const role = payload?.role
 
         const body = await request.json()
         const { type, category, description, amount, referenceNo } = body
@@ -85,7 +85,8 @@ export async function POST(request: Request) {
                 description,
                 amount: Number(amount),
                 referenceNo,
-                shiftId: activeShift.id
+                shiftId: activeShift.id,
+                createdBy: payload?.userId || 'unknown'
             }
         })
 

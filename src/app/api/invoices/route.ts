@@ -1,5 +1,7 @@
 import { NextResponse } from 'next/server'
+import { cookies } from 'next/headers'
 import prisma from '@/lib/prisma'
+import { verifyJWT } from '@/lib/auth'
 
 export async function POST(request: Request) {
     try {
@@ -56,10 +58,14 @@ export async function POST(request: Request) {
         const invoiceNo = `INV-${new Date().getFullYear()}-${Math.floor(100000 + Math.random() * 899999)}`
 
         // Check for active shift
-        // TODO: Get real userId from session. For now hardcoded 'user_admin'
+        const cookieStore = await cookies()
+        const token = cookieStore.get('token')?.value
+        const payload: any = token ? await verifyJWT(token) : null
+        const userId = payload?.userId
+
         const activeShift = await prisma.shift.findFirst({
             where: {
-                userId: 'user_admin',
+                userId: userId,
                 status: 'OPEN'
             }
         })
