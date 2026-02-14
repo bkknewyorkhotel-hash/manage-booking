@@ -275,7 +275,7 @@ export default function POSPage() {
 
     return (
         <Shell>
-            <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative">
+            <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative print:hidden">
                 {/* Left: Product Catalog */}
                 <div className="flex-1 flex flex-col space-y-3 md:space-y-4 min-h-0">
                     <div className="flex flex-col md:flex-row gap-3 bg-card p-3 md:p-4 rounded-xl border shadow-sm">
@@ -625,12 +625,6 @@ export default function POSPage() {
                                     {t('confirmClose')}
                                 </button>
                             </div>
-                            <button
-                                onClick={() => setShowShiftModal(false)}
-                                className="w-full py-4 bg-zinc-100 text-zinc-500 rounded-xl font-black hover:bg-zinc-200 transition-all"
-                            >
-                                {t('cancel')}
-                            </button>
                         </div>
                     </div>
                 </div>
