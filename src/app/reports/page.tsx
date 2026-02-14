@@ -13,6 +13,7 @@ export default function ReportsPage() {
     const [monthlyStats, setMonthlyStats] = useState<any>(null)
     const [loading, setLoading] = useState(true)
     const [generating, setGenerating] = useState(false)
+    const [currentUser, setCurrentUser] = useState<any>(null)
 
     // Shift History State
     const [shiftHistory, setShiftHistory] = useState<any[]>([])
@@ -37,11 +38,15 @@ export default function ReportsPage() {
 
     const fetchData = async () => {
         try {
-            const [resRev, resOcc, resMonth] = await Promise.all([
+            const [resMe, resRev, resOcc, resMonth] = await Promise.all([
+                fetch('/api/auth/me'),
                 fetch('/api/reports?type=revenue'),
                 fetch('/api/reports?type=occupancy'),
                 fetch('/api/reports/summary')
             ])
+            const me = await resMe.json()
+            setCurrentUser(me)
+
             setRevenue(await resRev.json())
             setOccupancy(await resOcc.json())
             setMonthlyStats(await resMonth.json())
@@ -86,7 +91,7 @@ export default function ReportsPage() {
                 </div>
 
                 {/* Monthly Summary */}
-                {monthlyStats && (
+                {monthlyStats && currentUser?.role === 'ADMIN' && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="p-6 bg-card border rounded-3xl shadow-soft">
                             <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-2 opacity-70">Monthly Revenue</p>
@@ -131,8 +136,10 @@ export default function ReportsPage() {
                 )}
 
                 <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    {/* Paginated Shift History */}
-                    <div className="p-6 bg-card border rounded-3xl shadow-soft">
+                    <div className={cn(
+                        "p-6 bg-card border rounded-3xl shadow-soft",
+                        currentUser?.role === 'RECEPTION' ? "lg:col-span-2" : ""
+                    )}>
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl"><ToolIcon size={20} /></div>
                             <h3 className="text-xl font-bold">Shift History</h3>
@@ -200,58 +207,64 @@ export default function ReportsPage() {
                     </div>
 
                     {/* Occupancy & Housekeeping */}
-                    <div className="p-6 bg-card border rounded-3xl shadow-soft space-y-8">
-                        <div>
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><PieChart size={20} /></div>
-                                <h3 className="text-xl font-bold">Occupancy Metrics</h3>
+                    {currentUser?.role === 'ADMIN' && (
+                        <div className="p-6 bg-card border rounded-3xl shadow-soft space-y-8">
+                            <div>
+                                <div className="flex items-center space-x-3 mb-6">
+                                    <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><PieChart size={20} /></div>
+                                    <h3 className="text-xl font-bold">Occupancy Metrics</h3>
+                                </div>
+
+                                <div className="space-y-6 py-1">
+                                    <MetricProgress label="Stay Occupancy" value={occupancy?.rate || 0} color="bg-primary" />
+                                    <MetricProgress label="Reserved Load" value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
+                                </div>
+
+                                <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 border-t border-dashed pt-6 mt-6">
+                                    <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Total</p>
+                                        <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.total || 0}</p>
+                                    </div>
+                                    <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0 sm:border-x sm:border-dashed">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Occupied</p>
+                                        <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.occupied || 0}</p>
+                                    </div>
+                                    <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
+                                        <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Reserved</p>
+                                        <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.reserved || 0}</p>
+                                    </div>
+                                </div>
                             </div>
 
-                            <div className="space-y-6 py-1">
-                                <MetricProgress label="Stay Occupancy" value={occupancy?.rate || 0} color="bg-primary" />
-                                <MetricProgress label="Reserved Load" value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
-                            </div>
+                            <div className="pt-6 border-t border-dashed">
+                                <div className="flex items-center space-x-3 mb-6">
+                                    <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><TrendingUp size={20} /></div>
+                                    <h3 className="text-xl font-bold">Housekeeping</h3>
+                                </div>
 
-                            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 border-t border-dashed pt-6 mt-6">
-                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Total</p>
-                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.total || 0}</p>
-                                </div>
-                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0 sm:border-x sm:border-dashed">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Occupied</p>
-                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.occupied || 0}</p>
-                                </div>
-                                <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Reserved</p>
-                                    <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.reserved || 0}</p>
+                                <div className="grid grid-cols-2 gap-3">
+                                    <StatusSmallStat label="Dirty" count={occupancy?.dirty || 0} color="text-amber-600 bg-amber-50" />
+                                    <StatusSmallStat label="Cleaning" count={occupancy?.cleaning || 0} color="text-blue-600 bg-blue-50" />
+                                    <StatusSmallStat label="Inspecting" count={occupancy?.inspecting || 0} color="text-cyan-600 bg-cyan-50" />
+                                    <StatusSmallStat label="Clean" count={occupancy?.clean || 0} color="text-emerald-600 bg-emerald-50" />
                                 </div>
                             </div>
                         </div>
+                    )}
+                </div>
 
-                        <div className="pt-6 border-t border-dashed">
-                            <div className="flex items-center space-x-3 mb-6">
-                                <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><TrendingUp size={20} /></div>
-                                <h3 className="text-xl font-bold">Housekeeping</h3>
-                            </div>
-
-                            <div className="grid grid-cols-2 gap-3">
-                                <StatusSmallStat label="Dirty" count={occupancy?.dirty || 0} color="text-amber-600 bg-amber-50" />
-                                <StatusSmallStat label="Cleaning" count={occupancy?.cleaning || 0} color="text-blue-600 bg-blue-50" />
-                                <StatusSmallStat label="Inspecting" count={occupancy?.inspecting || 0} color="text-cyan-600 bg-cyan-50" />
-                                <StatusSmallStat label="Clean" count={occupancy?.clean || 0} color="text-emerald-600 bg-emerald-50" />
-                            </div>
-                        </div>
+                {currentUser?.role === 'ADMIN' && (
+                    <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
+                        <ArrivalsReport />
+                        <DeparturesReport />
                     </div>
-                </div>
+                )}
 
-                <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <ArrivalsReport />
-                    <DeparturesReport />
-                </div>
-
-                <div className="w-full">
-                    <RoomStatusReport />
-                </div>
+                {currentUser?.role === 'ADMIN' && (
+                    <div className="w-full">
+                        <RoomStatusReport />
+                    </div>
+                )}
             </div>
         </Shell>
     )

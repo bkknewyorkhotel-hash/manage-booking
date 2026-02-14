@@ -1,12 +1,29 @@
-
 import { NextResponse } from 'next/server'
 import prisma from '@/lib/prisma'
 import { startOfMonth, endOfMonth, subMonths } from 'date-fns'
+import { cookies } from 'next/headers'
+import { verifyJWT } from '@/lib/auth'
 
 export async function GET(request: Request) {
     try {
         const { searchParams } = new URL(request.url)
         const date = searchParams.get('date') ? new Date(searchParams.get('date')!) : new Date()
+
+        // Auth check
+        const cookieStore = await cookies()
+        const token = cookieStore.get('token')?.value
+        if (!token) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+        const payload = await verifyJWT(token)
+        if (!payload) return NextResponse.json({ error: 'Unauthorized' }, { status: 401 })
+
+        // Restriction: Reception shouldn't see global summary
+        if (payload.role === 'RECEPTION') {
+            return NextResponse.json({
+                revenue: { room: 0, pos: 0, total: 0 },
+                sources: [],
+                topProducts: []
+            })
+        }
 
         const start = startOfMonth(date)
         const end = endOfMonth(date)
