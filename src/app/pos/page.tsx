@@ -541,7 +541,6 @@ export default function POSPage() {
                                                 <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         ))}
-
                                         <div className="flex justify-between items-center text-zinc-400">
                                             <span>{t('cashOutDrawer')}</span>
                                             <span>{Number(shiftData.cashFlow?.cashOut || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
@@ -553,11 +552,6 @@ export default function POSPage() {
                                                 <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         ))}
-
-                                        <div className="flex justify-between items-center pt-2">
-                                            <span>{t('overShortCash')}</span>
-                                            <span className="font-bold">0.00</span>
-                                        </div>
                                     </div>
                                 </div>
                                 {/* Final Dashed Border */}
