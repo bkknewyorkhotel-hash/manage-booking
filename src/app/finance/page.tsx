@@ -96,7 +96,7 @@ export default function FinancePage() {
     )
 
     const netBalance = transactions.reduce((acc, tx) =>
-        tx.type === 'INCOME' ? acc + tx.amount : acc - tx.amount, 0
+        tx.type === 'INCOME' ? acc + Number(tx.amount) : acc - Number(tx.amount), 0
     )
 
     if (error === 'NO_ACTIVE_SHIFT') {
