@@ -87,18 +87,18 @@ export default function ReportsPage() {
         <Shell>
             <div className="space-y-6">
                 <div className="flex justify-between items-center">
-                    <h2 className="text-xl font-bold text-primary uppercase tracking-tight">Reports & Analytics</h2>
+                    <h2 className="text-xl font-bold text-primary uppercase tracking-tight">{t('reports')}</h2>
                 </div>
 
                 {/* Monthly Summary */}
                 {monthlyStats && currentUser?.role === 'ADMIN' && (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
                         <div className="p-6 bg-card border rounded-3xl shadow-soft">
-                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-2 opacity-70">Monthly Revenue</p>
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-2 opacity-70">{t('monthlyRevenue')}</p>
                             <p className="text-3xl font-bold text-primary tracking-tight">{formatCurrency(monthlyStats.revenue.total)}</p>
                             <div className="mt-4 space-y-2 text-sm">
                                 <div className="flex justify-between items-center">
-                                    <span className="text-muted-foreground font-semibold">Rooms</span>
+                                    <span className="text-muted-foreground font-semibold">{t('rooms')}</span>
                                     <span className="font-bold">{formatCurrency(monthlyStats.revenue.room)}</span>
                                 </div>
                                 <div className="flex justify-between items-center">
@@ -108,7 +108,7 @@ export default function ReportsPage() {
                             </div>
                         </div>
                         <div className="p-6 bg-card border rounded-3xl shadow-soft">
-                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4 opacity-70">Booking Sources</p>
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4 opacity-70">{t('sources')}</p>
                             <div className="space-y-3">
                                 {monthlyStats.sources.map((s: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center">
@@ -119,7 +119,7 @@ export default function ReportsPage() {
                             </div>
                         </div>
                         <div className="p-6 bg-card border rounded-3xl shadow-soft">
-                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4 opacity-70">Top Selling Products</p>
+                            <p className="text-[10px] font-bold uppercase text-muted-foreground tracking-widest mb-4 opacity-70">{t('products')}</p>
                             <div className="space-y-3">
                                 {monthlyStats.topProducts.map((p: any, i: number) => (
                                     <div key={i} className="flex justify-between items-center text-sm">
@@ -142,7 +142,7 @@ export default function ReportsPage() {
                     )}>
                         <div className="flex items-center space-x-3 mb-6">
                             <div className="p-2.5 bg-indigo-50 text-indigo-600 rounded-xl"><ToolIcon size={20} /></div>
-                            <h3 className="text-xl font-bold">Shift History</h3>
+                            <h3 className="text-xl font-bold">{t('shiftHistory')}</h3>
                         </div>
 
                         <div className="space-y-8 max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
@@ -150,7 +150,7 @@ export default function ReportsPage() {
                                 <div key={shift.id} className="space-y-4 pb-8 border-b border-dashed last:border-0 last:pb-0">
                                     <div className="flex items-center justify-between text-[11px] font-bold tracking-wider text-muted-foreground uppercase opacity-80">
                                         <span className="truncate">Shift ID: {shift.id.substring(0, 12)}...</span>
-                                        <span className="ml-4 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
+                                        <span className="ml-4 whitespace-nowrap">{t('today')}: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                     </div>
 
                                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
@@ -179,7 +179,7 @@ export default function ReportsPage() {
                                     </div>
 
                                     <div className="flex justify-between items-center px-1">
-                                        <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground opacity-70">Shift Total</span>
+                                        <span className="text-sm font-bold uppercase tracking-widest text-muted-foreground opacity-70">{t('totalSales')}</span>
                                         <span className="text-2xl font-bold text-primary tracking-tight">{formatCurrency(shift.totalRevenue)}</span>
                                     </div>
                                 </div>
@@ -192,7 +192,7 @@ export default function ReportsPage() {
                                         disabled={loadingMore}
                                         className="w-full py-4 border-2 border-dashed rounded-2xl font-bold text-muted-foreground text-sm hover:bg-secondary/50 transition-all disabled:opacity-50"
                                     >
-                                        {loadingMore ? 'Loading...' : 'Load History'}
+                                        {loadingMore ? '...' : t('shiftHistory')}
                                     </button>
                                 </div>
                             )}
@@ -200,7 +200,7 @@ export default function ReportsPage() {
                             {shiftHistory.length === 0 && (
                                 <div className="py-16 text-center">
                                     <Clock className="w-12 h-12 mx-auto text-muted-foreground/20 mb-4" />
-                                    <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">No shift history found</p>
+                                    <p className="text-muted-foreground text-sm font-bold uppercase tracking-widest">{t('noShiftHistory')}</p>
                                 </div>
                             )}
                         </div>
@@ -211,25 +211,25 @@ export default function ReportsPage() {
                         <div>
                             <div className="flex items-center space-x-3 mb-6">
                                 <div className="p-2.5 bg-purple-50 text-purple-600 rounded-xl"><PieChart size={20} /></div>
-                                <h3 className="text-xl font-bold">Occupancy Metrics</h3>
+                                <h3 className="text-xl font-bold">{t('occupancyMetrics')}</h3>
                             </div>
 
                             <div className="space-y-6 py-1">
-                                <MetricProgress label="Stay Occupancy" value={occupancy?.rate || 0} color="bg-primary" />
-                                <MetricProgress label="Reserved Load" value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
+                                <MetricProgress label={t('stayOccupancy')} value={occupancy?.rate || 0} color="bg-primary" />
+                                <MetricProgress label={t('reservedLoad')} value={(occupancy?.reserved / (occupancy?.total || 1)) * 100 || 0} color="bg-purple-500" />
                             </div>
 
                             <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 border-t border-dashed pt-6 mt-6">
                                 <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Total</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{t('total')}</p>
                                     <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.total || 0}</p>
                                 </div>
                                 <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0 sm:border-x sm:border-dashed">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Occupied</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{t('occupied')}</p>
                                     <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.occupied || 0}</p>
                                 </div>
                                 <div className="text-center p-3 bg-secondary/10 rounded-xl sm:bg-transparent sm:p-0">
-                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">Reserved</p>
+                                    <p className="text-[9px] font-bold text-muted-foreground uppercase tracking-widest opacity-60">{t('reserved')}</p>
                                     <p className="text-lg md:text-xl font-bold mt-0.5">{occupancy?.reserved || 0}</p>
                                 </div>
                             </div>
@@ -238,14 +238,14 @@ export default function ReportsPage() {
                         <div className="pt-6 border-t border-dashed">
                             <div className="flex items-center space-x-3 mb-6">
                                 <div className="p-2.5 bg-amber-50 text-amber-600 rounded-xl"><TrendingUp size={20} /></div>
-                                <h3 className="text-xl font-bold">Housekeeping</h3>
+                                <h3 className="text-xl font-bold">{t('housekeeping')}</h3>
                             </div>
 
                             <div className="grid grid-cols-2 gap-3">
-                                <StatusSmallStat label="Dirty" count={occupancy?.dirty || 0} color="text-amber-600 bg-amber-50" />
+                                <StatusSmallStat label={t('vacantDirty').split(' ')[1] || 'Dirty'} count={occupancy?.dirty || 0} color="text-amber-600 bg-amber-50" />
                                 <StatusSmallStat label="Cleaning" count={occupancy?.cleaning || 0} color="text-blue-600 bg-blue-50" />
                                 <StatusSmallStat label="Inspecting" count={occupancy?.inspecting || 0} color="text-cyan-600 bg-cyan-50" />
-                                <StatusSmallStat label="Clean" count={occupancy?.clean || 0} color="text-emerald-600 bg-emerald-50" />
+                                <StatusSmallStat label={t('vacantClean').split(' ')[1] || 'Clean'} count={occupancy?.clean || 0} color="text-emerald-600 bg-emerald-50" />
                             </div>
                         </div>
                     </div>
@@ -295,6 +295,7 @@ function MetricProgress({ label, value, color }: any) {
 }
 
 function ArrivalsReport() {
+    const { t } = useTranslation()
     const [data, setData] = useState<any[]>([])
 
     useEffect(() => {
@@ -304,8 +305,8 @@ function ArrivalsReport() {
     return (
         <div className="p-6 bg-card border rounded-3xl shadow-soft h-full">
             <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs">IN</div>
-                <h3 className="text-xl font-bold">Expected Arrivals</h3>
+                <div className="p-2.5 bg-emerald-50 text-emerald-600 rounded-xl font-bold text-xs">{t('checkIn')}</div>
+                <h3 className="text-xl font-bold">{t('expectedArrivals')}</h3>
             </div>
 
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -316,17 +317,18 @@ function ArrivalsReport() {
                             <p className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider mt-0.5">{b.bookingNo}</p>
                         </div>
                         <span className="px-2 py-0.5 bg-emerald-50 text-emerald-600 rounded text-[9px] font-bold uppercase tracking-wider border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                            {b.Rooms.length} Room(s)
+                            {b.Rooms.length} {t('room')}(s)
                         </span>
                     </div>
                 ))}
-                {data.length === 0 && <p className="text-center text-xs font-bold text-muted-foreground py-10 opacity-50 uppercase tracking-widest">No arrivals expected</p>}
+                {data.length === 0 && <p className="text-center text-xs font-bold text-muted-foreground py-10 opacity-50 uppercase tracking-widest">{t('noArrivals')}</p>}
             </div>
         </div>
     )
 }
 
 function DeparturesReport() {
+    const { t } = useTranslation()
     const [data, setData] = useState<any[]>([])
 
     useEffect(() => {
@@ -336,8 +338,8 @@ function DeparturesReport() {
     return (
         <div className="p-6 bg-card border rounded-3xl shadow-soft h-full">
             <div className="flex items-center space-x-3 mb-6">
-                <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs">OUT</div>
-                <h3 className="text-xl font-bold">Expected Departures</h3>
+                <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs">{t('checkOut')}</div>
+                <h3 className="text-xl font-bold">{t('expectedDepartures')}</h3>
             </div>
 
             <div className="space-y-3 max-h-[400px] overflow-y-auto pr-2 custom-scrollbar">
@@ -352,13 +354,14 @@ function DeparturesReport() {
                         </span>
                     </div>
                 ))}
-                {data.length === 0 && <p className="text-center text-xs font-bold text-muted-foreground py-10 opacity-50 uppercase tracking-widest">No departures expected</p>}
+                {data.length === 0 && <p className="text-center text-xs font-bold text-muted-foreground py-10 opacity-50 uppercase tracking-widest">{t('noDepartures')}</p>}
             </div>
         </div>
     )
 }
 
 function RoomStatusReport() {
+    const { t } = useTranslation()
     const [data, setData] = useState<any[]>([])
 
     useEffect(() => {
@@ -369,7 +372,7 @@ function RoomStatusReport() {
         <div className="p-6 bg-card border rounded-3xl shadow-soft">
             <div className="flex items-center space-x-3 mb-6">
                 <div className="p-2.5 bg-blue-50 text-blue-600 rounded-xl font-bold text-xs">ST</div>
-                <h3 className="text-xl font-bold">Room Status Detail</h3>
+                <h3 className="text-xl font-bold">{t('roomStatusDetail')}</h3>
             </div>
 
             <div className="overflow-x-auto scrollbar-hide">
@@ -414,6 +417,7 @@ function RoomStatusReport() {
 }
 
 function OutstandingReport() {
+    const { t } = useTranslation()
     const [data, setData] = useState<any[]>([])
 
     useEffect(() => {
@@ -424,7 +428,7 @@ function OutstandingReport() {
         <div className="p-6 bg-card border rounded-3xl shadow-soft">
             <div className="flex items-center space-x-3 mb-6">
                 <div className="p-2.5 bg-rose-50 text-rose-600 rounded-xl font-bold text-xs">BT</div>
-                <h3 className="text-xl font-bold">Outstanding Balances</h3>
+                <h3 className="text-xl font-bold">{t('outstandingBalances')}</h3>
             </div>
 
             <div className="overflow-x-auto scrollbar-hide">
@@ -451,7 +455,7 @@ function OutstandingReport() {
                         {data.length === 0 && (
                             <tr>
                                 <td colSpan={4} className="py-10 text-center text-xs font-bold text-muted-foreground uppercase tracking-widest opacity-50">
-                                    No outstanding balances
+                                    {t('noOutstanding')}
                                 </td>
                             </tr>
                         )}
