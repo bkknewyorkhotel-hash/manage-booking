@@ -86,14 +86,39 @@ export async function GET(request: Request) {
         const totalSales = posTotal + roomTotal
         const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + cashIn) - cashOut
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
-        const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length + shift.Deposits.length
-        const totalDiscount = 0 // Placeholder as explicit discount isn't tracked yet
-        const saleAfterDisc = totalSales - totalDiscount
-        const avgBill = orderCount > 0 ? (totalSales / orderCount) : 0
+
+        const posOrderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length
+        const totalDiscount = 0
+        const posSaleAfterDisc = posTotal - totalDiscount
+        const posAvgBill = posOrderCount > 0 ? (posTotal / posOrderCount) : 0
+
+        const roomCount = shift.Payments.length
 
         return NextResponse.json({
             ...openShift,
             stats: {
+                // Section 1: POS Sales
+                pos: {
+                    total: posTotal,
+                    count: posOrderCount,
+                    avg: posAvgBill,
+                    discount: totalDiscount,
+                    afterDiscount: posSaleAfterDisc
+                },
+                // Section 2: Room Revenue
+                room: {
+                    total: roomTotal,
+                    count: roomCount
+                },
+                // Section 3: Cash In-Out
+                cashFlow: {
+                    startCash: Number(shift.startCash || 0),
+                    cashIn: cashIn,
+                    cashOut: cashOut,
+                    netCash: cashSales,
+                    totalRevenue: totalSales
+                },
+                // Other existing data for backward compatibility or breakdown
                 posTotal,
                 roomTotal,
                 cashIn,
@@ -101,11 +126,11 @@ export async function GET(request: Request) {
                 totalSales,
                 cashSales,
                 otherSales,
-                orderCount,
+                orderCount: posOrderCount + roomCount + shift.Deposits.length,
                 paymentBreakdown: paymentStats,
                 totalDiscount,
-                saleAfterDisc,
-                avgBill,
+                saleAfterDisc: totalSales - totalDiscount,
+                avgBill: (posOrderCount + roomCount) > 0 ? (totalSales / (posOrderCount + roomCount)) : 0,
                 vat: 0,
                 serviceCharge: 0
             }

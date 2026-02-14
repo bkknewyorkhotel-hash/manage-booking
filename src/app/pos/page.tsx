@@ -459,7 +459,7 @@ export default function POSPage() {
 
                         {shiftData ? (
                             <div className="space-y-6 text-sm font-medium">
-                                <div className="space-y-1 text-[11px] font-mono text-muted-foreground">
+                                <div className="space-y-1 text-[11px] font-mono text-muted-foreground border-b pb-4">
                                     <div className="flex justify-between">
                                         <span>Shift ID:</span>
                                         <span className="font-bold">{activeShift?.id}</span>
@@ -470,79 +470,73 @@ export default function POSPage() {
                                     </div>
                                 </div>
 
-                                {/* Sales Overview Table */}
-                                <div className="border-t border-b py-4 space-y-2">
-                                    <div className="flex justify-between items-center pr-1">
-                                        <span>{t('totalSales')}</span>
-                                        <div className="flex space-x-12">
-                                            <span className="w-12 text-center">{shiftData.orderCount}</span>
-                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.totalSales)}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-center pr-1 opacity-70">
-                                        <span>{t('totalDiscount')}</span>
-                                        <div className="flex space-x-12">
-                                            <span className="w-12 text-center">0</span>
-                                            <span className="w-24 text-right">{formatCurrency(shiftData.totalDiscount || 0)}</span>
-                                        </div>
-                                    </div>
-                                    <div className="flex justify-between items-center pr-1 pt-2 border-t font-black">
-                                        <span>{t('saleAfterDisc')}</span>
-                                        <span className="text-right w-24">{formatCurrency(shiftData.saleAfterDisc)}</span>
-                                    </div>
-                                </div>
-
-                                {/* Payment Breakdown Section */}
+                                {/* Section 1: POS Sales */}
                                 <div className="space-y-3">
-                                    <div className="flex justify-between text-[11px] font-black uppercase text-muted-foreground border-b pb-1">
-                                        <span>{t('payment')}</span>
-                                        <div className="flex space-x-12">
-                                            <span className="w-12 text-center">Count</span>
-                                            <span className="w-24 text-right">Amount</span>
+                                    <h3 className="font-black text-primary border-b pb-1 uppercase tracking-wider">{t('posSection')}</h3>
+                                    <div className="space-y-2 px-1">
+                                        <div className="flex justify-between items-center">
+                                            <span>{t('posSales')}</span>
+                                            <div className="flex items-center space-x-8">
+                                                <span className="text-muted-foreground text-[10px] uppercase font-bold">{shiftData.pos?.count} bills</span>
+                                                <span className="font-black w-24 text-right">{formatCurrency(shiftData.pos?.total || 0)}</span>
+                                            </div>
+                                        </div>
+                                        <div className="flex justify-between items-center opacity-70 text-[12px]">
+                                            <span>{t('totalDiscount')}</span>
+                                            <span className="w-24 text-right">-{formatCurrency(shiftData.pos?.discount || 0)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center opacity-70 text-[12px]">
+                                            <span>{t('avgBill')}</span>
+                                            <span className="w-24 text-right">{formatCurrency(shiftData.pos?.avg || 0)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center pt-2 border-t font-black">
+                                            <span>{t('saleAfterDisc')}</span>
+                                            <span className="w-24 text-right text-primary">{formatCurrency(shiftData.pos?.afterDiscount || 0)}</span>
                                         </div>
                                     </div>
-                                    <div className="space-y-2">
-                                        {Object.entries(shiftData.paymentBreakdown || {}).map(([method, data]: any) => (
-                                            <div key={method} className="flex justify-between items-center pr-1">
-                                                <span className="capitalize">{method.toLowerCase().replace('_', ' ')}</span>
-                                                <div className="flex space-x-12 italic">
-                                                    <span className="w-12 text-center">{data.count}</span>
-                                                    <span className="w-24 text-right font-bold">{formatCurrency(data.amount)}</span>
-                                                </div>
+                                </div>
+
+                                {/* Section 2: Room Revenue */}
+                                <div className="space-y-3">
+                                    <h3 className="font-black text-emerald-600 border-b pb-1 uppercase tracking-wider">{t('roomSection')}</h3>
+                                    <div className="space-y-2 px-1">
+                                        <div className="flex justify-between items-center">
+                                            <span>{t('roomRevenue')}</span>
+                                            <div className="flex items-center space-x-8">
+                                                <span className="text-muted-foreground text-[10px] uppercase font-bold">{shiftData.room?.count} trans</span>
+                                                <span className="font-black w-24 text-right text-emerald-600">{formatCurrency(shiftData.room?.total || 0)}</span>
                                             </div>
-                                        ))}
+                                        </div>
                                     </div>
                                 </div>
 
-                                {/* Detailed Totals & Averages */}
-                                <div className="space-y-2 pt-4 border-t">
-                                    <div className="flex justify-between pr-1">
-                                        <span>{t('totalBills')}</span>
-                                        <span className="font-bold">{shiftData.orderCount}</span>
-                                    </div>
-                                    <div className="flex justify-between pr-1">
-                                        <span>{t('avgBill')}</span>
-                                        <span className="font-bold">{formatCurrency(shiftData.avgBill)}</span>
-                                    </div>
-                                    <div className="flex justify-between pr-1 opacity-70">
-                                        <span>{t('vat')}</span>
-                                        <span className="">{formatCurrency(shiftData.vat || 0)}</span>
-                                    </div>
-                                    <div className="flex justify-between pr-1 opacity-70">
-                                        <span>{t('serviceCharge')}</span>
-                                        <span className="">{formatCurrency(shiftData.serviceCharge || 0)}</span>
-                                    </div>
-                                </div>
+                                {/* Section 3: Cash In-Out */}
+                                <div className="space-y-3">
+                                    <h3 className="font-black text-blue-600 border-b pb-1 uppercase tracking-wider">{t('cashFlowSection')}</h3>
+                                    <div className="space-y-2 px-1">
+                                        <div className="flex justify-between items-center opacity-70">
+                                            <span>{t('startingCash')}</span>
+                                            <span className="w-24 text-right">{formatCurrency(shiftData.cashFlow?.startCash || 0)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-emerald-600">
+                                            <span>{t('cashIn')} (TX)</span>
+                                            <span className="w-24 text-right font-black">+{formatCurrency(shiftData.cashFlow?.cashIn || 0)}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-red-600">
+                                            <span>{t('cashOut')} (TX)</span>
+                                            <span className="w-24 text-right font-black">-{formatCurrency(shiftData.cashFlow?.cashOut || 0)}</span>
+                                        </div>
 
-                                {/* Cash Drawer Summary (Crucial for closing) */}
-                                <div className="mt-8 pt-6 border-t-2 border-dashed space-y-3">
-                                    <div className="flex justify-between items-center p-3 bg-secondary/20 rounded-xl">
-                                        <span className="font-bold">{t('netCashInDrawer')}</span>
-                                        <span className="font-black text-xl text-emerald-600">{formatCurrency(shiftData.cashSales)}</span>
-                                    </div>
-                                    <div className="flex justify-between items-center p-3 bg-primary/10 rounded-xl">
-                                        <span className="font-black text-lg">{t('totalRevenue')}</span>
-                                        <span className="font-black text-2xl text-primary">{formatCurrency(shiftData.totalSales)}</span>
+                                        <div className="pt-4 space-y-3 border-t-2 border-dashed">
+                                            <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
+                                                <span className="font-black">{t('netCashInDrawer')}</span>
+                                                <span className="font-black text-xl text-emerald-700">{formatCurrency(shiftData.cashFlow?.netCash || 0)}</span>
+                                            </div>
+                                            <div className="flex justify-between items-center p-3 bg-primary/5 rounded-xl">
+                                                <span className="font-black text-lg">{t('totalRevenue')}</span>
+                                                <span className="font-black text-2xl text-primary">{formatCurrency(shiftData.cashFlow?.totalRevenue || 0)}</span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
