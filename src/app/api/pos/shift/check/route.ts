@@ -33,8 +33,24 @@ export async function GET(request: Request) {
                 Orders: true,
                 Payments: true,
                 CashTransactions: true,
-                Deposits: true,
-                RefundedDeposits: true
+                Deposits: {
+                    include: {
+                        Stay: {
+                            include: {
+                                Booking: true
+                            }
+                        }
+                    }
+                },
+                RefundedDeposits: {
+                    include: {
+                        Stay: {
+                            include: {
+                                Booking: true
+                            }
+                        }
+                    }
+                }
             }
         })
 
@@ -69,12 +85,14 @@ export async function GET(request: Request) {
 
         // Deposits (e.g. Key Deposit)
         const depositTotal = shift.Deposits.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
-        const depositCash = shift.Deposits.filter((d: any) => d.method === 'CASH').reduce((sum: number, d: any) => sum + Number(d.amount), 0)
+        const depositCashItems = shift.Deposits.filter((d: any) => d.method === 'CASH')
+        const depositCash = depositCashItems.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
         const depositOther = depositTotal - depositCash
 
         // Refunds (from this shift)
         const refundTotal = (shift.RefundedDeposits || []).reduce((sum: number, d: any) => sum + Number(d.refundedAmount || 0), 0)
-        const refundCash = (shift.RefundedDeposits || []).filter((d: any) => d.method === 'CASH').reduce((sum: number, d: any) => sum + Number(d.refundedAmount || 0), 0)
+        const refundCashItems = (shift.RefundedDeposits || []).filter((d: any) => d.method === 'CASH')
+        const refundCash = refundCashItems.reduce((sum: number, d: any) => sum + Number(d.refundedAmount || 0), 0)
         const refundOther = refundTotal - refundCash
 
         // Cash In/Out (Petty Cash, Expenses)
@@ -107,14 +125,25 @@ export async function GET(request: Request) {
         const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + Number(p.amount), 0)
 
         const totalSales = posTotal + roomTotal
-        const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + txIn) - txOut
+        // Correct Actual Cash calculation: Sales Cash + Deposits - (Expenses + Refunds)
+        const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + depositCash + txIn) - (txOut + refundCash)
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
 
         // Detailed Transactions for "If none, don't show" rule
-        const detailedTransactions = shift.CashTransactions.map((t: any) => ({
-            label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
-            amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
-        }))
+        const detailedTransactions = [
+            ...shift.CashTransactions.map((t: any) => ({
+                label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
+                amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
+            })),
+            ...depositCashItems.map((d: any) => ({
+                label: `Key Deposit: ${d.Stay?.Booking?.bookingNo || ''}`,
+                amount: Number(d.amount)
+            })),
+            ...refundCashItems.map((r: any) => ({
+                label: `คืนมัดจำห้อง ${r.Stay?.Booking?.bookingNo || r.deposit?.bookingId || ''}`,
+                amount: -Number(r.refundedAmount)
+            }))
+        ]
 
         const totalPaymentCount = completedOrders.length + shift.Payments.length + shift.Deposits.length
 
@@ -146,18 +175,14 @@ export async function GET(request: Request) {
                     total: {
                         count: totalPaymentCount,
                         amount: cashTotalPay + nonCashTotalPay
-                    },
-                    split: {
-                        count: 0,
-                        amount: 0
                     }
                 },
                 // Section 3: Cash In-Out (Refined to match image)
                 cashFlow: {
                     startCash: Number(shift.startCash || 0),
-                    cashIn: txIn,
-                    cashOut: txOut,
-                    netFlow: txIn - txOut,
+                    cashIn: txIn + depositCash,
+                    cashOut: txOut + refundCash,
+                    netFlow: (txIn + depositCash) - (txOut + refundCash),
                     netCash: cashSales, // This is the "Actual Cash"
                     totalRevenue: totalSales,
                     transactions: detailedTransactions,

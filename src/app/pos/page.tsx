@@ -507,13 +507,6 @@ export default function POSPage() {
                                             <span className="font-bold">{Number(shiftData.payments?.total?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                     </div>
-                                    <div className="flex justify-between items-center text-zinc-800">
-                                        <span>{t('splitPayment')}</span>
-                                        <div className="flex items-center w-full max-w-[12rem] justify-between">
-                                            <span>0</span>
-                                            <span>0.00</span>
-                                        </div>
-                                    </div>
 
                                     <div className="relative py-4 text-center">
                                         <div className="absolute inset-0 flex items-center">
