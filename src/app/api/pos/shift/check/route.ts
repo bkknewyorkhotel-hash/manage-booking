@@ -110,6 +110,14 @@ export async function GET(request: Request) {
         const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + txIn) - txOut
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
 
+        // Detailed Transactions for "If none, don't show" rule
+        const detailedTransactions = shift.CashTransactions.map((t: any) => ({
+            label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
+            amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
+        }))
+
+        const totalPaymentCount = completedOrders.length + shift.Payments.length + shift.Deposits.length
+
         return NextResponse.json({
             ...openShift,
             stats: {
@@ -125,7 +133,7 @@ export async function GET(request: Request) {
                     count: shift.Payments.length,
                     breakdown: roomBreakdown
                 },
-                // Categorized Payments (Overall Breakdown at bottom)
+                // Categorized Payments
                 payments: {
                     cash: {
                         list: cashBreakdown,
@@ -134,15 +142,26 @@ export async function GET(request: Request) {
                     nonCash: {
                         list: nonCashBreakdown,
                         total: nonCashTotalPay
+                    },
+                    total: {
+                        count: totalPaymentCount,
+                        amount: cashTotalPay + nonCashTotalPay
+                    },
+                    split: {
+                        count: 0,
+                        amount: 0
                     }
                 },
-                // Section 3: Cash In-Out
+                // Section 3: Cash In-Out (Refined to match image)
                 cashFlow: {
                     startCash: Number(shift.startCash || 0),
                     cashIn: txIn,
                     cashOut: txOut,
-                    netCash: cashSales,
-                    totalRevenue: totalSales
+                    netFlow: txIn - txOut,
+                    netCash: cashSales, // This is the "Actual Cash"
+                    totalRevenue: totalSales,
+                    transactions: detailedTransactions,
+                    overShort: 0
                 },
                 // Metadata
                 posTotal,

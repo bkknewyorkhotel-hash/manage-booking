@@ -498,64 +498,68 @@ export default function POSPage() {
                                     </div>
                                 </div>
 
-                                {/* Payment Breakdown Section */}
-                                <div className="space-y-6">
-                                    <h3 className="text-sm font-black text-zinc-400 border-b pb-1 uppercase tracking-widest">{t('paymentBreakdownHeader')}</h3>
-
-                                    {/* Cash Group */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center font-black text-zinc-600">
-                                            <span>{t('cash')}</span>
-                                            <span className="w-28 text-right text-lg">{formatCurrency(shiftData.payments?.cash?.total || 0)}</span>
+                                {/* Section: Cash in Drawer (Formal Report Style) */}
+                                <div className="space-y-6 pt-6 border-t font-medium text-zinc-700">
+                                    <div className="flex justify-between items-center text-zinc-800">
+                                        <span>{t('paymentHeader')}</span>
+                                        <div className="flex items-center w-full max-w-[12rem] justify-between">
+                                            <span className="font-bold">{shiftData.payments?.total?.count || 0}</span>
+                                            <span className="font-bold">{Number(shiftData.payments?.total?.amount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
-                                        {shiftData.payments?.cash?.list?.map((item: any) => (
-                                            <div key={item.method} className="flex justify-between items-center pl-1 font-bold">
-                                                <span className="text-zinc-800 capitalize">{item.method.toLowerCase()}</span>
-                                                <div className="flex items-center">
-                                                    <span className="text-zinc-400 text-[11px] font-bold lowercase mr-6">{item.count} bills</span>
-                                                    <span className="w-28 text-right">{formatCurrency(item.amount)}</span>
-                                                </div>
+                                    </div>
+                                    <div className="flex justify-between items-center text-zinc-800">
+                                        <span>{t('splitPayment')}</span>
+                                        <div className="flex items-center w-full max-w-[12rem] justify-between">
+                                            <span>0</span>
+                                            <span>0.00</span>
+                                        </div>
+                                    </div>
+
+                                    <div className="relative py-4 text-center">
+                                        <div className="absolute inset-0 flex items-center">
+                                            <div className="w-full border-t border-zinc-100"></div>
+                                        </div>
+                                        <span className="relative px-4 bg-card text-[12px] font-black text-zinc-400 uppercase tracking-widest">{t('cashInDrawerTitle')}</span>
+                                    </div>
+
+                                    <div className="space-y-4">
+                                        <div className="flex justify-between items-center">
+                                            <span>{t('cashOpenClose')}</span>
+                                            <span className="font-bold">
+                                                {Number(shiftData.cashFlow?.startCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })} / {Number(shiftData.cashFlow?.netCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                            </span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span>{t('actualCashValue')}</span>
+                                            <span className="font-bold">{Number(shiftData.cashFlow?.netCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center">
+                                            <span>{t('cashInOutDrawer')}</span>
+                                            <span className="font-bold">{(shiftData.cashFlow?.netFlow || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-zinc-400">
+                                            <span>{t('cashInDrawer')}</span>
+                                            <span>{Number(shiftData.cashFlow?.cashIn || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+                                        <div className="flex justify-between items-center text-zinc-400">
+                                            <span>{t('cashOutDrawer')}</span>
+                                            <span>{Number(shiftData.cashFlow?.cashOut || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                        </div>
+
+                                        {/* Detailed Transactions - Hidden if amount is zero */}
+                                        {shiftData.cashFlow?.transactions?.filter((t: any) => t.amount !== 0).map((tx: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between items-center text-zinc-500 italic text-[13px]">
+                                                <span className="pl-4">{tx.label}</span>
+                                                <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         ))}
-                                    </div>
 
-                                    {/* Non-Cash Group */}
-                                    <div className="space-y-3">
-                                        <div className="flex justify-between items-center font-black text-zinc-600 pt-2 border-t border-zinc-100">
-                                            <span>{t('nonCash')}</span>
-                                            <span className="w-28 text-right text-lg">{formatCurrency(shiftData.payments?.nonCash?.total || 0)}</span>
-                                        </div>
-                                        {shiftData.payments?.nonCash?.list?.map((item: any) => (
-                                            <div key={item.method} className="flex justify-between items-center pl-1 font-bold">
-                                                <span className="text-zinc-800 capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
-                                                <div className="flex items-center">
-                                                    <span className="text-zinc-400 text-[11px] font-bold lowercase mr-6">{item.count} bills</span>
-                                                    <span className="w-28 text-right">{formatCurrency(item.amount)}</span>
-                                                </div>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-
-                                {/* Section 3: Cash In-Out */}
-                                <div className="space-y-5">
-                                    <h3 className="text-lg font-black text-[#3b82f6] border-b pb-2 uppercase tracking-wide">{t('cashFlowSection')}</h3>
-                                    <div className="space-y-3 px-1">
-                                        <div className="flex justify-between items-center font-bold text-zinc-500">
-                                            <span>{t('startingCash')}</span>
-                                            <span className="w-28 text-right font-black">฿{Number(shiftData.cashFlow?.startCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center font-black text-[#10b981]">
-                                            <span>{t('cashInLabel')}</span>
-                                            <span className="w-28 text-right text-lg">+{formatCurrency(shiftData.cashFlow?.cashIn || 0)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center font-black text-[#ef4444]">
-                                            <span>{t('cashOutLabel')}</span>
-                                            <span className="w-28 text-right text-lg">-{formatCurrency(shiftData.cashFlow?.cashOut || 0)}</span>
+                                        <div className="flex justify-between items-center pt-2">
+                                            <span>{t('overShortCash')}</span>
+                                            <span className="font-bold">0.00</span>
                                         </div>
                                     </div>
                                 </div>
-
                                 {/* Final Dashed Border */}
                                 <div className="border-t-2 border-dashed border-zinc-300 pt-4"></div>
                             </div>
