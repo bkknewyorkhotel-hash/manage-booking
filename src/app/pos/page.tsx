@@ -630,20 +630,12 @@ export default function POSPage() {
 
                         {/* Actions */}
                         <div className="flex flex-col gap-3 py-4 print:hidden">
-                            <div className="flex space-x-3">
-                                <button
-                                    onClick={() => setTimeout(() => window.print(), 100)}
-                                    className="flex-1 py-4 border border-zinc-200 rounded-xl font-black text-zinc-700 hover:bg-zinc-50 transition-all active:scale-95"
-                                >
-                                    {t('printReport')}
-                                </button>
-                                <button
-                                    onClick={() => setIsCloseModalOpen(true)}
-                                    className="flex-1 py-4 bg-red-500 text-white rounded-xl font-black shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all active:scale-95"
-                                >
-                                    {t('confirmClose')}
-                                </button>
-                            </div>
+                            <button
+                                onClick={() => setTimeout(() => window.print(), 100)}
+                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 shadow-lg active:scale-95 transition-all"
+                            >
+                                {t('printReport')}
+                            </button>
                             <button
                                 onClick={() => setShowShiftModal(false)}
                                 className="w-full py-4 bg-zinc-100 text-zinc-500 rounded-xl font-black hover:bg-zinc-200 transition-all"
