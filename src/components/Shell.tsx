@@ -94,7 +94,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {/* Sidebar */}
             <aside
                 className={cn(
-                    "flex flex-col h-full transition-all duration-500 ease-in-out border-r bg-card fixed inset-y-0 left-0 lg:relative z-[110] lg:z-20",
+                    "flex flex-col h-full transition-all duration-500 ease-in-out border-r bg-card fixed inset-y-0 left-0 lg:relative z-[110] lg:z-20 print:hidden",
                     collapsed ? "w-20" : "w-64",
                     mobileMenuOpen ? "translate-x-0" : "-translate-x-full lg:translate-x-0"
                 )}
@@ -149,7 +149,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
             {/* Main Content */}
             <div className="flex flex-col flex-1 min-w-0 overflow-hidden relative">
                 {/* Header */}
-                <header className="flex items-center justify-between h-16 px-4 md:px-6 border-b frosted sticky top-0 z-10 shrink-0">
+                <header className="flex items-center justify-between h-16 px-4 md:px-6 border-b frosted sticky top-0 z-10 shrink-0 print:hidden">
                     <div className="flex items-center space-x-3">
                         <button
                             onClick={() => setMobileMenuOpen(true)}
@@ -186,7 +186,7 @@ export function Shell({ children }: { children: React.ReactNode }) {
                     </div>
                 </header>
 
-                <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-secondary/20 relative">
+                <main className="flex-1 overflow-y-auto p-4 md:p-6 bg-secondary/20 relative print:p-0">
                     <div className="absolute top-0 right-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -mr-32 -mt-32 pointer-events-none" />
                     <div className="absolute bottom-0 left-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -ml-32 -mb-32 pointer-events-none" />
 

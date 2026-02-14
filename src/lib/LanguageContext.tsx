@@ -189,6 +189,7 @@ const translations = {
         totalCashRevenue: 'ยอดเงินโอนรายรับ (CASH)',
         inputClosingCash: 'กรอกยอดเงินสดปิดกะ',
         enterClosingCash: 'ระบุยอดรวมเงินสดที่นับได้จริง...',
+        shiftSummaryReport: 'ใบตรวจสอบยอดกะการทำงาน (Shift Summary)',
 
         // Finance
         financeTransactions: 'รายการบันทึกการเงิน',
@@ -437,6 +438,7 @@ const translations = {
         totalCashRevenue: 'Total Cash Revenue (POS/Rooms)',
         inputClosingCash: 'Input Closing Cash',
         enterClosingCash: 'Enter actual counted cash...',
+        shiftSummaryReport: 'Shift Summary Report',
         confirmClose: 'Confirm Close',
         posLocked: 'Finance Locked',
         posLockedDesc: 'Please open a shift in the POS section first.',

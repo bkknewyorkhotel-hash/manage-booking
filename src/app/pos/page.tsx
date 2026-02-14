@@ -403,7 +403,7 @@ export default function POSPage() {
                 {/* Mobile Cart Floating Button */}
                 <button
                     onClick={() => setIsCartOpen(true)}
-                    className="fixed bottom-4 right-4 z-[140] lg:hidden bg-primary text-white p-4 rounded-full shadow-2xl flex items-center space-x-2 animate-bounce-subtle"
+                    className="fixed bottom-4 right-4 z-[140] lg:hidden bg-primary text-white p-4 rounded-full shadow-2xl flex items-center space-x-2 animate-bounce-subtle print:hidden"
                 >
                     <div className="relative">
                         <ShoppingCart size={24} />
@@ -420,15 +420,21 @@ export default function POSPage() {
             {/* Shift Summary Modal */}
             {showShiftModal && (
                 <div
-                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200"
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200 print:bg-white print:p-0 print:static print:block"
                     onClick={() => setShowShiftModal(false)}
                 >
                     <div
-                        className="bg-card w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl space-y-8 overflow-y-auto max-h-[90vh]"
+                        className="bg-card w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl space-y-8 overflow-y-auto max-h-[90vh] print:max-w-none print:w-full print:p-0 print:m-0 print:shadow-none print:rounded-none print:max-h-none print:static print:overflow-visible"
                         onClick={(e) => e.stopPropagation()}
                     >
+                        {/* Print Only Header */}
+                        <div className="hidden print:block text-center space-y-2 border-b-2 pb-6">
+                            <h2 className="text-2xl font-black uppercase tracking-widest">{t('hotelName')}</h2>
+                            <h3 className="text-lg font-bold text-zinc-500 uppercase">{t('shiftSummaryReport')}</h3>
+                        </div>
+
                         {/* Header Info */}
-                        <div className="flex justify-between items-start">
+                        <div className="flex justify-between items-start print:border-b print:pb-4">
                             <div className="space-y-1 text-[11px] font-mono text-muted-foreground">
                                 <div className="flex space-x-2">
                                     <span>Shift ID:</span>
@@ -439,7 +445,7 @@ export default function POSPage() {
                                     <span className="font-bold">{new Date().toLocaleDateString('th-TH')}</span>
                                 </div>
                             </div>
-                            <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors">
+                            <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors print:hidden">
                                 <X size={20} className="text-muted-foreground" />
                             </button>
                         </div>
@@ -583,8 +589,12 @@ export default function POSPage() {
                                         </div>
                                     </div>
                                 </div>
-                                {/* Final Dashed Border */}
-                                <div className="border-t-2 border-dashed border-zinc-300 pt-4"></div>
+                                {/* Final Dashed Border and Print Footer */}
+                                <div className="border-t-2 border-dashed border-zinc-300 pt-4 print:border-solid"></div>
+                                <div className="hidden print:flex justify-between items-center pt-8 text-[10px] font-mono text-zinc-400">
+                                    <span>Printed on: {new Date().toLocaleString('th-TH')}</span>
+                                    <span>Authorized Signature: _________________________</span>
+                                </div>
                             </div>
                         ) : (
                             <div className="flex justify-center py-12">
@@ -593,7 +603,7 @@ export default function POSPage() {
                         )}
 
                         {/* Actions */}
-                        <div className="flex flex-col gap-3 py-4">
+                        <div className="flex flex-col gap-3 py-4 print:hidden">
                             <div className="flex space-x-3">
                                 <button
                                     onClick={() => window.print()}
