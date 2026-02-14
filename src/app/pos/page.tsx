@@ -39,6 +39,7 @@ export default function POSPage() {
     // Confirmation states
     const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+    const [isClosingCashInputOpen, setIsClosingCashInputOpen] = useState(false)
     const [paymentMethod, setPaymentMethod] = useState('')
     const [isCartOpen, setIsCartOpen] = useState(false) // Mobile cart toggle
     const [closingCash, setClosingCash] = useState('')
@@ -47,6 +48,26 @@ export default function POSPage() {
     useEffect(() => {
         checkActiveShift()
     }, [])
+
+    const handleViewShiftSummary = () => {
+        // Open closing cash input modal first
+        setIsClosingCashInputOpen(true)
+    }
+
+    const handleClosingCashSubmit = () => {
+        if (!closingCash) {
+            showToast(t('enterClosingCash'), 'warning')
+            return
+        }
+        // Fetch shift data and open summary
+        fetch('/api/pos/shift/check')
+            .then(res => res.json())
+            .then(data => {
+                setShiftData(data.stats)
+                setIsClosingCashInputOpen(false)
+                setShowShiftModal(true)
+            })
+    }
 
     const checkActiveShift = () => {
         fetch('/api/pos/shift/check')
@@ -424,7 +445,7 @@ export default function POSPage() {
                     onClick={() => setShowShiftModal(false)}
                 >
                     <div
-                        className="bg-card w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl space-y-8 overflow-y-auto max-h-[90vh] print:max-w-none print:w-full print:p-0 print:m-0 print:shadow-none print:rounded-none print:max-h-none print:static print:overflow-visible"
+                        className="bg-card w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl space-y-8 overflow-y-auto max-h-[90vh] print:max-w-full print:p-8 print:m-0 print:shadow-none print:rounded-none print:max-h-none print:overflow-visible"
                         onClick={(e) => e.stopPropagation()}
                     >
                         {/* Print Only Header */}
@@ -623,6 +644,67 @@ export default function POSPage() {
                                 className="w-full py-4 bg-zinc-100 text-zinc-500 rounded-xl font-black hover:bg-zinc-200 transition-all"
                             >
                                 {t('cancel')}
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            )}
+
+            {/* Closing Cash Input Modal */}
+            {isClosingCashInputOpen && (
+                <div
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200"
+                    onClick={() => setIsClosingCashInputOpen(false)}
+                >
+                    <div
+                        className="bg-card w-full max-w-md p-8 rounded-2xl shadow-2xl space-y-6"
+                        onClick={(e) => e.stopPropagation()}
+                    >
+                        <div className="space-y-2">
+                            <h2 className="text-2xl font-black text-foreground">{t('inputClosingCash')}</h2>
+                            <p className="text-sm text-muted-foreground">
+                                {t('enterClosingCashBeforeSummary') || 'ระบุยอดเงินสดที่นับได้จริง จากนั้นจึงจะแสดงรายงานสรุปกะ'}
+                            </p>
+                        </div>
+
+                        <div className="space-y-2">
+                            <label className="text-xs font-black text-muted-foreground uppercase block">
+                                {t('closingCashAmount') || 'ยอดเงินสดปิดกะ'}
+                            </label>
+                            <div className="relative">
+                                <Banknote className="absolute left-4 top-1/2 -translate-y-1/2 text-muted-foreground" size={20} />
+                                <input
+                                    type="number"
+                                    value={closingCash}
+                                    onChange={(e) => setClosingCash(e.target.value)}
+                                    placeholder="0.00"
+                                    autoFocus
+                                    className="w-full pl-14 pr-4 py-4 bg-secondary border-2 border-border rounded-xl focus:border-primary focus:bg-background transition-all font-bold text-xl outline-none"
+                                />
+                            </div>
+                            {activeShift && (
+                                <div className="flex items-center justify-between text-sm pt-2">
+                                    <span className="text-muted-foreground">{t('startingCash')}:</span>
+                                    <span className="font-bold">{formatCurrency(activeShift.startCash)}</span>
+                                </div>
+                            )}
+                        </div>
+
+                        <div className="flex gap-3 pt-4">
+                            <button
+                                onClick={() => {
+                                    setIsClosingCashInputOpen(false)
+                                    setClosingCash('')
+                                }}
+                                className="flex-1 py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-all"
+                            >
+                                {t('cancel')}
+                            </button>
+                            <button
+                                onClick={handleClosingCashSubmit}
+                                className="flex-1 py-3 bg-primary text-primary-foreground rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all"
+                            >
+                                {t('viewSummary') || 'ดูรายงาน'}
                             </button>
                         </div>
                     </div>
