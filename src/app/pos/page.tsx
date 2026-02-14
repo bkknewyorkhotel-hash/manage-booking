@@ -52,22 +52,12 @@ export default function POSPage() {
             .then(res => res.json())
             .then(data => {
                 setActiveShift(data)
-                // If we have an active shift, also load shift stats for the "Close Shift" preview
                 if (data) {
                     setShiftData(data.stats)
                 }
             })
             .catch(err => console.error(err))
     }
-
-    // Load Shift Data when modal opens
-    useEffect(() => {
-        if (showShiftModal) {
-            // shiftData is already set by checkActiveShift if there's an active shift
-            // If modal is opened without an active shift (e.g., for a new shift), shiftData would be null
-            // For now, we rely on checkActiveShift to populate it.
-        }
-    }, [showShiftModal])
 
     // Load Products
     useEffect(() => {
@@ -158,7 +148,7 @@ export default function POSPage() {
             const res = await fetch('/api/pos/shift/close', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ shiftId: activeShift.id, endCash: 0 }) // TODO: Input actual end cash
+                body: JSON.stringify({ shiftId: activeShift.id, endCash: 0 })
             })
 
             if (res.ok) {
@@ -167,7 +157,6 @@ export default function POSPage() {
                 setShiftData(null)
                 setShowShiftModal(false)
                 setIsCloseModalOpen(false)
-                // Print functionality would go here
             } else {
                 showToast(t('failedToCloseShift'), 'error')
             }
@@ -204,11 +193,9 @@ export default function POSPage() {
                 showToast(t('paymentSuccessful'), 'success')
                 setCart([])
                 setIsPaymentModalOpen(false)
-                // Refresh products to see stock update
                 fetch('/api/pos/products')
                     .then(res => res.json())
                     .then(data => setProducts(data))
-                // Refresh shift stats
                 checkActiveShift()
             } else {
                 showToast(t('paymentFailed'), 'error')
@@ -260,7 +247,6 @@ export default function POSPage() {
             <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative">
                 {/* Left: Product Catalog */}
                 <div className="flex-1 flex flex-col space-y-3 md:space-y-4 min-h-0">
-                    {/* Filters */}
                     <div className="flex flex-col md:flex-row gap-3 bg-card p-3 md:p-4 rounded-xl border shadow-sm">
                         <div className="relative">
                             <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
@@ -290,7 +276,6 @@ export default function POSPage() {
                         </div>
                     </div>
 
-                    {/* Grid */}
                     <div className="grid grid-cols-2 sm:grid-cols-3 xl:grid-cols-4 gap-3 md:gap-4 overflow-y-auto pr-2 custom-scrollbar flex-1">
                         {filteredProducts.map(product => (
                             <button
@@ -314,7 +299,7 @@ export default function POSPage() {
                     </div>
                 </div>
 
-                {/* Mobile Cart Overlay */}
+                {/* Right: Cart */}
                 {isCartOpen && (
                     <div
                         className="fixed inset-0 bg-black/60 backdrop-blur-sm z-[150] lg:hidden animate-in fade-in duration-300"
@@ -322,7 +307,6 @@ export default function POSPage() {
                     />
                 )}
 
-                {/* Right: Cart */}
                 <div className={cn(
                     "fixed lg:relative inset-x-0 bottom-0 lg:bottom-auto lg:inset-x-auto h-[80vh] lg:h-full lg:w-96 flex flex-col bg-card border-t lg:border-l rounded-t-[2rem] lg:rounded-2xl shadow-2xl lg:shadow-xl overflow-hidden z-[160] lg:z-10 transition-transform duration-300 transform",
                     isCartOpen ? "translate-y-0" : "translate-y-full lg:translate-y-0"
@@ -338,10 +322,7 @@ export default function POSPage() {
                                 </span>
                             )}
                         </div>
-                        <button
-                            onClick={() => setIsCartOpen(false)}
-                            className="p-2 hover:bg-secondary rounded-full lg:hidden"
-                        >
+                        <button onClick={() => setIsCartOpen(false)} className="p-2 hover:bg-secondary rounded-full lg:hidden">
                             <X size={20} />
                         </button>
                     </div>
@@ -361,17 +342,11 @@ export default function POSPage() {
                                     </div>
                                     <div className="flex items-center space-x-2 md:space-x-3 shrink-0">
                                         <div className="flex items-center space-x-1 bg-card rounded-lg border shadow-sm">
-                                            <button
-                                                onClick={() => updateQty(item.id, -1)}
-                                                className="p-1 hover:bg-secondary rounded-l transition-colors"
-                                            >
+                                            <button onClick={() => updateQty(item.id, -1)} className="p-1 hover:bg-secondary rounded-l transition-colors">
                                                 <Minus size={12} className="md:size-[14px]" />
                                             </button>
                                             <span className="w-6 md:w-8 text-center text-xs md:text-sm font-bold">{item.qty}</span>
-                                            <button
-                                                onClick={() => updateQty(item.id, 1)}
-                                                className="p-1 hover:bg-secondary rounded-r transition-colors"
-                                            >
+                                            <button onClick={() => updateQty(item.id, 1)} className="p-1 hover:bg-secondary rounded-r transition-colors">
                                                 <Plus size={12} className="md:size-[14px]" />
                                             </button>
                                         </div>
@@ -412,7 +387,7 @@ export default function POSPage() {
                         <div className="pt-3 md:pt-4 border-t border-gray-200">
                             <button
                                 onClick={() => {
-                                    checkActiveShift() // Refresh stats before showing modal
+                                    checkActiveShift()
                                     setShowShiftModal(true)
                                 }}
                                 className="w-full py-2.5 md:py-3 bg-zinc-800 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-zinc-700 shadow-lg active:scale-95 transition-all"
@@ -447,102 +422,101 @@ export default function POSPage() {
                     onClick={() => setShowShiftModal(false)}
                 >
                     <div
-                        className="bg-card w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6"
+                        className="bg-card w-full max-w-lg p-6 md:p-8 rounded-2xl shadow-2xl space-y-8 overflow-y-auto max-h-[90vh]"
                         onClick={(e) => e.stopPropagation()}
                     >
-                        <div className="flex justify-between items-center border-b pb-4">
-                            <h2 className="text-xl font-black">{t('shiftSummary')}</h2>
+                        {/* Header Info */}
+                        <div className="flex justify-between items-start">
+                            <div className="space-y-1 text-[11px] font-mono text-muted-foreground">
+                                <div className="flex space-x-2">
+                                    <span>Shift ID:</span>
+                                    <span className="font-bold">{activeShift?.id}</span>
+                                </div>
+                                <div className="flex space-x-2">
+                                    <span>{t('date')}:</span>
+                                    <span className="font-bold">{new Date().toLocaleDateString('th-TH')}</span>
+                                </div>
+                            </div>
                             <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors">
                                 <X size={20} className="text-muted-foreground" />
                             </button>
                         </div>
 
                         {shiftData ? (
-                            <div className="space-y-6 text-sm font-medium">
-                                <div className="space-y-1 text-[11px] font-mono text-muted-foreground border-b pb-4">
-                                    <div className="flex justify-between">
-                                        <span>Shift ID:</span>
-                                        <span className="font-bold">{activeShift?.id}</span>
-                                    </div>
-                                    <div className="flex justify-between">
-                                        <span>{t('date')}:</span>
-                                        <span className="font-bold">{new Date().toLocaleDateString('th-TH')}</span>
-                                    </div>
-                                </div>
-
+                            <div className="space-y-10 text-[14px]">
                                 {/* Section 1: POS Sales */}
-                                <div className="space-y-3">
-                                    <h3 className="font-black text-primary border-b pb-1 uppercase tracking-wider">{t('posSection')}</h3>
-                                    <div className="space-y-2 px-1">
-                                        <div className="flex justify-between items-center">
-                                            <span>{t('posSales')}</span>
-                                            <div className="flex items-center space-x-8">
-                                                <span className="text-muted-foreground text-[10px] uppercase font-bold">{shiftData.pos?.count} bills</span>
-                                                <span className="font-black w-24 text-right">{formatCurrency(shiftData.pos?.total || 0)}</span>
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-black text-[#3b82f6] border-b pb-2 uppercase tracking-wide">{t('posSection')}</h3>
+                                    <div className="space-y-2.5">
+                                        <div className="flex justify-between items-center font-bold">
+                                            <span className="text-zinc-800">{t('posSales')}</span>
+                                            <div className="flex items-center">
+                                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-tighter mr-6">{shiftData.pos?.count} BILLS</span>
+                                                <span className="w-28 text-right text-lg">{formatCurrency(shiftData.pos?.total || 0)}</span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center opacity-70 text-[12px]">
+                                        <div className="flex justify-between items-center text-zinc-500 font-medium">
                                             <span>{t('totalDiscount')}</span>
-                                            <span className="w-24 text-right">-{formatCurrency(shiftData.pos?.discount || 0)}</span>
+                                            <span className="w-28 text-right">-{formatCurrency(shiftData.pos?.discount || 0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center opacity-70 text-[12px]">
+                                        <div className="flex justify-between items-center text-zinc-500 font-medium pb-2">
                                             <span>{t('avgBill')}</span>
-                                            <span className="w-24 text-right">{formatCurrency(shiftData.pos?.avg || 0)}</span>
+                                            <span className="w-28 text-right">{formatCurrency(shiftData.pos?.avg || 0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center pt-2 border-t font-black">
+                                        <div className="flex justify-between items-center pt-3 border-t font-black text-[#3b82f6] text-xl">
                                             <span>{t('saleAfterDisc')}</span>
-                                            <span className="w-24 text-right text-primary">{formatCurrency(shiftData.pos?.afterDiscount || 0)}</span>
+                                            <span className="w-28 text-right">฿{Number(shiftData.pos?.afterDiscount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
                                     </div>
                                 </div>
 
                                 {/* Section 2: Room Revenue */}
-                                <div className="space-y-3">
-                                    <h3 className="font-black text-emerald-600 border-b pb-1 uppercase tracking-wider">{t('roomSection')}</h3>
-                                    <div className="space-y-2 px-1">
-                                        <div className="flex justify-between items-center">
-                                            <span>{t('roomRevenue')}</span>
-                                            <div className="flex items-center space-x-8">
-                                                <span className="text-muted-foreground text-[10px] uppercase font-bold">{shiftData.room?.count} trans</span>
-                                                <span className="font-black w-24 text-right text-emerald-600">{formatCurrency(shiftData.room?.total || 0)}</span>
+                                <div className="space-y-4">
+                                    <h3 className="text-lg font-black text-[#10b981] border-b pb-2 uppercase tracking-wide">{t('roomSection')}</h3>
+                                    <div className="space-y-2.5">
+                                        <div className="flex justify-between items-center font-bold text-[#10b981]">
+                                            <span className="text-zinc-800 tracking-tight">roomRevenue</span>
+                                            <div className="flex items-center">
+                                                <span className="text-zinc-400 text-[11px] font-black uppercase tracking-tighter mr-6">{shiftData.room?.count} TRANS</span>
+                                                <span className="w-28 text-right text-lg">฿{Number(shiftData.room?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         </div>
                                     </div>
                                 </div>
 
-                                {/* Payment Breakdown Categorized */}
-                                <div className="space-y-4">
-                                    <h3 className="font-black text-zinc-600 border-b pb-1 uppercase tracking-wider">{t('payment')} Breakdown</h3>
+                                {/* Payment Breakdown Section */}
+                                <div className="space-y-6">
+                                    <h3 className="text-sm font-black text-zinc-400 border-b pb-1 uppercase tracking-widest">{t('paymentBreakdownHeader')}</h3>
 
                                     {/* Cash Group */}
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-[11px] font-black text-muted-foreground uppercase">
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center font-black text-zinc-600">
                                             <span>{t('cash')}</span>
-                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.payments?.cash?.total || 0)}</span>
+                                            <span className="w-28 text-right text-lg">{formatCurrency(shiftData.payments?.cash?.total || 0)}</span>
                                         </div>
                                         {shiftData.payments?.cash?.list?.map((item: any) => (
-                                            <div key={item.method} className="flex justify-between items-center px-1">
-                                                <span className="capitalize">{item.method.toLowerCase()}</span>
-                                                <div className="flex items-center space-x-8">
-                                                    <span className="text-muted-foreground text-[10px]">{item.count} bills</span>
-                                                    <span className="font-bold w-24 text-right">{formatCurrency(item.amount)}</span>
+                                            <div key={item.method} className="flex justify-between items-center pl-1 font-bold">
+                                                <span className="text-zinc-800 capitalize">{item.method.toLowerCase()}</span>
+                                                <div className="flex items-center">
+                                                    <span className="text-zinc-400 text-[11px] font-bold lowercase mr-6">{item.count} bills</span>
+                                                    <span className="w-28 text-right">{formatCurrency(item.amount)}</span>
                                                 </div>
                                             </div>
                                         ))}
                                     </div>
 
                                     {/* Non-Cash Group */}
-                                    <div className="space-y-2">
-                                        <div className="flex justify-between items-center text-[11px] font-black text-muted-foreground uppercase">
+                                    <div className="space-y-3">
+                                        <div className="flex justify-between items-center font-black text-zinc-600 pt-2 border-t border-zinc-100">
                                             <span>{t('nonCash')}</span>
-                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.payments?.nonCash?.total || 0)}</span>
+                                            <span className="w-28 text-right text-lg">{formatCurrency(shiftData.payments?.nonCash?.total || 0)}</span>
                                         </div>
                                         {shiftData.payments?.nonCash?.list?.map((item: any) => (
-                                            <div key={item.method} className="flex justify-between items-center px-1">
-                                                <span className="capitalize">{item.method.toLowerCase().replace('_', ' ')}</span>
-                                                <div className="flex items-center space-x-8">
-                                                    <span className="text-muted-foreground text-[10px]">{item.count} bills</span>
-                                                    <span className="font-bold w-24 text-right">{formatCurrency(item.amount)}</span>
+                                            <div key={item.method} className="flex justify-between items-center pl-1 font-bold">
+                                                <span className="text-zinc-800 capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
+                                                <div className="flex items-center">
+                                                    <span className="text-zinc-400 text-[11px] font-bold lowercase mr-6">{item.count} bills</span>
+                                                    <span className="w-28 text-right">{formatCurrency(item.amount)}</span>
                                                 </div>
                                             </div>
                                         ))}
@@ -550,59 +524,52 @@ export default function POSPage() {
                                 </div>
 
                                 {/* Section 3: Cash In-Out */}
-                                <div className="space-y-3">
-                                    <h3 className="font-black text-blue-600 border-b pb-1 uppercase tracking-wider">{t('cashFlowSection')}</h3>
-                                    <div className="space-y-2 px-1">
-                                        <div className="flex justify-between items-center opacity-70">
+                                <div className="space-y-5">
+                                    <h3 className="text-lg font-black text-[#3b82f6] border-b pb-2 uppercase tracking-wide">{t('cashFlowSection')}</h3>
+                                    <div className="space-y-3 px-1">
+                                        <div className="flex justify-between items-center font-bold text-zinc-500">
                                             <span>{t('startingCash')}</span>
-                                            <span className="w-24 text-right">{formatCurrency(shiftData.cashFlow?.startCash || 0)}</span>
+                                            <span className="w-28 text-right font-black">฿{Number(shiftData.cashFlow?.startCash || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-emerald-600">
-                                            <span>{t('cashIn')} (TX)</span>
-                                            <span className="w-24 text-right font-black">+{formatCurrency(shiftData.cashFlow?.cashIn || 0)}</span>
+                                        <div className="flex justify-between items-center font-black text-[#10b981]">
+                                            <span>{t('cashInLabel')}</span>
+                                            <span className="w-28 text-right text-lg">+{formatCurrency(shiftData.cashFlow?.cashIn || 0)}</span>
                                         </div>
-                                        <div className="flex justify-between items-center text-red-600">
-                                            <span>{t('cashOut')} (TX)</span>
-                                            <span className="w-24 text-right font-black">-{formatCurrency(shiftData.cashFlow?.cashOut || 0)}</span>
-                                        </div>
-
-                                        <div className="pt-4 space-y-3 border-t-2 border-dashed">
-                                            <div className="flex justify-between items-center p-3 bg-emerald-50 rounded-xl">
-                                                <span className="font-black">{t('netCashInDrawer')}</span>
-                                                <span className="font-black text-xl text-emerald-700">{formatCurrency(shiftData.cashFlow?.netCash || 0)}</span>
-                                            </div>
-                                            <div className="flex justify-between items-center p-3 bg-primary/5 rounded-xl">
-                                                <span className="font-black text-lg">{t('totalRevenue')}</span>
-                                                <span className="font-black text-2xl text-primary">{formatCurrency(shiftData.cashFlow?.totalRevenue || 0)}</span>
-                                            </div>
+                                        <div className="flex justify-between items-center font-black text-[#ef4444]">
+                                            <span>{t('cashOutLabel')}</span>
+                                            <span className="w-28 text-right text-lg">-{formatCurrency(shiftData.cashFlow?.cashOut || 0)}</span>
                                         </div>
                                     </div>
                                 </div>
+
+                                {/* Final Dashed Border */}
+                                <div className="border-t-2 border-dashed border-zinc-300 pt-4"></div>
                             </div>
                         ) : (
-                            <div className="flex justify-center py-8">
-                                <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
+                            <div className="flex justify-center py-12">
+                                <div className="animate-spin rounded-full h-10 w-10 border-b-2 border-[#3b82f6]"></div>
                             </div>
                         )}
 
-                        <div className="flex flex-col gap-3 pt-4">
+                        {/* Actions */}
+                        <div className="flex flex-col gap-3 py-4">
                             <div className="flex space-x-3">
                                 <button
                                     onClick={() => window.print()}
-                                    className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
+                                    className="flex-1 py-4 border border-zinc-200 rounded-xl font-black text-zinc-700 hover:bg-zinc-50 transition-all active:scale-95"
                                 >
                                     {t('printReport')}
                                 </button>
                                 <button
                                     onClick={() => setIsCloseModalOpen(true)}
-                                    className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
+                                    className="flex-1 py-4 bg-red-500 text-white rounded-xl font-black shadow-lg shadow-red-500/20 hover:bg-red-600 transition-all active:scale-95"
                                 >
                                     {t('confirmClose')}
                                 </button>
                             </div>
                             <button
                                 onClick={() => setShowShiftModal(false)}
-                                className="w-full py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-colors"
+                                className="w-full py-4 bg-zinc-100 text-zinc-500 rounded-xl font-black hover:bg-zinc-200 transition-all"
                             >
                                 {t('cancel')}
                             </button>
@@ -611,7 +578,6 @@ export default function POSPage() {
                 </div>
             )}
 
-            {/* Confirmation Modals */}
             <ConfirmationModal
                 isOpen={isCloseModalOpen}
                 title={t('closeShift')}
