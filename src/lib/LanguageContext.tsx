@@ -193,6 +193,8 @@ const translations = {
         enterClosingCashBeforeSummary: 'ระบุยอดเงินสดที่นับได้จริง จากนั้นจึงจะแสดงรายงานสรุปกะ',
         closingCashAmount: 'ยอดเงินสดปิดกะ',
         viewSummary: 'ดูรายงาน',
+        viewShiftSummary: 'ดูสรุปกะ / พิมพ์',
+        pleaseEnterClosingCash: 'กรุณากรอกยอดเงินสดปิดกะก่อน',
 
         // Finance
         financeTransactions: 'รายการบันทึกการเงิน',
@@ -445,6 +447,8 @@ const translations = {
         enterClosingCashBeforeSummary: 'Enter the actual cash counted, then view the shift summary report.',
         closingCashAmount: 'Closing Cash Amount',
         viewSummary: 'View Summary',
+        viewShiftSummary: 'View Summary / Print',
+        pleaseEnterClosingCash: 'Please enter closing cash amount first',
         confirmClose: 'Confirm Close',
         posLocked: 'Finance Locked',
         posLockedDesc: 'Please open a shift in the POS section first.',
