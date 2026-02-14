@@ -442,8 +442,14 @@ export default function POSPage() {
 
             {/* Shift Summary Modal */}
             {showShiftModal && (
-                <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
-                    <div className="bg-card w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6">
+                <div
+                    className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200"
+                    onClick={() => setShowShiftModal(false)}
+                >
+                    <div
+                        className="bg-card w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6"
+                        onClick={(e) => e.stopPropagation()}
+                    >
                         <div className="flex justify-between items-center border-b pb-4">
                             <h2 className="text-xl font-black">{t('shiftSummary')}</h2>
                             <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors">
@@ -499,18 +505,26 @@ export default function POSPage() {
                                     </div>
                                 </div>
 
-                                <div className="flex space-x-3 pt-4">
+                                <div className="flex flex-col gap-3 pt-4">
+                                    <div className="flex space-x-3">
+                                        <button
+                                            onClick={() => window.print()}
+                                            className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
+                                        >
+                                            {t('printReport')}
+                                        </button>
+                                        <button
+                                            onClick={() => setIsCloseModalOpen(true)}
+                                            className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
+                                        >
+                                            {t('confirmClose')}
+                                        </button>
+                                    </div>
                                     <button
-                                        onClick={() => window.print()}
-                                        className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
+                                        onClick={() => setShowShiftModal(false)}
+                                        className="w-full py-3 bg-secondary text-foreground rounded-xl font-bold hover:bg-secondary/80 transition-colors"
                                     >
-                                        {t('printReport')}
-                                    </button>
-                                    <button
-                                        onClick={() => setIsCloseModalOpen(true)}
-                                        className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
-                                    >
-                                        {t('confirmClose')}
+                                        {t('cancel')}
                                     </button>
                                 </div>
                             </div>
