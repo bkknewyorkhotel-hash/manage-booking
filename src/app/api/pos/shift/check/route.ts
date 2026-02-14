@@ -56,9 +56,12 @@ export async function GET(request: Request) {
         // Deposits (e.g. Key Deposit)
         const depositTotal = shift.Deposits.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
         const depositCash = shift.Deposits.filter((d: any) => d.method === 'CASH').reduce((sum: number, d: any) => sum + Number(d.amount), 0)
+        const depositOther = depositTotal - depositCash
 
         // Refunds (from this shift)
         const refundTotal = (shift.RefundedDeposits || []).reduce((sum: number, d: any) => sum + Number(d.refundedAmount || 0), 0)
+        const refundCash = (shift.RefundedDeposits || []).filter((d: any) => d.method === 'CASH').reduce((sum: number, d: any) => sum + Number(d.refundedAmount || 0), 0)
+        const refundOther = refundTotal - refundCash
 
         // Cash In/Out (Petty Cash, Expenses)
         const txIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
@@ -69,8 +72,8 @@ export async function GET(request: Request) {
 
         // Totals
         const totalSales = posTotal + roomTotal
-        const cashSales = (posCash + roomCash + cashIn) - cashOut
-        const otherSales = totalSales - (posCash + roomCash)
+        const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + cashIn) - cashOut
+        const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
         const orderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length + shift.Payments.length + shift.Deposits.length
 
         return NextResponse.json({
