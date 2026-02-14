@@ -187,6 +187,8 @@ const translations = {
         cashOutDrawer: 'เงินออกลิ้นชัก',
         overShortCash: 'ยอดเงินสดขาด / ยอดเงินสดเกิน',
         totalCashRevenue: 'ยอดเงินโอนรายรับ (CASH)',
+        inputClosingCash: 'กรอกยอดเงินสดปิดกะ',
+        enterClosingCash: 'ระบุยอดรวมเงินสดที่นับได้จริง...',
 
         // Finance
         financeTransactions: 'รายการบันทึกการเงิน',
@@ -433,6 +435,8 @@ const translations = {
         vat: 'VAT',
         serviceCharge: 'Service charge',
         totalCashRevenue: 'Total Cash Revenue (POS/Rooms)',
+        inputClosingCash: 'Input Closing Cash',
+        enterClosingCash: 'Enter actual counted cash...',
         confirmClose: 'Confirm Close',
         posLocked: 'Finance Locked',
         posLockedDesc: 'Please open a shift in the POS section first.',

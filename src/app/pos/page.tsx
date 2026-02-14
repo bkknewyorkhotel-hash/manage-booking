@@ -41,6 +41,7 @@ export default function POSPage() {
     const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
     const [paymentMethod, setPaymentMethod] = useState('')
     const [isCartOpen, setIsCartOpen] = useState(false) // Mobile cart toggle
+    const [closingCash, setClosingCash] = useState('')
 
     // 1. Check for Active Shift on Load
     useEffect(() => {
@@ -148,13 +149,14 @@ export default function POSPage() {
             const res = await fetch('/api/pos/shift/close', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ shiftId: activeShift.id, endCash: 0 })
+                body: JSON.stringify({ shiftId: activeShift.id, endCash: Number(closingCash || 0) })
             })
 
             if (res.ok) {
-                showToast(t('shiftClosedSuccessfully'), 'success')
                 setActiveShift(null)
                 setShiftData(null)
+                setClosingCash('')
+                showToast(t('shiftClosedSuccessfully'), 'success')
                 setShowShiftModal(false)
                 setIsCloseModalOpen(false)
             } else {
@@ -552,6 +554,33 @@ export default function POSPage() {
                                                 <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         ))}
+
+                                        <div className="space-y-4 pt-6 border-t border-dashed border-zinc-100">
+                                            <div className="space-y-2">
+                                                <label className="text-[12px] font-black text-zinc-400 uppercase tracking-widest block">{t('inputClosingCash')}</label>
+                                                <div className="relative">
+                                                    <Banknote className="absolute left-4 top-1/2 -translate-y-1/2 text-zinc-400" size={18} />
+                                                    <input
+                                                        type="number"
+                                                        value={closingCash}
+                                                        onChange={(e) => setClosingCash(e.target.value)}
+                                                        placeholder={t('enterClosingCash')}
+                                                        className="w-full pl-12 pr-4 py-4 bg-zinc-50 border-2 border-zinc-100 rounded-xl focus:border-blue-500 focus:bg-white transition-all font-bold text-lg outline-none"
+                                                    />
+                                                </div>
+                                            </div>
+
+                                            <div className="flex justify-between items-center pt-2">
+                                                <span className="font-bold">{t('overShortCash')}</span>
+                                                <span className={cn(
+                                                    "font-black text-lg",
+                                                    (Number(closingCash || 0) - (shiftData.cashFlow?.netCash || 0)) < 0 ? "text-red-500" :
+                                                        (Number(closingCash || 0) - (shiftData.cashFlow?.netCash || 0)) > 0 ? "text-emerald-500" : "text-zinc-400"
+                                                )}>
+                                                    {(Number(closingCash || 0) - (shiftData.cashFlow?.netCash || 0)).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}
+                                                </span>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 {/* Final Dashed Border */}
@@ -610,6 +639,6 @@ export default function POSPage() {
                 onConfirm={handleCheckout}
                 onCancel={() => setIsPaymentModalOpen(false)}
             />
-        </Shell>
+        </Shell >
     )
 }
