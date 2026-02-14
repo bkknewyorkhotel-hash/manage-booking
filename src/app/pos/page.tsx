@@ -606,7 +606,7 @@ export default function POSPage() {
                         <div className="flex flex-col gap-3 py-4 print:hidden">
                             <div className="flex space-x-3">
                                 <button
-                                    onClick={() => window.print()}
+                                    onClick={() => setTimeout(() => window.print(), 100)}
                                     className="flex-1 py-4 border border-zinc-200 rounded-xl font-black text-zinc-700 hover:bg-zinc-50 transition-all active:scale-95"
                                 >
                                     {t('printReport')}
