@@ -57,7 +57,7 @@ export default function RoomBoardPage() {
                                     : "bg-card hover:bg-secondary text-muted-foreground border-border"
                             )}
                         >
-                            Floor {floor.floorNo}
+                            {t('floor')} {floor.floorNo}
                         </button>
                     ))}
                 </div>
@@ -138,7 +138,7 @@ function RoomCard({ room, onAction }: { room: any, onAction: () => void }) {
                     {room.RoomType.name}
                 </p>
                 <p className="text-[10px] font-medium opacity-60">
-                    Capacity: {room.RoomType.capacity}
+                    {t('capacity')}: {room.RoomType.capacity}
                 </p>
             </div>
 
@@ -147,7 +147,7 @@ function RoomCard({ room, onAction }: { room: any, onAction: () => void }) {
                     e.stopPropagation()
                     onAction()
                 }} className="flex-1 py-1.5 text-[10px] font-bold bg-white/80 lg:bg-white/50 hover:bg-white rounded-lg border border-current shadow-sm active:scale-95 transition-all">
-                    Update Status
+                    {t('updateRoomStatus')}
                 </button>
             </div>
 

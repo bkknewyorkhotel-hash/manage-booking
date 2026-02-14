@@ -5,7 +5,7 @@ import { Shell } from '@/components/Shell'
 import { useTranslation } from '@/lib/LanguageContext'
 import { useToast } from '@/lib/ToastContext'
 import { cn } from '@/lib/utils'
-import { Trash2, Sparkles, Search, CheckCircle, RefreshCcw, Eye } from 'lucide-react'
+import { Brush, CheckCircle2, Search, Clock, ShieldAlert } from 'lucide-react'
 
 export default function HousekeepingPage() {
     const { t } = useTranslation()
@@ -37,7 +37,7 @@ export default function HousekeepingPage() {
         fetchData()
     }, [])
 
-    const updateStatus = async (roomId: string, status: string) => {
+    const updateRoomStatus = async (roomId: string, status: string) => {
         if (!user?.id) {
             showToast('No user session found', 'error')
             return
@@ -51,18 +51,18 @@ export default function HousekeepingPage() {
             })
             if (res.ok) {
                 setRooms(rooms.map(r => r.id === roomId ? { ...r, status } : r))
-                showToast(`Room status updated to ${status.replace('_', ' ')}`, 'success')
+                showToast(t('roomStatusUpdated'), 'success')
             } else {
-                showToast('Failed to update status', 'error')
+                showToast(t('failedToUpdateStatus'), 'error')
             }
         } catch (err) {
             console.error(err)
-            showToast('An error occurred', 'error')
+            showToast(t('anErrorOccurred'), 'error')
         }
     }
 
     const housekeepingQueue = rooms.filter(r =>
-        r.status === 'VACANT_DIRTY' ||
+        r.status === 'DIRTY' ||
         r.status === 'CLEANING' ||
         r.status === 'INSPECTING' ||
         r.status === 'OCCUPIED'
@@ -71,11 +71,31 @@ export default function HousekeepingPage() {
     return (
         <Shell>
             <div className="space-y-6">
-                <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
-                    <HousekeepStat label="Dirty Rooms" count={rooms.filter(r => r.status === 'VACANT_DIRTY').length} color="text-amber-600 bg-amber-50" />
-                    <HousekeepStat label="In Progress" count={rooms.filter(r => r.status === 'CLEANING').length} color="text-blue-600 bg-blue-50" />
-                    <HousekeepStat label="To Inspect" count={rooms.filter(r => r.status === 'INSPECTING').length} countColor="text-cyan-600" color="bg-cyan-50" />
-                    <HousekeepStat label="Clean & Ready" count={rooms.filter(r => r.status === 'VACANT_CLEAN').length} color="text-emerald-600 bg-emerald-50" />
+                <header>
+                    <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">{t('housekeeping')}</h2>
+                </header>
+
+                <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+                    <StatCard
+                        title={t('dirtyRooms')}
+                        count={rooms.filter(r => r.status === 'DIRTY').length}
+                        color="bg-rose-50 text-rose-600"
+                    />
+                    <StatCard
+                        title={t('inProgress')}
+                        count={rooms.filter(r => r.status === 'CLEANING').length}
+                        color="bg-amber-50 text-amber-600"
+                    />
+                    <StatCard
+                        title={t('toInspect')}
+                        count={rooms.filter(r => r.status === 'INSPECTING').length}
+                        color="bg-blue-50 text-blue-600"
+                    />
+                    <StatCard
+                        title={t('cleanReady')}
+                        count={rooms.filter(r => r.status === 'CLEAN').length}
+                        color="bg-emerald-50 text-emerald-600"
+                    />
                 </div>
 
                 <div className="bg-card border rounded-2xl shadow-sm overflow-hidden">
@@ -83,55 +103,55 @@ export default function HousekeepingPage() {
                         <table className="w-full text-left border-collapse min-w-[600px]">
                             <thead className="bg-secondary/50 border-b">
                                 <tr>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Room</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('room')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('type')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('status')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y text-sm">
-                                {housekeepingQueue.map((room) => (
-                                    <tr key={room.id} className="hover:bg-secondary/10">
-                                        <td className="px-6 py-4 font-black text-lg">{room.roomNo}</td>
-                                        <td className="px-6 py-4 text-muted-foreground">{room.RoomType.name}</td>
+                                {housekeepingQueue.map((r) => (
+                                    <tr key={r.id} className="hover:bg-secondary/10">
+                                        <td className="px-6 py-4 font-black text-lg">{r.roomNo}</td>
+                                        <td className="px-6 py-4 text-muted-foreground">{r.RoomType.name}</td>
                                         <td className="px-6 py-4">
                                             <span className={cn(
                                                 "px-2 py-1 rounded-full text-[10px] font-black uppercase tracking-widest border",
-                                                room.status === 'VACANT_DIRTY' && "bg-amber-100 text-amber-700 border-amber-200",
-                                                room.status === 'CLEANING' && "bg-blue-100 text-blue-700 border-blue-200",
-                                                room.status === 'INSPECTING' && "bg-cyan-100 text-cyan-700 border-cyan-200",
-                                                room.status === 'OCCUPIED' && "bg-zinc-100 text-zinc-700 border-zinc-200",
-                                                room.status === 'VACANT_CLEAN' && "bg-emerald-100 text-emerald-700 border-emerald-200"
+                                                r.status === 'DIRTY' && "bg-amber-100 text-amber-700 border-amber-200",
+                                                r.status === 'CLEANING' && "bg-blue-100 text-blue-700 border-blue-200",
+                                                r.status === 'INSPECTING' && "bg-cyan-100 text-cyan-700 border-cyan-200",
+                                                r.status === 'OCCUPIED' && "bg-zinc-100 text-zinc-700 border-zinc-200",
+                                                r.status === 'CLEAN' && "bg-emerald-100 text-emerald-700 border-emerald-200"
                                             )}>
-                                                {room.status.replace('_', ' ')}
+                                                {r.status.replace('_', ' ')}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4 text-right space-x-2">
-                                            {(room.status === 'VACANT_DIRTY' || room.status === 'OCCUPIED') && (
+                                            {(r.status === 'DIRTY' || r.status === 'OCCUPIED') && (
                                                 <button
-                                                    onClick={() => updateStatus(room.id, 'CLEANING')}
-                                                    className="p-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 shadow-sm transition-all active:scale-90"
-                                                    title="Start Cleaning"
+                                                    onClick={() => updateRoomStatus(r.id, 'CLEANING')}
+                                                    className="w-full flex items-center justify-center space-x-2 py-2 bg-amber-50 text-amber-600 rounded-lg text-xs font-bold hover:bg-amber-100 transition-colors"
                                                 >
-                                                    <RefreshCcw size={16} />
+                                                    <Brush size={14} />
+                                                    <span>{t('startCleaning')}</span>
                                                 </button>
                                             )}
-                                            {room.status === 'CLEANING' && (
+                                            {r.status === 'CLEANING' && (
                                                 <button
-                                                    onClick={() => updateStatus(room.id, 'INSPECTING')}
-                                                    className="p-2 bg-cyan-500 text-white rounded-lg hover:bg-cyan-600 shadow-sm transition-all active:scale-90"
-                                                    title="Finish & Inspect"
+                                                    onClick={() => updateRoomStatus(r.id, 'INSPECTING')}
+                                                    className="w-full flex items-center justify-center space-x-2 py-2 bg-blue-50 text-blue-600 rounded-lg text-xs font-bold hover:bg-blue-100 transition-colors"
                                                 >
-                                                    <Sparkles size={16} />
+                                                    <Clock size={14} />
+                                                    <span>{t('finishInspect')}</span>
                                                 </button>
                                             )}
-                                            {room.status === 'INSPECTING' && (
+                                            {r.status === 'INSPECTING' && (
                                                 <button
-                                                    onClick={() => updateStatus(room.id, 'VACANT_CLEAN')}
-                                                    className="p-2 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 shadow-sm transition-all active:scale-90"
-                                                    title="Mark as Cleaned"
+                                                    onClick={() => updateRoomStatus(r.id, 'CLEAN')}
+                                                    className="w-full flex items-center justify-center space-x-2 py-2 bg-emerald-50 text-emerald-600 rounded-lg text-xs font-bold hover:bg-emerald-100 transition-colors"
                                                 >
-                                                    <CheckCircle size={16} />
+                                                    <CheckCircle2 size={14} />
+                                                    <span>{t('markAsCleaned')}</span>
                                                 </button>
                                             )}
                                         </td>
@@ -143,6 +163,15 @@ export default function HousekeepingPage() {
                 </div>
             </div>
         </Shell>
+    )
+}
+
+function StatCard({ title, count, color }: any) {
+    return (
+        <div className={cn("p-4 md:p-6 rounded-2xl border shadow-sm", color)}>
+            <p className="text-[10px] md:text-xs font-black uppercase tracking-widest opacity-80 mb-1">{title}</p>
+            <p className="text-2xl md:text-4xl font-black tracking-tight">{count}</p>
+        </div>
     )
 }
 

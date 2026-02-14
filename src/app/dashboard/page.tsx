@@ -139,38 +139,38 @@ export default function DashboardPage() {
             <div className="max-w-7xl mx-auto space-y-6">
                 <div className="space-y-6 md:space-y-10">
                     <header>
-                        <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">Hotel Overview</h2>
-                        <p className="text-xs md:text-sm text-muted-foreground font-bold italic opacity-70">Real-time status and operations summary</p>
+                        <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">{t('hotelOverview')}</h2>
+                        <p className="text-xs md:text-sm text-muted-foreground font-bold italic opacity-70">{t('dashboardDesc')}</p>
                     </header>
 
                     <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 md:gap-8">
                         <StatCard
-                            title="Today's Occupancy"
+                            title={t('todaysOccupancy')}
                             value={`${stats?.rate || 0}%`}
                             icon={Users}
                             color="bg-indigo-50 text-indigo-600"
-                            description={`${stats?.occupied || 0} / ${stats?.total || 0} Rooms occupied (${roomStats.dirty || 0} dirty)`}
+                            description={`${stats?.occupied || 0} / ${stats?.total || 0} ${t('rooms')} ${t('occupied').toLowerCase()} (${roomStats.dirty || 0} ${t('vacantDirty').toLowerCase()})`}
                         />
                         <StatCard
-                            title="Arrivals"
+                            title={t('expectedArrivals')}
                             value={arrivals.length}
                             icon={DoorOpen}
                             color="bg-emerald-50 text-emerald-600"
-                            description={`${arrivals.length} expected today`}
+                            description={`${arrivals.length} ${t('expectedArrivals').toLowerCase()}`}
                         />
                         <StatCard
-                            title="Departures"
+                            title={t('expectedDepartures')}
                             value={departures.length}
                             icon={Clock}
                             color="bg-amber-50 text-amber-600"
-                            description={`${departures.length} expected today`}
+                            description={`${departures.length} ${t('expectedDepartures').toLowerCase()}`}
                         />
                         <StatCard
-                            title="Maintenance"
+                            title={t('maintenanceCount')}
                             value={roomStats.outOfOrder || 0}
                             icon={Ban}
                             color="bg-rose-50 text-rose-600"
-                            description="Rooms currently OOO"
+                            description={t('rooms') + " " + t('outOfOrder').toLowerCase()}
                         />
                     </div>
 
@@ -182,7 +182,7 @@ export default function DashboardPage() {
                                 <div className="p-5 md:p-8 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
                                     <div className="flex items-center space-x-3 mb-6 md:mb-8">
                                         <div className="p-2.5 md:p-3 bg-emerald-50 text-emerald-600 rounded-xl md:rounded-2xl"><CheckCircle2 size={20} className="md:size-6" /></div>
-                                        <h3 className="text-xl md:text-2xl font-black italic">Arrivals</h3>
+                                        <h3 className="text-xl md:text-2xl font-black italic">{t('expectedArrivals')}</h3>
                                     </div>
                                     <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {arrivals.map((b: any) => (
@@ -193,7 +193,7 @@ export default function DashboardPage() {
                                                         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">{b.bookingNo}</p>
                                                     </div>
                                                     <span className="px-3 py-1 bg-emerald-50 text-emerald-600 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-emerald-100 group-hover:bg-emerald-500 group-hover:text-white transition-colors">
-                                                        {b.Rooms.length} Room(s)
+                                                        {b.Rooms.length} {t('room')}(s)
                                                     </span>
                                                 </div>
                                             </div>
@@ -201,7 +201,7 @@ export default function DashboardPage() {
                                         {arrivals.length === 0 && (
                                             <div className="py-12 text-center">
                                                 <CheckCircle2 className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
-                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">No arrivals today</p>
+                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">{t('noArrivals')}</p>
                                             </div>
                                         )}
                                     </div>
@@ -211,7 +211,7 @@ export default function DashboardPage() {
                                 <div className="p-5 md:p-8 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
                                     <div className="flex items-center space-x-3 mb-6 md:mb-8">
                                         <div className="p-2.5 md:p-3 bg-amber-50 text-amber-600 rounded-xl md:rounded-2xl"><Clock size={20} className="md:size-6" /></div>
-                                        <h3 className="text-xl md:text-2xl font-black italic">Departures</h3>
+                                        <h3 className="text-xl md:text-2xl font-black italic">{t('expectedDepartures')}</h3>
                                     </div>
                                     <div className="space-y-3 max-h-[300px] md:max-h-[400px] overflow-y-auto pr-2 custom-scrollbar text-sm">
                                         {departures.map((b: any) => (
@@ -222,7 +222,7 @@ export default function DashboardPage() {
                                                         <p className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider mt-0.5">{b.bookingNo}</p>
                                                     </div>
                                                     <span className="px-3 py-1 bg-amber-50 text-amber-600 rounded-lg text-[10px] font-bold uppercase tracking-wider border border-amber-100 group-hover:bg-amber-500 group-hover:text-white transition-colors">
-                                                        Rooms: {b.Rooms.map((r: any) => r.Room?.roomNo).filter(Boolean).join(', ') || 'N/A'}
+                                                        {t('rooms')}: {b.Rooms.map((r: any) => r.Room?.roomNo).filter(Boolean).join(', ') || 'N/A'}
                                                     </span>
                                                 </div>
                                             </div>
@@ -230,7 +230,7 @@ export default function DashboardPage() {
                                         {departures.length === 0 && (
                                             <div className="py-12 text-center">
                                                 <Clock className="w-10 h-10 mx-auto text-muted-foreground/20 mb-3" />
-                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">No departures today</p>
+                                                <p className="text-muted-foreground text-xs font-bold uppercase tracking-widest">{t('noDepartures')}</p>
                                             </div>
                                         )}
                                     </div>
@@ -241,8 +241,8 @@ export default function DashboardPage() {
                             <div className="p-6 md:p-8 bg-indigo-600 text-white rounded-[1.5rem] md:rounded-[2.5rem] shadow-indigo-200 shadow-xl overflow-hidden relative min-h-[120px] md:min-h-0">
                                 <div className="relative z-10 flex items-center justify-between">
                                     <div className="max-w-[80%] md:max-w-[400px]">
-                                        <h3 className="text-xl md:text-3xl font-black tracking-tight mb-1 md:mb-2 italic">Need Help?</h3>
-                                        <p className="text-indigo-100 font-bold text-xs md:text-base">System is running normally. Check logs in Settings.</p>
+                                        <h3 className="text-xl md:text-3xl font-black tracking-tight mb-1 md:mb-2 italic">{t('needHelp')}</h3>
+                                        <p className="text-indigo-100 font-bold text-xs md:text-base">{t('systemRunning')}</p>
                                     </div>
                                     <ToolIcon size={60} className="text-indigo-400 opacity-30 -rotate-12 absolute -right-2 top-0 md:size-20 md:-right-4" />
                                 </div>
@@ -253,14 +253,14 @@ export default function DashboardPage() {
                         <div className="lg:col-span-1 p-5 md:p-6 bg-card border rounded-[1.5rem] md:rounded-[2.5rem] shadow-sm">
                             <div className="flex items-center space-x-3 mb-6 md:mb-8">
                                 <div className="p-2.5 md:p-3 bg-[#EEF2FF] text-[#6366F1] rounded-xl md:rounded-2xl"><ToolIcon size={20} className="md:size-6" /></div>
-                                <h3 className="text-xl md:text-2xl font-black italic">Shift History</h3>
+                                <h3 className="text-xl md:text-2xl font-black italic">{t('shiftHistory')}</h3>
                             </div>
                             <div className="space-y-8 md:space-y-12 max-h-[500px] md:max-h-[700px] overflow-y-auto pr-2 custom-scrollbar">
                                 {shiftHistory.map((shift: any) => (
                                     <div key={shift.id} className="space-y-6 pb-12 border-b border-dashed border-gray-200 last:border-0 last:pb-0">
                                         <div className="flex items-center justify-between text-sm font-black tracking-tight">
                                             <span className="truncate">Shift ID:{shift.id}</span>
-                                            <span className="ml-4 whitespace-nowrap">Date: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
+                                            <span className="ml-4 whitespace-nowrap">{t('finance').slice(0, 4)}: {new Date(shift.endTime).toLocaleDateString('th-TH')}</span>
                                         </div>
 
                                         <div className="space-y-3 md:space-y-4">
@@ -289,7 +289,7 @@ export default function DashboardPage() {
                                         </div>
 
                                         <div className="flex justify-between items-center px-1 md:px-2 pt-4 border-t border-gray-100">
-                                            <span className="text-base md:text-xl font-black uppercase tracking-tight text-gray-900">Total Revenue</span>
+                                            <span className="text-base md:text-xl font-black uppercase tracking-tight text-gray-900">{t('totalSales')}</span>
                                             <span className="text-2xl md:text-4xl font-black text-[#6366F1] tracking-tighter">{formatCurrency(shift.totalRevenue)}</span>
                                         </div>
                                     </div>
@@ -302,7 +302,7 @@ export default function DashboardPage() {
                                             disabled={loadingMore}
                                             className="w-full py-6 border-4 border-dashed rounded-[2rem] font-black text-gray-900 text-lg hover:bg-gray-50 transition-all disabled:opacity-50"
                                         >
-                                            {loadingMore ? 'Loading...' : 'Next: old data'}
+                                            {loadingMore ? t('processing') : t('nextOldData')}
                                         </button>
                                     </div>
                                 )}
@@ -310,7 +310,7 @@ export default function DashboardPage() {
                                 {shiftHistory.length === 0 && (
                                     <div className="py-24 text-center">
                                         <Clock className="w-20 h-20 mx-auto text-gray-200 mb-6" />
-                                        <p className="text-gray-400 text-xl font-black">No shift history found.</p>
+                                        <p className="text-gray-400 text-xl font-black">{t('noShiftHistory')}</p>
                                     </div>
                                 )}
                             </div>
@@ -319,7 +319,7 @@ export default function DashboardPage() {
 
                     {/* Alerts */}
                     <div className="lg:col-span-1 p-6 bg-card border rounded-xl shadow-sm h-fit">
-                        <h3 className="text-lg font-bold mb-4">Notifications</h3>
+                        <h3 className="text-lg font-bold mb-4">{t('notifications')}</h3>
                         <div className="space-y-4">
                             {alerts.map((alert, idx) => (
                                 <AlertItem

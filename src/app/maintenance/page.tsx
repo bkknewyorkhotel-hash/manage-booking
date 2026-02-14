@@ -5,7 +5,7 @@ import { Shell } from '@/components/Shell'
 import { useTranslation } from '@/lib/LanguageContext'
 import { useToast } from '@/lib/ToastContext'
 import { cn } from '@/lib/utils'
-import { Hammer, Plus, CheckCircle, AlertTriangle, Clock } from 'lucide-react'
+import { Plus, Wrench, AlertTriangle, CheckCircle2, Search, Clock, ShieldAlert } from 'lucide-react'
 
 export default function MaintenancePage() {
     const { t } = useTranslation()
@@ -62,18 +62,18 @@ export default function MaintenancePage() {
                 const refreshedTickets = await refreshedRes.json()
                 setTickets(refreshedTickets)
 
-                showToast('Issue reported successfully', 'success')
+                showToast(t('issueReportedSuccessfully'), 'success')
 
                 // Keep modal open for a split second so user sees the success state if we add one,
                 // but for now just close it.
                 setIsModalOpen(false)
                 setFormData({ roomId: '', issue: '', priority: 'MEDIUM' })
             } else {
-                showToast('Failed to report issue', 'error')
+                showToast(t('failedToReportIssue'), 'error')
             }
         } catch (err) {
             console.error(err)
-            showToast('An error occurred', 'error')
+            showToast(t('anErrorOccurred'), 'error')
         } finally {
             setIsSubmitting(false)
         }
@@ -88,36 +88,36 @@ export default function MaintenancePage() {
             })
             if (res.ok) {
                 setTickets(tickets.map(t => t.id === id ? { ...t, status } : t))
-                showToast(`Ticket status: ${status.replace('_', ' ')}`, 'info')
+                showToast(t('ticketStatusUpdated'), 'info')
             } else {
-                showToast('Failed to update ticket', 'error')
+                showToast(t('failedToUpdateTicket'), 'error')
             }
         } catch (err) {
             console.error(err)
-            showToast('Error updating status', 'error')
+            showToast(t('errorUpdatingStatus'), 'error')
         }
     }
 
     return (
         <Shell>
             <div className="space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
-                    <h2 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tight">Maintenance Tickets</h2>
+                <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tight">{t('maintenanceTickets')}</h2>
                     <button
                         onClick={() => setIsModalOpen(true)}
                         className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
                     >
                         <Plus size={18} />
-                        <span>Report Issue</span>
+                        <span>{t('reportIssue')}</span>
                     </button>
-                </div>
+                </header>
 
                 <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                     {loading ? (
                         [...Array(3)].map((_, i) => <div key={i} className="h-48 bg-card animate-pulse border rounded-2xl" />)
                     ) : tickets.length === 0 ? (
                         <div className="lg:col-span-3 p-12 text-center text-muted-foreground border-2 border-dashed rounded-2xl">
-                            No active maintenance tickets
+                            {t('noActiveMaintenanceTickets')}
                         </div>
                     ) : tickets.map((ticket) => (
                         <div key={ticket.id} className="relative p-6 bg-card border rounded-2xl shadow-sm hover:shadow-md transition-shadow">
@@ -133,7 +133,7 @@ export default function MaintenancePage() {
                                 <p className="font-bold text-sm leading-snug">{ticket.issue}</p>
                                 <div className="flex items-center text-[10px] font-bold text-muted-foreground space-x-1">
                                     <Clock size={12} />
-                                    <span>Reported {new Date(ticket.createdAt).toLocaleString()}</span>
+                                    <span>{t('reported')} {new Date(ticket.createdAt).toLocaleString()}</span>
                                 </div>
                             </div>
 
@@ -150,19 +150,19 @@ export default function MaintenancePage() {
                                             )}
                                             disabled={ticket.status === 'IN_PROGRESS'}
                                         >
-                                            {ticket.status === 'IN_PROGRESS' ? 'In Progress' : 'Start Work'}
+                                            {ticket.status === 'IN_PROGRESS' ? t('inProgress') : t('startWork')}
                                         </button>
                                         <button
                                             onClick={() => updateTicketStatus(ticket.id, 'RESOLVED')}
                                             className="flex-1 py-2 text-xs font-black bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors"
                                         >
-                                            Resolve
+                                            {t('resolve')}
                                         </button>
                                     </>
                                 ) : (
                                     <div className="flex-1 py-1.5 text-center text-[10px] font-black uppercase text-emerald-600 bg-emerald-50 border border-emerald-100 rounded-lg flex items-center justify-center space-x-1">
-                                        <CheckCircle size={14} />
-                                        <span>Resolved</span>
+                                        <CheckCircle2 size={14} />
+                                        <span>{t('resolved')}</span>
                                     </div>
                                 )}
                             </div>
@@ -175,32 +175,35 @@ export default function MaintenancePage() {
             {isModalOpen && (
                 <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm">
                     <div className="bg-card w-full max-w-md rounded-3xl shadow-2xl overflow-hidden border animate-in zoom-in-95 duration-200">
-                        <div className="p-6 border-b bg-secondary/10">
-                            <h3 className="text-xl font-black text-primary uppercase tracking-tight">Report New Issue</h3>
+                        <div className="p-6 border-b bg-secondary/10 flex justify-between items-center">
+                            <h3 className="text-xl font-black text-primary uppercase tracking-tight">{t('reportNewIssue')}</h3>
+                            <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-secondary rounded-full">
+                                <Plus className="rotate-45" size={24} />
+                            </button>
                         </div>
 
                         <form onSubmit={handleSubmit} className="p-6 space-y-4">
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Room Number</label>
+                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">{t('roomNumber')}</label>
                                 <select
                                     required
                                     className="w-full h-12 px-4 rounded-xl border bg-background font-bold focus:ring-2 focus:ring-primary/20 outline-none transition-all"
                                     value={formData.roomId}
                                     onChange={(e) => setFormData({ ...formData, roomId: e.target.value })}
                                 >
-                                    <option value="">Select Room</option>
+                                    <option value="">{t('selectRoom')}</option>
                                     {rooms.map(room => (
-                                        <option key={room.id} value={room.id}>Room {room.roomNo}</option>
+                                        <option key={room.id} value={room.id}>{t('room')} {room.roomNo}</option>
                                     ))}
                                 </select>
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Issue Description</label>
+                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">{t('issueDescription')}</label>
                                 <textarea
                                     required
                                     rows={3}
-                                    placeholder="Describe the problem..."
+                                    placeholder={t('describeProblem')}
                                     className="w-full p-4 rounded-xl border bg-background font-medium focus:ring-2 focus:ring-primary/20 outline-none transition-all resize-none"
                                     value={formData.issue}
                                     onChange={(e) => setFormData({ ...formData, issue: e.target.value })}
@@ -208,7 +211,7 @@ export default function MaintenancePage() {
                             </div>
 
                             <div className="space-y-1.5">
-                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">Priority</label>
+                                <label className="text-[10px] font-black uppercase text-muted-foreground tracking-widest pl-1">{t('priority')}</label>
                                 <div className="grid grid-cols-3 gap-2">
                                     {['LOW', 'MEDIUM', 'HIGH'].map((p) => (
                                         <button
@@ -218,11 +221,13 @@ export default function MaintenancePage() {
                                             className={cn(
                                                 "py-2 rounded-lg text-[10px] font-black uppercase transition-all border-2",
                                                 formData.priority === p
-                                                    ? "bg-primary text-white border-primary"
+                                                    ? p === 'HIGH' ? "bg-rose-500 text-white border-rose-500 shadow-lg shadow-rose-200"
+                                                        : p === 'MEDIUM' ? "bg-amber-500 text-white border-amber-500 shadow-lg shadow-amber-200"
+                                                            : "bg-emerald-500 text-white border-emerald-500 shadow-lg shadow-emerald-200"
                                                     : "bg-secondary/50 text-muted-foreground border-transparent hover:border-muted-foreground/20"
                                             )}
                                         >
-                                            {p}
+                                            {t(p.toLowerCase())}
                                         </button>
                                     ))}
                                 </div>
@@ -234,14 +239,14 @@ export default function MaintenancePage() {
                                     onClick={() => setIsModalOpen(false)}
                                     className="flex-1 h-12 rounded-xl font-bold text-muted-foreground hover:bg-secondary transition-colors"
                                 >
-                                    Cancel
+                                    {t('cancel')}
                                 </button>
                                 <button
                                     type="submit"
                                     disabled={isSubmitting}
                                     className="flex-[2] h-12 rounded-xl bg-primary text-white font-black shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all disabled:opacity-50"
                                 >
-                                    {isSubmitting ? 'Submitting...' : 'Submit Ticket'}
+                                    {isSubmitting ? t('processing') : t('submitTicket')}
                                 </button>
                             </div>
                         </form>

@@ -88,24 +88,28 @@ export default function ReservationsPage() {
     return (
         <Shell>
             <div className="space-y-6">
-                <div className="flex flex-col md:flex-row justify-between items-stretch md:items-center gap-4">
-                    <div className="relative flex-1">
-                        <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
-                        <input
-                            type="text"
-                            placeholder="Search booking #, guest name..."
-                            value={search}
-                            onChange={(e) => setSearch(e.target.value)}
-                            className="w-full pl-10 pr-4 py-2 bg-card border rounded-xl outline-none focus:ring-2 focus:ring-primary/20 text-sm md:text-base"
-                        />
-                    </div>
+                <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4">
+                    <h2 className="text-xl md:text-2xl font-black text-primary uppercase tracking-tight">{t('reservations')}</h2>
                     <button
                         onClick={() => setIsModalOpen(true)}
-                        className="flex items-center justify-center space-x-2 px-4 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform shrink-0"
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
                     >
-                        <Plus size={20} />
-                        <span className="text-sm md:text-base">New Booking</span>
+                        <Plus size={18} />
+                        <span>{t('newBooking')}</span>
                     </button>
+                </div>
+
+                <div className="bg-card p-4 rounded-xl border shadow-sm flex flex-col md:flex-row gap-4">
+                    <div className="relative flex-1">
+                        <Search className="absolute left-3 top-2.5 text-muted-foreground" size={18} />
+                        <input
+                            type="text"
+                            placeholder={t('searchBooking')}
+                            value={search}
+                            onChange={(e) => setSearch(e.target.value)}
+                            className="w-full pl-10 pr-4 py-2 bg-secondary/50 border-none rounded-lg outline-none focus:ring-2 focus:ring-primary/20"
+                        />
+                    </div>
                 </div>
 
                 {/* Booking Table */}
@@ -115,11 +119,11 @@ export default function ReservationsPage() {
                             <thead className="bg-secondary/50 border-b">
                                 <tr>
                                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Booking #</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Guest</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Stay Dates</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('guestName')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('stayDates')}</th>
                                     <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Rooms</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Status</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Actions</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('status')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">{t('actions')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y">
@@ -162,7 +166,7 @@ export default function ReservationsPage() {
                                             </div>
                                         </td>
                                         <td className="px-6 py-4">
-                                            <StatusBadge status={booking.status} />
+                                            <StatusBadge status={booking.status} t={t} />
                                         </td>
                                         <td className="px-6 py-4 text-right">
                                             <div className="flex justify-end space-x-2">
@@ -179,7 +183,7 @@ export default function ReservationsPage() {
                                                             disabled={updating === booking.id}
                                                             className="px-3 py-1 bg-red-100 text-red-600 text-xs font-bold rounded hover:bg-red-200 disabled:opacity-50"
                                                         >
-                                                            Cancel
+                                                            {t('cancel')}
                                                         </button>
                                                     </>
                                                 )}
@@ -254,7 +258,7 @@ export default function ReservationsPage() {
     )
 }
 
-function StatusBadge({ status }: { status: string }) {
+function StatusBadge({ status, t }: { status: string, t: any }) {
     const styles = {
         CONFIRMED: "bg-emerald-500/10 text-emerald-600 border-emerald-100",
         CANCELLED: "bg-red-500/10 text-red-600 border-red-100",
@@ -263,7 +267,11 @@ function StatusBadge({ status }: { status: string }) {
     }
     return (
         <span className={cn("px-2.5 py-1 text-[10px] font-black border rounded-full uppercase tracking-widest", (styles as any)[status])}>
-            {status.replace('_', ' ')}
+            {status === 'CONFIRMED' && t('confirmed')}
+            {status === 'CANCELLED' && t('cancelled')}
+            {status === 'CHECKED_IN' && t('checkedIn')}
+            {status === 'CHECKED_OUT' && t('checkedOut')}
+            {!['CONFIRMED', 'CANCELLED', 'CHECKED_IN', 'CHECKED_OUT'].includes(status) && status.replace('_', ' ')}
         </span>
     )
 }

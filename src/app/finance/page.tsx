@@ -2,11 +2,13 @@
 
 import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
-import { Plus, ArrowUpCircle, ArrowDownCircle, Search, Wallet, Receipt, Trash2 } from 'lucide-react'
+import { Plus, Wallet, Search, ArrowUpCircle, ArrowDownCircle, Clock } from 'lucide-react'
 import { cn, formatCurrency } from '@/lib/utils'
+import { useTranslation } from '@/lib/LanguageContext'
 import { useToast } from '@/lib/ToastContext'
 
 export default function FinancePage() {
+    const { t } = useTranslation()
     const { showToast } = useToast()
     const [transactions, setTransactions] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
@@ -105,16 +107,16 @@ export default function FinancePage() {
                         <Wallet size={48} />
                     </div>
                     <div className="max-w-md space-y-2">
-                        <h2 className="text-3xl font-black text-foreground">Finance Locked</h2>
+                        <h2 className="text-3xl font-black text-foreground">{t('financeLocked')}</h2>
                         <p className="text-muted-foreground">
-                            Please open a shift in the POS section first. Receptionists can only access finance records during an active shift.
+                            {t('financeLockedDesc')}
                         </p>
                     </div>
                     <button
                         onClick={() => window.location.href = '/pos'}
                         className="px-8 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all"
                     >
-                        Go to POS to Open Shift
+                        {t('goToPosOpenShift')}
                     </button>
                 </div>
             </Shell>
@@ -123,24 +125,37 @@ export default function FinancePage() {
 
     return (
         <Shell>
+            <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
+                <div>
+                    <h2 className="text-2xl md:text-3xl font-black text-primary uppercase tracking-tight">{t('financeTransactions')}</h2>
+                    <p className="text-xs md:text-sm text-muted-foreground font-bold italic opacity-70">{t('financeDesc')}</p>
+                </div>
+                {userRole === 'ADMIN' && (
+                    <button
+                        onClick={() => setIsModalOpen(true)}
+                        className="w-full sm:w-auto flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:bg-primary/90 transition-all active:scale-95"
+                    >
+                        <Plus size={18} />
+                        <span>{t('recordCashFlow')}</span>
+                    </button>
+                )}
+            </header>
             <div className="space-y-6">
                 {/* Header Stats */}
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
                         <div className="flex items-center gap-3">
-                            <h2 className="text-2xl font-black">Finance Transactions</h2>
                             {activeShift && (
                                 <span className="bg-primary/10 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-primary/20">
-                                    Active Shift: {activeShift.id.slice(-6)}
+                                    {t('activeShift')}: {activeShift.id.slice(-6)}
                                 </span>
                             )}
                             {userRole === 'ADMIN' && (
                                 <span className="bg-purple-100 text-purple-700 text-[10px] font-black px-2 py-0.5 rounded-full uppercase border border-purple-200">
-                                    Admin View (All Data)
+                                    {t('adminViewAllData')}
                                 </span>
                             )}
                         </div>
-                        <p className="text-muted-foreground text-sm">Monitor and record cash flow during your shift.</p>
                     </div>
                 </div>
 
@@ -150,11 +165,20 @@ export default function FinancePage() {
                         <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform hidden sm:block">
                             <Wallet size={64} />
                         </div>
-                        <p className="text-[10px] md:text-xs font-bold text-muted-foreground uppercase tracking-widest mb-1">
-                            {userRole === 'ADMIN' ? 'Total Balance' : 'Current Shift Balance'}
-                        </p>
-                        <h3 className={cn("text-2xl md:text-3xl font-black truncate", netBalance >= 0 ? "text-emerald-600" : "text-red-600")}>
-                            {formatCurrency(netBalance)}
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{t('totalBalance')}</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-primary tracking-tighter">
+                            {formatCurrency(transactions.reduce((acc, curr) => curr.type === 'INCOME' ? acc + curr.amount : acc - curr.amount, 0))}
+                        </h3>
+                    </div>
+                    <div className="bg-card p-5 md:p-6 rounded-2xl md:rounded-3xl border border-primary/10 shadow-sm relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 p-4 opacity-10 group-hover:scale-110 transition-transform hidden sm:block">
+                            <Wallet size={64} />
+                        </div>
+                        <p className="text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em] mb-1">{t('shiftBalance')}</p>
+                        <h3 className="text-2xl md:text-3xl font-black text-indigo-600 tracking-tighter">
+                            {activeShift ? formatCurrency(transactions
+                                .filter(t => t.shiftId === activeShift.id)
+                                .reduce((acc, curr) => curr.type === 'INCOME' ? acc + curr.amount : acc - curr.amount, 0)) : formatCurrency(0)}
                         </h3>
                     </div>
                 </div>
@@ -164,7 +188,7 @@ export default function FinancePage() {
                         <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
                         <input
                             type="text"
-                            placeholder="Search transactions, ref..."
+                            placeholder={t('searchTransactionsRef')}
                             value={search}
                             onChange={(e) => setSearch(e.target.value)}
                             disabled={userRole === 'RECEPTION' && !activeShift}
@@ -177,7 +201,7 @@ export default function FinancePage() {
                         className="flex items-center justify-center space-x-2 px-6 py-2.5 bg-primary text-white rounded-xl font-bold shadow-lg shadow-primary/20 hover:scale-[1.02] transition-transform disabled:opacity-50 disabled:grayscale disabled:scale-100"
                     >
                         <Plus size={20} />
-                        <span className="text-sm md:text-base">Record Cash In/Out</span>
+                        <span className="text-sm md:text-base">{t('recordCashFlow')}</span>
                     </button>
                 </div>
 
@@ -187,11 +211,11 @@ export default function FinancePage() {
                         <table className="w-full text-left border-collapse min-w-[800px]">
                             <thead className="bg-secondary/50 border-b">
                                 <tr>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Date</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Type</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Category</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">Description</th>
-                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">Amount</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('date')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('type')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('category')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground">{t('description')}</th>
+                                    <th className="px-6 py-4 text-xs font-bold uppercase tracking-wider text-muted-foreground text-right">{t('amount')}</th>
                                 </tr>
                             </thead>
                             <tbody className="divide-y text-sm">
@@ -200,7 +224,7 @@ export default function FinancePage() {
                                         <tr key={i} className="animate-pulse"><td colSpan={5} className="px-6 py-6"><div className="h-4 bg-secondary rounded w-full" /></td></tr>
                                     ))
                                 ) : filtered.length === 0 ? (
-                                    <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-medium">No transactions found</td></tr>
+                                    <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-medium">{t('noTransactionsFound')}</td></tr>
                                 ) : filtered.map((t) => (
                                     <tr key={t.id} className="hover:bg-secondary/20 transition-colors">
                                         <td className="px-6 py-4 font-medium text-muted-foreground">
@@ -217,13 +241,13 @@ export default function FinancePage() {
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-2 py-0.5 bg-secondary text-[10px] font-black rounded border uppercase">
-                                                {t.category.replace('_', ' ')}
+                                                {t(t.category.toLowerCase().replace(/_/g, ''))}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div>
                                                 <p className="font-bold">{t.description}</p>
-                                                {t.referenceNo && <p className="text-[10px] text-muted-foreground uppercase">Ref: {t.referenceNo}</p>}
+                                                {t.referenceNo && <p className="text-[10px] text-muted-foreground uppercase">{t('ref')}: {t.referenceNo}</p>}
                                             </div>
                                         </td>
                                         <td className={cn(
@@ -245,7 +269,7 @@ export default function FinancePage() {
                 <div className="fixed inset-0 z-[1000] flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in">
                     <div className="bg-background w-full max-w-md rounded-3xl shadow-2xl border overflow-hidden">
                         <div className="flex justify-between items-center p-6 border-b bg-secondary/20">
-                            <h2 className="text-xl font-black uppercase text-primary">Record Cash Flow</h2>
+                            <h2 className="text-xl font-black uppercase text-primary">{t('recordCashFlow')}</h2>
                             <button onClick={() => setIsModalOpen(false)} className="p-2 hover:bg-secondary rounded-full">
                                 <Plus className="rotate-45" size={24} />
                             </button>
@@ -256,47 +280,47 @@ export default function FinancePage() {
                                     type="button"
                                     onClick={() => setType('INCOME')}
                                     className={cn("flex-1 py-2 rounded-lg font-bold text-xs transition-all", type === 'INCOME' ? "bg-emerald-500 text-white shadow-md" : "text-muted-foreground")}
-                                >INCOME (เข้า)</button>
+                                >{t('income')}</button>
                                 <button
                                     type="button"
                                     onClick={() => setType('EXPENSE')}
                                     className={cn("flex-1 py-2 rounded-lg font-bold text-xs transition-all", type === 'EXPENSE' ? "bg-red-500 text-white shadow-md" : "text-muted-foreground")}
-                                >EXPENSE (ออก)</button>
+                                >{t('expense')}</button>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Category</label>
+                                <label className="text-xs font-bold uppercase text-muted-foreground">{t('category')}</label>
                                 <select
                                     value={category}
                                     onChange={(e) => setCategory(e.target.value)}
                                     className="w-full px-4 py-2 bg-card border rounded-xl"
                                 >
-                                    <option value="PETTY_CASH">Petty Cash (เงินย่อย)</option>
-                                    <option value="REFUND">Refund Deposit (คืนมัดจำ)</option>
-                                    <option value="PURCHASE">Supplies/Market (ซื้อของ)</option>
-                                    <option value="UTILITY">Utility/Bill</option>
-                                    <option value="OTHER">Other</option>
+                                    <option value="PETTY_CASH">{t('pettyCash')}</option>
+                                    <option value="REFUND">{t('refundDeposit')}</option>
+                                    <option value="PURCHASE">{t('suppliesMarket')}</option>
+                                    <option value="UTILITY">{t('utilityBill')}</option>
+                                    <option value="OTHER">{t('other')}</option>
                                 </select>
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Amount</label>
+                                <label className="text-xs font-bold uppercase text-muted-foreground">{t('amount')}</label>
                                 <input
                                     type="number"
                                     value={amount}
                                     onChange={(e) => setAmount(e.target.value)}
-                                    placeholder="0.00"
+                                    placeholder={t('amountPlaceholder')}
                                     className="w-full px-4 py-3 bg-card border rounded-xl text-2xl font-black text-primary"
                                     required
                                 />
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Description</label>
+                                <label className="text-xs font-bold uppercase text-muted-foreground">{t('description')}</label>
                                 <textarea
                                     value={description}
                                     onChange={(e) => setDescription(e.target.value)}
-                                    placeholder="What is this for?"
+                                    placeholder={t('descriptionPlaceholder')}
                                     className="w-full px-4 py-2 bg-card border rounded-xl resize-none"
                                     rows={3}
                                     required
@@ -304,12 +328,12 @@ export default function FinancePage() {
                             </div>
 
                             <div className="space-y-2">
-                                <label className="text-xs font-bold uppercase text-muted-foreground">Reference (Optional)</label>
+                                <label className="text-xs font-bold uppercase text-muted-foreground">{t('referenceOptional')}</label>
                                 <input
                                     type="text"
                                     value={referenceNo}
                                     onChange={(e) => setReferenceNo(e.target.value)}
-                                    placeholder="Booking # or Invoice #"
+                                    placeholder={t('referencePlaceholder')}
                                     className="w-full px-4 py-2 bg-card border rounded-xl"
                                 />
                             </div>

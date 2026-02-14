@@ -2,7 +2,8 @@
 
 import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
-import { Search, ShoppingCart, Plus, Minus, Trash2, CreditCard, Banknote, Wallet, X } from 'lucide-react'
+import { Search, ShoppingCart, Plus, Minus, Trash2, CreditCard, Banknote, Wallet, X, User, QrCode } from 'lucide-react'
+import { useTranslation } from '@/lib/LanguageContext'
 import { cn, formatCurrency } from '@/lib/utils'
 import { useToast } from '@/lib/ToastContext'
 import { ConfirmationModal } from '@/components/ConfirmationModal'
@@ -19,23 +20,24 @@ interface CartItem extends Product {
     qty: number
 }
 
-export default function PosPage() {
+export default function POSPage() {
+    const { t } = useTranslation()
     const { showToast } = useToast()
     const [products, setProducts] = useState<Product[]>([])
     const [cart, setCart] = useState<CartItem[]>([])
     const [search, setSearch] = useState('')
     const [category, setCategory] = useState('All')
     const [loading, setLoading] = useState(false)
-    const [processing, setProcessing] = useState(false)
+    const [isProcessing, setIsProcessing] = useState(false)
     const [showShiftModal, setShowShiftModal] = useState(false)
     const [shiftData, setShiftData] = useState<any>(null)
     const [activeShift, setActiveShift] = useState<any>(null)
-    const [startCash, setStartCash] = useState('')
+    const [startingCash, setStartingCash] = useState('')
 
     // Confirmation states
-    const [confirmCloseOpen, setConfirmCloseOpen] = useState(false)
-    const [confirmPaymentOpen, setConfirmPaymentOpen] = useState(false)
-    const [pendingPaymentMethod, setPendingPaymentMethod] = useState('')
+    const [isCloseModalOpen, setIsCloseModalOpen] = useState(false)
+    const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false)
+    const [paymentMethod, setPaymentMethod] = useState('')
     const [isCartOpen, setIsCartOpen] = useState(false) // Mobile cart toggle
 
     // 1. Check for Active Shift on Load
@@ -118,38 +120,38 @@ export default function PosPage() {
     const total = cart.reduce((sum, item) => sum + (item.price * item.qty), 0)
 
     const handleOpenShift = async () => {
-        if (!startCash) {
-            showToast('Please enter starting cash', 'warning')
+        if (!startingCash) {
+            showToast(t('pleaseEnterStartingCash'), 'warning')
             return
         }
-        setProcessing(true)
+        setIsProcessing(true)
         try {
             const res = await fetch('/api/pos/shift/open', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ userId: 'user_admin', startCash: Number(startCash) })
+                body: JSON.stringify({ userId: 'user_admin', startCash: Number(startingCash) })
             })
             if (res.ok) {
                 const shift = await res.json()
                 setActiveShift(shift)
-                setStartCash('')
-                showToast('Shift opened successfully', 'success')
+                setStartingCash('')
+                showToast(t('shiftOpenedSuccessfully'), 'success')
             } else {
-                showToast('Failed to open shift', 'error')
+                showToast(t('failedToOpenShift'), 'error')
             }
         } catch (error) {
             console.error(error)
-            showToast('Error opening shift', 'error')
+            showToast(t('errorOpeningShift'), 'error')
         } finally {
-            setProcessing(false)
+            setIsProcessing(false)
         }
     }
 
     const handleCloseShift = async () => {
         if (!activeShift) return
 
-        setProcessing(true)
-        setConfirmCloseOpen(false)
+        setIsProcessing(true)
+        setIsCloseModalOpen(false)
         try {
             const res = await fetch('/api/pos/shift/close', {
                 method: 'POST',
@@ -158,31 +160,31 @@ export default function PosPage() {
             })
 
             if (res.ok) {
-                showToast('Shift Closed Successfully', 'success')
+                showToast(t('shiftClosedSuccessfully'), 'success')
                 setActiveShift(null)
                 setShiftData(null)
                 setShowShiftModal(false)
-                setConfirmCloseOpen(false)
+                setIsCloseModalOpen(false)
                 // Print functionality would go here
             } else {
-                showToast('Failed to close shift', 'error')
+                showToast(t('failedToCloseShift'), 'error')
             }
         } catch (error) {
             console.error(error)
-            showToast('Error closing shift', 'error')
+            showToast(t('errorClosingShift'), 'error')
         } finally {
-            setProcessing(false)
+            setIsProcessing(false)
         }
     }
 
     const handleCheckout = async () => {
         if (!activeShift) {
-            showToast('Please open a shift first!', 'error')
+            showToast(t('pleaseOpenShiftFirst'), 'error')
             return
         }
         if (cart.length === 0) return
 
-        setProcessing(true)
+        setIsProcessing(true)
         try {
             const res = await fetch('/api/pos/orders', {
                 method: 'POST',
@@ -190,16 +192,16 @@ export default function PosPage() {
                 body: JSON.stringify({
                     items: cart.map(i => ({ productId: i.id, name: i.name, price: i.price, qty: i.qty })),
                     total,
-                    paymentMethod: pendingPaymentMethod,
+                    paymentMethod: paymentMethod,
                     userId: 'user_admin', // TODO: Get from session
                     shiftId: activeShift.id
                 })
             })
 
             if (res.ok) {
-                showToast('Payment Successful!', 'success')
+                showToast(t('paymentSuccessful'), 'success')
                 setCart([])
-                setConfirmPaymentOpen(false)
+                setIsPaymentModalOpen(false)
                 // Refresh products to see stock update
                 fetch('/api/pos/products')
                     .then(res => res.json())
@@ -207,19 +209,19 @@ export default function PosPage() {
                 // Refresh shift stats
                 checkActiveShift()
             } else {
-                showToast('Payment Failed', 'error')
+                showToast(t('paymentFailed'), 'error')
             }
         } catch (err) {
             console.error(err)
-            showToast('Error processing payment', 'error')
+            showToast(t('errorProcessingPayment'), 'error')
         } finally {
-            setProcessing(false)
+            setIsProcessing(false)
         }
     }
 
     const initiateCheckout = (method: string) => {
-        setPendingPaymentMethod(method)
-        setConfirmPaymentOpen(true)
+        setPaymentMethod(method)
+        setIsPaymentModalOpen(true)
     }
 
     // Modal to Open Shift if none active
@@ -227,32 +229,23 @@ export default function PosPage() {
         return (
             <Shell>
                 <div className="flex items-center justify-center h-[calc(100vh-100px)]">
-                    <div className="bg-card w-full max-w-md p-8 rounded-2xl shadow-xl border text-center space-y-6">
-                        <div className="w-20 h-20 bg-primary/10 text-primary rounded-full flex items-center justify-center mx-auto">
-                            <Wallet size={40} />
-                        </div>
-                        <div>
-                            <h2 className="text-2xl font-black">Open New Shift</h2>
-                            <p className="text-muted-foreground">Please start a shift to begin selling.</p>
-                        </div>
-
-                        <div className="text-left space-y-2">
-                            <label className="text-sm font-bold">Starting Cash Float</label>
+                    <div className="w-full max-w-sm p-6 bg-card border rounded-3xl shadow-xl space-y-4">
+                        <div className="space-y-1.5 text-left">
+                            <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">{t('startingCash')}</label>
                             <input
                                 type="number"
-                                value={startCash}
-                                onChange={(e) => setStartCash(e.target.value)}
                                 placeholder="0.00"
-                                className="w-full p-3 bg-secondary rounded-xl font-mono text-lg outline-none focus:ring-2 focus:ring-primary"
+                                className="w-full h-12 px-4 rounded-xl border bg-background font-mono text-lg font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                value={startingCash}
+                                onChange={(e) => setStartingCash(e.target.value)}
                             />
                         </div>
-
                         <button
                             onClick={handleOpenShift}
-                            disabled={processing}
-                            className="w-full py-4 bg-primary text-primary-foreground rounded-xl font-bold text-lg hover:bg-primary/90 transition-colors"
+                            disabled={isProcessing}
+                            className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50"
                         >
-                            Open Shift
+                            {isProcessing ? t('processing') : t('openShift')}
                         </button>
                     </div>
                 </div>
@@ -267,14 +260,14 @@ export default function PosPage() {
                 <div className="flex-1 flex flex-col space-y-3 md:space-y-4 min-h-0">
                     {/* Filters */}
                     <div className="flex flex-col md:flex-row gap-3 bg-card p-3 md:p-4 rounded-xl border shadow-sm">
-                        <div className="relative flex-1">
-                            <Search className="absolute left-3 top-2.5 md:top-3 text-muted-foreground" size={18} />
+                        <div className="relative">
+                            <Search className="absolute left-3 top-3 text-muted-foreground" size={18} />
                             <input
                                 type="text"
-                                placeholder="Search products..."
+                                placeholder={t('searchProducts')}
+                                className="w-full pl-10 pr-4 py-3 bg-secondary/50 border-none rounded-xl outline-none focus:ring-2 focus:ring-primary/20"
                                 value={search}
                                 onChange={(e) => setSearch(e.target.value)}
-                                className="w-full pl-9 pr-4 py-2 bg-secondary/50 border-none rounded-lg outline-none focus:ring-2 focus:ring-primary/20 text-sm md:text-base"
                             />
                         </div>
                         <div className="flex space-x-2 overflow-x-auto pb-1 scrollbar-hide">
@@ -309,7 +302,7 @@ export default function PosPage() {
                                 </div>
                                 <div className="min-w-0 w-full">
                                     <h3 className="font-bold text-foreground text-sm md:text-base truncate">{product.name}</h3>
-                                    <p className="text-[10px] md:text-xs text-muted-foreground italic">{product.stock} in stock</p>
+                                    <p className="text-[10px] md:text-xs text-muted-foreground italic">{product.stock} {t('inStock')}</p>
                                 </div>
                                 <div className="font-black text-base md:text-lg text-primary">
                                     {formatCurrency(product.price)}
@@ -335,11 +328,11 @@ export default function PosPage() {
                     <div className="p-4 border-b bg-secondary/30 flex justify-between items-center shrink-0">
                         <div className="flex flex-col">
                             <h2 className="font-black text-lg flex items-center">
-                                <ShoppingCart className="mr-2" size={20} /> Current Order
+                                <ShoppingCart className="mr-2" size={20} /> {t('currentOrder')}
                             </h2>
                             {activeShift && (
                                 <span className="text-[10px] font-mono text-muted-foreground">
-                                    Shift #{activeShift.id?.slice(-8)}
+                                    {t('shift')} #{activeShift.id?.slice(-8)}
                                 </span>
                             )}
                         </div>
@@ -355,7 +348,7 @@ export default function PosPage() {
                         {cart.length === 0 ? (
                             <div className="h-full flex flex-col items-center justify-center text-muted-foreground space-y-4 opacity-50 italic">
                                 <ShoppingCart size={40} className="md:size-12" />
-                                <p className="text-sm md:text-base">Cart is empty</p>
+                                <p className="text-sm md:text-base">{t('cartIsEmpty')}</p>
                             </div>
                         ) : (
                             cart.map(item => (
@@ -391,26 +384,26 @@ export default function PosPage() {
 
                     <div className="p-4 md:p-6 bg-secondary/30 space-y-3 md:space-y-4 shrink-0 pb-8 lg:pb-6">
                         <div className="flex justify-between items-center text-lg md:text-xl font-black italic">
-                            <span>Total</span>
+                            <span>{t('total')}</span>
                             <span className="text-primary">{formatCurrency(total)}</span>
                         </div>
 
                         <div className="grid grid-cols-2 gap-2 md:gap-3">
                             <button
                                 onClick={() => initiateCheckout('CASH')}
-                                disabled={cart.length === 0 || processing}
+                                disabled={cart.length === 0 || isProcessing}
                                 className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-emerald-500 text-white rounded-xl md:rounded-2xl hover:bg-emerald-600 transition-colors disabled:opacity-50 shadow-md shadow-emerald-500/20 active:scale-95"
                             >
                                 <Banknote size={20} className="mb-0.5 md:mb-1 md:size-6" />
-                                <span className="text-[10px] md:text-xs font-bold uppercase">Cash</span>
+                                <span className="text-[10px] md:text-xs font-bold uppercase">{t('cash')}</span>
                             </button>
                             <button
                                 onClick={() => initiateCheckout('QR')}
-                                disabled={cart.length === 0 || processing}
+                                disabled={cart.length === 0 || isProcessing}
                                 className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-blue-500 text-white rounded-xl md:rounded-2xl hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-95"
                             >
                                 <CreditCard size={20} className="mb-0.5 md:mb-1 md:size-6" />
-                                <span className="text-[10px] md:text-xs font-bold uppercase">QR Pay</span>
+                                <span className="text-[10px] md:text-xs font-bold uppercase">{t('qrPay')}</span>
                             </button>
                         </div>
 
@@ -422,7 +415,7 @@ export default function PosPage() {
                                 }}
                                 className="w-full py-2.5 md:py-3 bg-zinc-800 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-zinc-700 shadow-lg active:scale-95 transition-all"
                             >
-                                Close Shift / Summary
+                                {t('closeShift')} / {t('summary')}
                             </button>
                         </div>
                     </div>
@@ -450,7 +443,7 @@ export default function PosPage() {
                 <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 animate-in fade-in duration-200">
                     <div className="bg-card w-full max-w-md p-6 rounded-2xl shadow-2xl space-y-6">
                         <div className="flex justify-between items-center border-b pb-4">
-                            <h2 className="text-xl font-black">Shift Summary</h2>
+                            <h2 className="text-xl font-black">{t('shiftSummary')}</h2>
                             <button onClick={() => setShowShiftModal(false)} className="p-2 hover:bg-secondary rounded-full transition-colors">
                                 <X size={20} className="text-muted-foreground" />
                             </button>
@@ -460,46 +453,46 @@ export default function PosPage() {
                             <div className="space-y-4">
                                 <div className="p-4 bg-secondary/30 rounded-xl space-y-2">
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Shift ID</span>
+                                        <span className="text-muted-foreground">{t('shiftId')}</span>
                                         <span className="font-bold">{activeShift?.id}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Date</span>
+                                        <span className="text-muted-foreground">{t('date')}</span>
                                         <span className="font-bold">{new Date().toLocaleDateString()}</span>
                                     </div>
                                     <div className="flex justify-between">
-                                        <span className="text-muted-foreground">Total Orders</span>
+                                        <span className="text-muted-foreground">{t('totalOrders')}</span>
                                         <span className="font-bold">{shiftData.orderCount}</span>
                                     </div>
                                 </div>
 
                                 <div className="space-y-2">
                                     <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">POS Sales</span>
+                                        <span className="font-medium">{t('posSales')}</span>
                                         <span className="font-bold text-lg">{formatCurrency(shiftData.posTotal || 0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg bg-emerald-50 text-emerald-700">
-                                        <span className="font-medium">Room Revenue</span>
+                                        <span className="font-medium">{t('roomRevenue')}</span>
                                         <span className="font-bold text-lg">{formatCurrency(shiftData.roomTotal || 0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg bg-blue-50 text-blue-700">
-                                        <span className="font-medium">Cash In (เบิกเข้า)</span>
+                                        <span className="font-medium">{t('cashIn')}</span>
                                         <span className="font-bold text-lg">+{formatCurrency(shiftData.cashIn || 0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg bg-red-50 text-red-700">
-                                        <span className="font-medium">Cash Out (เบิกจ่าย/ค่าน้ำ)</span>
+                                        <span className="font-medium">{t('cashOut')}</span>
                                         <span className="font-bold text-lg">-{formatCurrency(shiftData.cashOut || 0)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">Net Cash in Drawer</span>
+                                        <span className="font-medium">{t('netCashInDrawer')}</span>
                                         <span className="font-bold text-green-600 text-lg">{formatCurrency(shiftData.cashSales)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-3 border rounded-lg">
-                                        <span className="font-medium">Total Other (Non-Cash)</span>
+                                        <span className="font-medium">{t('totalOtherNonCash')}</span>
                                         <span className="font-bold text-blue-600 text-lg">{formatCurrency(shiftData.otherSales)}</span>
                                     </div>
                                     <div className="flex justify-between items-center p-4 bg-primary/10 rounded-xl">
-                                        <span className="font-black text-lg">Total Revenue</span>
+                                        <span className="font-black text-lg">{t('totalRevenue')}</span>
                                         <span className="font-black text-2xl text-primary">{formatCurrency(shiftData.totalSales)}</span>
                                     </div>
                                 </div>
@@ -509,13 +502,13 @@ export default function PosPage() {
                                         onClick={() => window.print()}
                                         className="flex-1 py-3 border border-border rounded-xl font-bold hover:bg-secondary transition-colors"
                                     >
-                                        Print Report
+                                        {t('printReport')}
                                     </button>
                                     <button
-                                        onClick={() => setConfirmCloseOpen(true)}
+                                        onClick={() => setIsCloseModalOpen(true)}
                                         className="flex-1 py-3 bg-red-500 text-white rounded-xl font-bold hover:bg-red-600 transition-colors"
                                     >
-                                        Confirm Close
+                                        {t('confirmClose')}
                                     </button>
                                 </div>
                             </div>
@@ -530,24 +523,24 @@ export default function PosPage() {
 
             {/* Confirmation Modals */}
             <ConfirmationModal
-                isOpen={confirmCloseOpen}
-                title="Close Shift"
-                message="Are you sure you want to end this shift? Ensure all cash is counted."
-                confirmLabel="Yes, Close Shift"
+                isOpen={isCloseModalOpen}
+                title={t('closeShift')}
+                message={t('confirmCloseShiftMessage')}
+                confirmLabel={t('confirmClose')}
                 type="danger"
-                isProcessing={processing}
+                isProcessing={isProcessing}
                 onConfirm={handleCloseShift}
-                onCancel={() => setConfirmCloseOpen(false)}
+                onCancel={() => setIsCloseModalOpen(false)}
             />
 
             <ConfirmationModal
-                isOpen={confirmPaymentOpen}
-                title="Confirm Payment"
-                message={`Process payment of ${formatCurrency(total)} via ${pendingPaymentMethod}?`}
-                confirmLabel="Confirm Payment"
-                isProcessing={processing}
+                isOpen={isPaymentModalOpen}
+                title={t('confirmPayment')}
+                message={t('confirmPaymentMessage')}
+                confirmLabel={t('confirmPayment')}
+                isProcessing={isProcessing}
                 onConfirm={handleCheckout}
-                onCancel={() => setConfirmPaymentOpen(false)}
+                onCancel={() => setIsPaymentModalOpen(false)}
             />
         </Shell>
     )

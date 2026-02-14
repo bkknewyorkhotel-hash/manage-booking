@@ -3,9 +3,13 @@
 import React, { useEffect, useState } from 'react'
 import { Shell } from '@/components/Shell'
 import { Construction, Save, Plus, Trash2, User as UserIcon, Bed, Building, DoorOpen, Package } from 'lucide-react'
+import { useTranslation } from '@/lib/LanguageContext'
+import { useToast } from '@/lib/ToastContext'
 import { cn, formatCurrency } from '@/lib/utils'
 
 export default function SettingsPage() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [activeTab, setActiveTab] = useState('general')
     const [user, setUser] = useState<any>(null)
     const [loading, setLoading] = useState(true)
@@ -19,7 +23,7 @@ export default function SettingsPage() {
             })
     }, [])
 
-    if (loading) return <Shell><div className="p-8">Loading...</div></Shell>
+    if (loading) return <Shell><div className="p-8">{t('processing')}</div></Shell>
 
     if (user?.role !== 'ADMIN') {
         return (
@@ -28,9 +32,9 @@ export default function SettingsPage() {
                     <div className="p-4 bg-red-50 text-red-500 rounded-full">
                         <Construction size={48} />
                     </div>
-                    <h2 className="text-2xl font-black text-red-600 uppercase">Access Denied</h2>
+                    <h2 className="text-2xl font-black text-red-600 uppercase">{t('accessDenied')}</h2>
                     <p className="text-muted-foreground max-w-sm">
-                        You do not have permission to access the system configuration. Please contact the administrator.
+                        {t('noPermissionSettings')}
                     </p>
                 </div>
             </Shell>
@@ -40,15 +44,15 @@ export default function SettingsPage() {
     return (
         <Shell>
             <div className="space-y-6">
-                <h2 className="text-2xl font-black text-primary uppercase tracking-tight">System Configuration</h2>
+                <h2 className="text-2xl font-black text-primary uppercase tracking-tight">{t('systemConfiguration')}</h2>
                 ...
 
                 <div className="flex space-x-2 border-b pb-2 overflow-x-auto">
-                    <TabButton active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={Building} label="General" />
-                    <TabButton active={activeTab === 'rooms'} onClick={() => setActiveTab('rooms')} icon={DoorOpen} label="Rooms" />
-                    <TabButton active={activeTab === 'room_types'} onClick={() => setActiveTab('room_types')} icon={Bed} label="Room Types" />
-                    <TabButton active={activeTab === 'products'} onClick={() => setActiveTab('products')} icon={Package} label="Products" />
-                    <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={UserIcon} label="Users" />
+                    <TabButton active={activeTab === 'general'} onClick={() => setActiveTab('general')} icon={Building} label={t('general')} />
+                    <TabButton active={activeTab === 'rooms'} onClick={() => setActiveTab('rooms')} icon={DoorOpen} label={t('rooms')} />
+                    <TabButton active={activeTab === 'room_types'} onClick={() => setActiveTab('room_types')} icon={Bed} label={t('roomTypes')} />
+                    <TabButton active={activeTab === 'products'} onClick={() => setActiveTab('products')} icon={Package} label={t('products')} />
+                    <TabButton active={activeTab === 'users'} onClick={() => setActiveTab('users')} icon={UserIcon} label={t('users')} />
                 </div>
 
                 <div className="min-h-[400px]">
@@ -79,6 +83,8 @@ function TabButton({ active, onClick, icon: Icon, label }: any) {
 }
 
 function GeneralSettings() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [settings, setSettings] = useState<any>({})
     const [loading, setLoading] = useState(true)
     const [saving, setSaving] = useState(false)
@@ -101,22 +107,22 @@ function GeneralSettings() {
                 headers: { 'Content-Type': 'application/json' },
                 body: JSON.stringify(settings)
             })
-            alert('Settings saved!')
+            showToast(t('settingsSaved'), 'success')
         } catch (error) {
-            alert('Failed to save')
+            showToast(t('failedToSave'), 'error')
         } finally {
             setSaving(false)
         }
     }
 
-    if (loading) return <p>Loading...</p>
+    if (loading) return <p>{t('processing')}</p>
 
     return (
         <div className="max-w-2xl p-6 bg-card border rounded-2xl shadow-sm">
-            <h3 className="text-lg font-bold mb-6">Hotel Information</h3>
+            <h3 className="text-lg font-bold mb-6">{t('hotelInformation')}</h3>
             <form onSubmit={handleSave} className="space-y-4">
                 <div className="space-y-1">
-                    <label className="text-sm font-bold text-muted-foreground">Hotel Name</label>
+                    <label className="text-sm font-bold text-muted-foreground">{t('hotelName')}</label>
                     <input
                         type="text"
                         value={settings.hotelName || ''}
@@ -125,7 +131,7 @@ function GeneralSettings() {
                     />
                 </div>
                 <div className="space-y-1">
-                    <label className="text-sm font-bold text-muted-foreground">Address</label>
+                    <label className="text-sm font-bold text-muted-foreground">{t('address')}</label>
                     <textarea
                         value={settings.address || ''}
                         onChange={e => setSettings({ ...settings, address: e.target.value })}
@@ -133,7 +139,7 @@ function GeneralSettings() {
                     />
                 </div>
                 <div className="space-y-1">
-                    <label className="text-sm font-bold text-muted-foreground">Tax ID</label>
+                    <label className="text-sm font-bold text-muted-foreground">{t('taxId')}</label>
                     <input
                         type="text"
                         value={settings.taxId || ''}
@@ -142,7 +148,7 @@ function GeneralSettings() {
                     />
                 </div>
                 <div className="space-y-1">
-                    <label className="text-sm font-bold text-muted-foreground">Phone</label>
+                    <label className="text-sm font-bold text-muted-foreground">{t('phone')}</label>
                     <input
                         type="text"
                         value={settings.phone || ''}
@@ -157,7 +163,7 @@ function GeneralSettings() {
                         className="px-6 py-2 bg-primary text-white rounded-lg font-bold hover:bg-primary/90 flex items-center space-x-2"
                     >
                         <Save size={18} />
-                        <span>{saving ? 'Saving...' : 'Save Changes'}</span>
+                        <span>{saving ? t('processing') : t('saveChanges')}</span>
                     </button>
                 </div>
             </form>
@@ -166,6 +172,8 @@ function GeneralSettings() {
 }
 
 function RoomTypeSettings() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [types, setTypes] = useState<any[]>([])
     const [loading, setLoading] = useState(true)
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -198,22 +206,22 @@ function RoomTypeSettings() {
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure?')) return
+        if (!confirm(t('confirmDeleteType'))) return
         const res = await fetch(`/api/room-types?id=${id}`, { method: 'DELETE' })
         if (res.ok) fetchTypes()
-        else alert('Failed to delete (might be in use)')
+        else showToast(t('failedToDelete'), 'error')
     }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">Manage Room Types</h3>
+                <h3 className="text-lg font-bold">{t('manageRoomTypes')}</h3>
                 <button
                     onClick={() => { setFormData({}); setIsFormOpen(true) }}
                     className="flex items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg font-bold hover:bg-emerald-100"
                 >
                     <Plus size={18} />
-                    <span>Add Room Type</span>
+                    <span>{t('addRoomType')}</span>
                 </button>
             </div>
 
@@ -222,25 +230,25 @@ function RoomTypeSettings() {
                     <form onSubmit={handleSave} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Name</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('guestName')}</label>
                                 <input required type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Base Rate</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('baseRate')}</label>
                                 <input required type="number" value={formData.baseRate || ''} onChange={e => setFormData({ ...formData, baseRate: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Capacity</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('capacity')}</label>
                                 <input required type="number" value={formData.capacity || ''} onChange={e => setFormData({ ...formData, capacity: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Amenities</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('amenities')}</label>
                                 <input type="text" value={formData.amenities || ''} onChange={e => setFormData({ ...formData, amenities: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                         </div>
                         <div className="flex space-x-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">Cancel</button>
-                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">Save</button>
+                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">{t('cancel')}</button>
+                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">{t('saveChanges')}</button>
                         </div>
                     </form>
                 </div>
@@ -267,6 +275,8 @@ function RoomTypeSettings() {
 }
 
 function UserSettings() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [users, setUsers] = useState<any[]>([])
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [formData, setFormData] = useState<any>({})
@@ -293,13 +303,14 @@ function UserSettings() {
             setIsFormOpen(false)
             setFormData({})
             fetchUsers()
+            showToast(t('settingsSaved'), 'success')
         } else {
-            alert('Error saving user')
+            showToast(t('failedToSave'), 'error')
         }
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure?')) return
+        if (!confirm(t('confirmDeleteUser'))) return
         await fetch(`/api/users?id=${id}`, { method: 'DELETE' })
         fetchUsers()
     }
@@ -307,13 +318,13 @@ function UserSettings() {
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">Manage Users</h3>
+                <h3 className="text-lg font-bold">{t('manageUsers')}</h3>
                 <button
                     onClick={() => { setFormData({}); setIsFormOpen(true) }}
                     className="flex items-center space-x-2 px-4 py-2 bg-blue-50 text-blue-600 border border-blue-200 rounded-lg font-bold hover:bg-blue-100"
                 >
                     <Plus size={18} />
-                    <span>Add User</span>
+                    <span>{t('addUser')}</span>
                 </button>
             </div>
 
@@ -322,29 +333,29 @@ function UserSettings() {
                     <form onSubmit={handleSave} className="space-y-4">
                         <div className="grid grid-cols-2 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Username</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('username')}</label>
                                 <input required disabled={!!formData.id} type="text" value={formData.username || ''} onChange={e => setFormData({ ...formData, username: e.target.value })} className="w-full p-2 border rounded-lg disabled:opacity-50" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Password</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('password')}</label>
                                 <input type="password" placeholder={formData.id ? "(Unchanged)" : ""} value={formData.password || ''} onChange={e => setFormData({ ...formData, password: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Role</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('role')}</label>
                                 <select value={formData.role || 'RECEPTION'} onChange={e => setFormData({ ...formData, role: e.target.value })} className="w-full p-2 border rounded-lg">
-                                    <option value="ADMIN">Admin</option>
-                                    <option value="RECEPTION">Reception</option>
-                                    <option value="HOUSEKEEPING">Housekeeping</option>
+                                    <option value="ADMIN">{t('admin')}</option>
+                                    <option value="RECEPTION">{t('reception')}</option>
+                                    <option value="HOUSEKEEPING">{t('housekeeping')}</option>
                                 </select>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Name</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('guestName')}</label>
                                 <input required type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                         </div>
                         <div className="flex space-x-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">Cancel</button>
-                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">Save</button>
+                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">{t('cancel')}</button>
+                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">{t('saveChanges')}</button>
                         </div>
                     </form>
                 </div>
@@ -354,10 +365,10 @@ function UserSettings() {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-secondary/20">
                         <tr>
-                            <th className="p-4">Name</th>
-                            <th className="p-4">Username</th>
-                            <th className="p-4">Role</th>
-                            <th className="p-4 text-right">Actions</th>
+                            <th className="p-4">{t('guestName')}</th>
+                            <th className="p-4">{t('username')}</th>
+                            <th className="p-4">{t('role')}</th>
+                            <th className="p-4 text-right">{t('actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -365,10 +376,10 @@ function UserSettings() {
                             <tr key={u.id}>
                                 <td className="p-4 font-bold">{u.name}</td>
                                 <td className="p-4 text-muted-foreground">{u.username}</td>
-                                <td className="p-4"><span className="px-2 py-1 bg-secondary rounded text-xs font-bold">{u.role}</span></td>
+                                <td className="p-4"><span className="px-2 py-1 bg-secondary rounded text-xs font-bold">{t(u.role.toLowerCase())}</span></td>
                                 <td className="p-4 text-right">
-                                    <button onClick={() => { setFormData(u); setIsFormOpen(true) }} className="px-2 text-blue-600 hover:underline">Edit</button>
-                                    <button onClick={() => handleDelete(u.id)} className="px-2 text-red-600 hover:underline">Delete</button>
+                                    <button onClick={() => { setFormData(u); setIsFormOpen(true) }} className="px-2 text-blue-600 hover:underline">{t('edit')}</button>
+                                    <button onClick={() => handleDelete(u.id)} className="px-2 text-red-600 hover:underline">{t('delete')}</button>
                                 </td>
                             </tr>
                         ))}
@@ -380,6 +391,8 @@ function UserSettings() {
 }
 
 function RoomSettings() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [floors, setFloors] = useState<any[]>([])
     const [roomTypes, setRoomTypes] = useState<any[]>([])
     const [isFormOpen, setIsFormOpen] = useState(false)
@@ -406,33 +419,34 @@ function RoomSettings() {
             setIsFormOpen(false)
             setFormData({})
             fetchData()
+            showToast(t('settingsSaved'), 'success')
         } else {
             const json = await res.json()
-            alert(json.error || 'Error saving room')
+            showToast(json.error || t('failedToSave'), 'error')
         }
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this room?')) return
+        if (!confirm(t('confirmDeleteRoom'))) return
         const res = await fetch(`/api/rooms?id=${id}`, { method: 'DELETE' })
         if (res.ok) {
             fetchData()
         } else {
             const json = await res.json()
-            alert(json.error || 'Failed to delete room')
+            showToast(json.error || t('failedToDeleteRoom'), 'error')
         }
     }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">Manage Rooms</h3>
+                <h3 className="text-lg font-bold">{t('manageRooms')}</h3>
                 <button
                     onClick={() => { setFormData({}); setIsFormOpen(true) }}
                     className="flex items-center space-x-2 px-4 py-2 bg-emerald-50 text-emerald-600 border border-emerald-200 rounded-lg font-bold hover:bg-emerald-100"
                 >
                     <Plus size={18} />
-                    <span>Add Room</span>
+                    <span>{t('addRoomSetting')}</span>
                 </button>
             </div>
 
@@ -441,27 +455,27 @@ function RoomSettings() {
                     <form onSubmit={handleSave} className="space-y-4">
                         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Room Number</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('roomNumber')}</label>
                                 <input required type="text" placeholder="e.g. 101" value={formData.roomNo || ''} onChange={e => setFormData({ ...formData, roomNo: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Floor Number</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('floorNumber')}</label>
                                 <input required type="number" placeholder="e.g. 1" value={formData.floorNo || (formData.Floor?.floorNo) || ''} onChange={e => setFormData({ ...formData, floorNo: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Room Type</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('roomType')}</label>
                                 <select required value={formData.roomTypeId || ''} onChange={e => setFormData({ ...formData, roomTypeId: e.target.value })} className="w-full p-2 border rounded-lg">
-                                    <option value="">Select Type...</option>
+                                    <option value="">{t('selectType')}...</option>
                                     {roomTypes.map(rt => (
-                                        <option key={rt.id} value={rt.id}>{rt.name} ({rt.baseRate} THB)</option>
+                                        <option key={rt.id} value={rt.id}>{rt.name} ({formatCurrency(rt.baseRate)})</option>
                                     ))}
                                 </select>
                             </div>
                         </div>
                         <div className="flex space-x-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">Cancel</button>
+                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">{t('cancel')}</button>
                             <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">
-                                {formData.id ? 'Save Changes' : 'Create Room'}
+                                {formData.id ? t('saveChanges') : t('createRoom')}
                             </button>
                         </div>
                     </form>
@@ -472,8 +486,8 @@ function RoomSettings() {
                 {floors.map(floor => (
                     <div key={floor.id} className="border rounded-xl overflow-hidden">
                         <div className="bg-secondary/30 p-3 font-bold flex justify-between items-center">
-                            <span>Floor {floor.floorNo}</span>
-                            <span className="text-xs text-muted-foreground">{floor.Rooms?.length || 0} Rooms</span>
+                            <span>{t('floor')} {floor.floorNo}</span>
+                            <span className="text-xs text-muted-foreground">{floor.Rooms?.length || 0} {t('rooms')}</span>
                         </div>
                         <div className="p-4 grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-3">
                             {floor.Rooms?.map((room: any) => (
@@ -498,7 +512,7 @@ function RoomSettings() {
                             ))}
                             {(!floor.Rooms || floor.Rooms.length === 0) && (
                                 <div className="col-span-full text-center py-4 text-muted-foreground text-sm italic">
-                                    No rooms on this floor
+                                    {t('noRoomsOnFloor')}
                                 </div>
                             )}
                         </div>
@@ -510,6 +524,8 @@ function RoomSettings() {
 }
 
 function ProductSettings() {
+    const { t } = useTranslation()
+    const { showToast } = useToast()
     const [products, setProducts] = useState<any[]>([])
     const [isFormOpen, setIsFormOpen] = useState(false)
     const [formData, setFormData] = useState<any>({})
@@ -536,32 +552,33 @@ function ProductSettings() {
             setIsFormOpen(false)
             setFormData({})
             fetchProducts()
+            showToast(t('settingsSaved'), 'success')
         } else {
-            alert('Error saving product')
+            showToast(t('failedToSave'), 'error')
         }
     }
 
     const handleDelete = async (id: string) => {
-        if (!confirm('Are you sure you want to delete this product?')) return
+        if (!confirm(t('confirmDeleteProduct'))) return
         const res = await fetch(`/api/pos/products?id=${id}`, { method: 'DELETE' })
         if (res.ok) {
             fetchProducts()
         } else {
             const json = await res.json()
-            alert(json.error || 'Failed to delete product')
+            showToast(json.error || t('failedToDelete'), 'error')
         }
     }
 
     return (
         <div className="space-y-6">
             <div className="flex justify-between items-center">
-                <h3 className="text-lg font-bold">Manage Products</h3>
+                <h3 className="text-lg font-bold">{t('manageProducts')}</h3>
                 <button
                     onClick={() => { setFormData({}); setIsFormOpen(true) }}
                     className="flex items-center space-x-2 px-4 py-2 bg-indigo-50 text-indigo-600 border border-indigo-200 rounded-lg font-bold hover:bg-indigo-100"
                 >
                     <Plus size={18} />
-                    <span>Add Product</span>
+                    <span>{t('addProduct')}</span>
                 </button>
             </div>
 
@@ -570,11 +587,11 @@ function ProductSettings() {
                     <form onSubmit={handleSave} className="space-y-4">
                         <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Product Name</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('productName')}</label>
                                 <input required type="text" value={formData.name || ''} onChange={e => setFormData({ ...formData, name: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Category</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('category')}</label>
                                 <input required type="text" list="categories" value={formData.category || ''} onChange={e => setFormData({ ...formData, category: e.target.value })} className="w-full p-2 border rounded-lg" />
                                 <datalist id="categories">
                                     <option value="Food" />
@@ -584,25 +601,25 @@ function ProductSettings() {
                                 </datalist>
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Price</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('amount')}</label>
                                 <input required type="number" step="0.01" value={formData.price || ''} onChange={e => setFormData({ ...formData, price: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Cost</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('cost')}</label>
                                 <input type="number" step="0.01" value={formData.cost || ''} onChange={e => setFormData({ ...formData, cost: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Stock</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('stock')}</label>
                                 <input type="number" value={formData.stock || ''} onChange={e => setFormData({ ...formData, stock: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                             <div className="space-y-1">
-                                <label className="text-sm font-bold text-muted-foreground">Barcode</label>
+                                <label className="text-sm font-bold text-muted-foreground">{t('barcode')}</label>
                                 <input type="text" value={formData.barcode || ''} onChange={e => setFormData({ ...formData, barcode: e.target.value })} className="w-full p-2 border rounded-lg" />
                             </div>
                         </div>
                         <div className="flex space-x-2">
-                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">Cancel</button>
-                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">Save Product</button>
+                            <button type="button" onClick={() => setIsFormOpen(false)} className="px-4 py-2 border rounded-lg font-bold">{t('cancel')}</button>
+                            <button type="submit" className="px-4 py-2 bg-primary text-white rounded-lg font-bold">{t('saveProduct')}</button>
                         </div>
                     </form>
                 </div>
@@ -612,11 +629,11 @@ function ProductSettings() {
                 <table className="w-full text-left text-sm">
                     <thead className="bg-secondary/20">
                         <tr>
-                            <th className="p-4">Product Name</th>
-                            <th className="p-4">Category</th>
-                            <th className="p-4">Price</th>
-                            <th className="p-4">Stock</th>
-                            <th className="p-4 text-right">Actions</th>
+                            <th className="p-4">{t('productName')}</th>
+                            <th className="p-4">{t('category')}</th>
+                            <th className="p-4">{t('amount')}</th>
+                            <th className="p-4">{t('stock')}</th>
+                            <th className="p-4 text-right">{t('actions')}</th>
                         </tr>
                     </thead>
                     <tbody className="divide-y">
@@ -631,14 +648,14 @@ function ProductSettings() {
                                     </span>
                                 </td>
                                 <td className="p-4 text-right">
-                                    <button onClick={() => { setFormData(p); setIsFormOpen(true) }} className="px-2 text-blue-600 hover:underline">Edit</button>
-                                    <button onClick={() => handleDelete(p.id)} className="px-2 text-red-600 hover:underline">Delete</button>
+                                    <button onClick={() => { setFormData(p); setIsFormOpen(true) }} className="px-2 text-blue-600 hover:underline">{t('edit')}</button>
+                                    <button onClick={() => handleDelete(p.id)} className="px-2 text-red-600 hover:underline">{t('delete')}</button>
                                 </td>
                             </tr>
                         ))}
                         {products.length === 0 && (
                             <tr>
-                                <td colSpan={5} className="p-4 text-center text-muted-foreground">No products found. Add one above!</td>
+                                <td colSpan={5} className="p-4 text-center text-muted-foreground">{t('noBookings')}</td>
                             </tr>
                         )}
                     </tbody>
