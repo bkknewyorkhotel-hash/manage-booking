@@ -132,4 +132,30 @@ body {
     print-color-adjust: exact;
     -webkit-print-color-adjust: exact;
   }
+
+  /* Hide everything except shift summary modal */
+  body>div:first-child>div:not([class*="fixed"]) {
+    display: none !important;
+  }
+
+  /* Show only the shift summary modal */
+  body>div:first-child>div[class*="fixed"][class*="inset-0"] {
+    position: static !important;
+    background: white !important;
+    display: block !important;
+    z-index: auto !important;
+  }
+
+  /* Reset modal container for print */
+  body>div:first-child>div[class*="fixed"]>div {
+    max-width: 100% !important;
+    width: 100% !important;
+    margin: 0 !important;
+    padding: 2rem !important;
+    box-shadow: none !important;
+    border-radius: 0 !important;
+    overflow: visible !important;
+    max-height: none !important;
+    background: white !important;
+  }
 }
