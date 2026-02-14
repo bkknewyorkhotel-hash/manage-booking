@@ -415,18 +415,12 @@ export default function POSPage() {
                             </button>
                         </div>
 
-                        <div className="pt-3 md:pt-4 border-t border-gray-200 space-y-2">
+                        <div className="pt-3 md:pt-4 border-t border-gray-200">
                             <button
                                 onClick={handleViewShiftSummary}
-                                className="w-full py-2.5 md:py-3 bg-blue-600 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-blue-700 shadow-lg active:scale-95 transition-all"
+                                className="w-full py-2.5 md:py-3 bg-zinc-800 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-zinc-700 shadow-lg active:scale-95 transition-all"
                             >
-                                {t('viewShiftSummary') || 'ดูสรุปกะ / พิมพ์'}
-                            </button>
-                            <button
-                                onClick={() => setIsCloseModalOpen(true)}
-                                className="w-full py-2.5 md:py-3 bg-red-600 text-white rounded-xl md:rounded-2xl font-bold text-xs md:text-sm hover:bg-red-700 shadow-lg active:scale-95 transition-all"
-                            >
-                                {t('closeShift')}
+                                {t('closeShift')} / {t('summary')}
                             </button>
                         </div>
                     </div>
@@ -630,12 +624,20 @@ export default function POSPage() {
 
                         {/* Actions */}
                         <div className="flex flex-col gap-3 py-4 print:hidden">
-                            <button
-                                onClick={() => setTimeout(() => window.print(), 100)}
-                                className="w-full py-4 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 shadow-lg active:scale-95 transition-all"
-                            >
-                                {t('printReport')}
-                            </button>
+                            <div className="flex space-x-3">
+                                <button
+                                    onClick={() => setTimeout(() => window.print(), 100)}
+                                    className="flex-1 py-4 bg-blue-600 text-white rounded-xl font-black hover:bg-blue-700 shadow-lg active:scale-95 transition-all"
+                                >
+                                    {t('printReport')}
+                                </button>
+                                <button
+                                    onClick={() => setIsCloseModalOpen(true)}
+                                    className="flex-1 py-4 bg-red-600 text-white rounded-xl font-black hover:bg-red-700 shadow-lg active:scale-95 transition-all"
+                                >
+                                    {t('confirmClose')}
+                                </button>
+                            </div>
                             <button
                                 onClick={() => setShowShiftModal(false)}
                                 className="w-full py-4 bg-zinc-100 text-zinc-500 rounded-xl font-black hover:bg-zinc-200 transition-all"
