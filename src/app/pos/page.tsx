@@ -542,7 +542,7 @@ export default function POSPage() {
                                         {/* Detailed Transactions - Hidden if amount is zero */}
                                         {shiftData.cashFlow?.transactions?.filter((t: any) => t.amount !== 0).map((tx: any, idx: number) => (
                                             <div key={idx} className="flex justify-between items-center text-zinc-500 italic text-[13px]">
-                                                <span className="pl-4">{tx.label}</span>
+                                                <span className="pl-4">{tx.labelKey ? t(tx.labelKey) : tx.label}</span>
                                                 <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
                                         ))}
