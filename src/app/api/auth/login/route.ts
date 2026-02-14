@@ -5,15 +5,33 @@ import { signJWT } from '@/lib/auth'
 export async function POST(request: Request) {
     try {
         console.log('1. Login API called')
-        const { username, password } = await request.json()
-        console.log('2. Parsed request:', username)
+        const body = await request.json()
+        const username = body.username?.trim()
+        const password = body.password
 
-        const user = await prisma.user.findUnique({
-            where: { username },
+        console.log('2. Parsed request for username:', username)
+
+        if (!username) {
+            return NextResponse.json({ error: 'Username is required' }, { status: 400 })
+        }
+
+        const user = await prisma.user.findFirst({
+            where: {
+                username: {
+                    equals: username,
+                    mode: 'insensitive' // Optional: handle case-insensitivity
+                }
+            },
         })
         console.log('3. Found user:', user?.username)
 
-        if (!user || user.password !== password) {
+        if (!user) {
+            console.log('Login Failed: User not found')
+            return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
+        }
+
+        if (user.password !== password) {
+            console.log('Login Failed: Password mismatch')
             return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 })
         }
 

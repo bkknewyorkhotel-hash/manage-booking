@@ -36,16 +36,45 @@ npm run dev
 # Access at http://localhost:3000
 ```
 
+## Handling Database Changes (Prisma Migrations)
+
+If you modify `schema.prisma` (e.g., add a column, change a type), **DO NOT use `--force-reset`**. Instead:
+
+1.  **Generate a migration**:
+    ```bash
+    npx prisma migrate dev --name your_change_description
+    ```
+    This will:
+    - Compare your schema with the database structure.
+    - Generate an SQL file with the necessary `ALTER TABLE` statements.
+    - Apply the changes safely while **preserving your existing data**.
+
+2.  **Deploying migrations**:
+    When deploying to production (Vercel/Cloud), run:
+    ```bash
+    npx prisma migrate deploy
+    ```
+
 ## Database Commands
 
 ```bash
-# Reset and reseed database
-npx prisma db push --force-reset
-npm run db:seed
+# [DEVELOPMENT] Reset and reseed database
+# CAUTION: This will wipe all data in the database
+# npx prisma db push --force-reset
+# npm run db:seed
+
+# [RECOMMENDED] Apply schema changes without wiping data (Uses ALTER TABLE)
+npx prisma migrate dev
+
+# [PRODUCTION] Apply migrations
+npx prisma migrate deploy
 
 # View database in browser
 npx prisma studio
 ```
+
+> [!WARNING]
+> NEVER use `--force-reset` in production as it will permanently delete all your data.
 
 ## Production Note
 

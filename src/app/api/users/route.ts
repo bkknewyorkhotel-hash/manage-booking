@@ -22,7 +22,8 @@ export async function GET() {
 export async function POST(request: Request) {
     try {
         const body = await request.json()
-        const { username, password, name, role } = body
+        const username = body.username?.trim()
+        const { password, name, role } = body
 
         if (!username || !password || !name) {
             return NextResponse.json({ error: 'Missing required fields' }, { status: 400 })
