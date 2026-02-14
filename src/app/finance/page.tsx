@@ -95,8 +95,8 @@ export default function FinancePage() {
         t.referenceNo?.toLowerCase().includes(search.toLowerCase())
     )
 
-    const netBalance = transactions.reduce((acc, t) =>
-        t.type === 'INCOME' ? acc + t.amount : acc - t.amount, 0
+    const netBalance = transactions.reduce((acc, tx) =>
+        tx.type === 'INCOME' ? acc + tx.amount : acc - tx.amount, 0
     )
 
     if (error === 'NO_ACTIVE_SHIFT') {
@@ -225,36 +225,36 @@ export default function FinancePage() {
                                     ))
                                 ) : filtered.length === 0 ? (
                                     <tr><td colSpan={5} className="px-6 py-12 text-center text-muted-foreground font-medium">{t('noTransactionsFound')}</td></tr>
-                                ) : filtered.map((t) => (
-                                    <tr key={t.id} className="hover:bg-secondary/20 transition-colors">
+                                ) : filtered.map((tx) => (
+                                    <tr key={tx.id} className="hover:bg-secondary/20 transition-colors">
                                         <td className="px-6 py-4 font-medium text-muted-foreground">
-                                            {new Date(t.createdAt).toLocaleString()}
+                                            {new Date(tx.createdAt).toLocaleString()}
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className={cn(
                                                 "flex items-center gap-1 font-bold",
-                                                t.type === 'INCOME' ? "text-emerald-600" : "text-red-500"
+                                                tx.type === 'INCOME' ? "text-emerald-600" : "text-red-500"
                                             )}>
-                                                {t.type === 'INCOME' ? <ArrowUpCircle size={14} /> : <ArrowDownCircle size={14} />}
-                                                {t.type}
+                                                {tx.type === 'INCOME' ? <ArrowUpCircle size={14} /> : <ArrowDownCircle size={14} />}
+                                                {tx.type}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <span className="px-2 py-0.5 bg-secondary text-[10px] font-black rounded border uppercase">
-                                                {t(t.category.toLowerCase().replace(/_/g, ''))}
+                                                {t(tx.category.toLowerCase().replace(/_/g, ''))}
                                             </span>
                                         </td>
                                         <td className="px-6 py-4">
                                             <div>
-                                                <p className="font-bold">{t.description}</p>
-                                                {t.referenceNo && <p className="text-[10px] text-muted-foreground uppercase">{t('ref')}: {t.referenceNo}</p>}
+                                                <p className="font-bold">{tx.description}</p>
+                                                {tx.referenceNo && <p className="text-[10px] text-muted-foreground uppercase">{t('ref')}: {tx.referenceNo}</p>}
                                             </div>
                                         </td>
                                         <td className={cn(
                                             "px-6 py-4 text-right font-black",
-                                            t.type === 'INCOME' ? "text-emerald-600" : "text-red-500"
+                                            tx.type === 'INCOME' ? "text-emerald-600" : "text-red-500"
                                         )}>
-                                            {t.type === 'INCOME' ? '+' : '-'}{formatCurrency(t.amount)}
+                                            {tx.type === 'INCOME' ? '+' : '-'}{formatCurrency(tx.amount)}
                                         </td>
                                     </tr>
                                 ))}
