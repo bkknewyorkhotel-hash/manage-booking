@@ -82,6 +82,17 @@ export async function GET(request: Request) {
         shift.Payments.forEach((p: any) => updatePaymentStats(p.method, Number(p.amount)))
         shift.Deposits.forEach((d: any) => updatePaymentStats(d.method, Number(d.amount)))
 
+        // Sectioned Payment Breakdown
+        const cashBreakdown = Object.entries(paymentStats)
+            .filter(([method]) => method === 'CASH')
+            .map(([method, data]) => ({ method, ...data }))
+        const nonCashBreakdown = Object.entries(paymentStats)
+            .filter(([method]) => method !== 'CASH')
+            .map(([method, data]) => ({ method, ...data }))
+
+        const cashTotalPay = cashBreakdown.reduce((sum, item) => sum + item.amount, 0)
+        const nonCashTotalPay = nonCashBreakdown.reduce((sum, item) => sum + item.amount, 0)
+
         // Totals
         const totalSales = posTotal + roomTotal
         const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + cashIn) - cashOut
@@ -110,6 +121,17 @@ export async function GET(request: Request) {
                     total: roomTotal,
                     count: roomCount
                 },
+                // Categorized Payments
+                payments: {
+                    cash: {
+                        list: cashBreakdown,
+                        total: cashTotalPay
+                    },
+                    nonCash: {
+                        list: nonCashBreakdown,
+                        total: nonCashTotalPay
+                    }
+                },
                 // Section 3: Cash In-Out
                 cashFlow: {
                     startCash: Number(shift.startCash || 0),
@@ -118,7 +140,7 @@ export async function GET(request: Request) {
                     netCash: cashSales,
                     totalRevenue: totalSales
                 },
-                // Other existing data for backward compatibility or breakdown
+                // Other existing data for backward compatibility
                 posTotal,
                 roomTotal,
                 cashIn,

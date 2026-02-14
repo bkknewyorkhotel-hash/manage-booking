@@ -510,6 +510,45 @@ export default function POSPage() {
                                     </div>
                                 </div>
 
+                                {/* Payment Breakdown Categorized */}
+                                <div className="space-y-4">
+                                    <h3 className="font-black text-zinc-600 border-b pb-1 uppercase tracking-wider">{t('payment')} Breakdown</h3>
+
+                                    {/* Cash Group */}
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-[11px] font-black text-muted-foreground uppercase">
+                                            <span>{t('cash')}</span>
+                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.payments?.cash?.total || 0)}</span>
+                                        </div>
+                                        {shiftData.payments?.cash?.list?.map((item: any) => (
+                                            <div key={item.method} className="flex justify-between items-center px-1">
+                                                <span className="capitalize">{item.method.toLowerCase()}</span>
+                                                <div className="flex items-center space-x-8">
+                                                    <span className="text-muted-foreground text-[10px]">{item.count} bills</span>
+                                                    <span className="font-bold w-24 text-right">{formatCurrency(item.amount)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+
+                                    {/* Non-Cash Group */}
+                                    <div className="space-y-2">
+                                        <div className="flex justify-between items-center text-[11px] font-black text-muted-foreground uppercase">
+                                            <span>{t('nonCash')}</span>
+                                            <span className="w-24 text-right font-black">{formatCurrency(shiftData.payments?.nonCash?.total || 0)}</span>
+                                        </div>
+                                        {shiftData.payments?.nonCash?.list?.map((item: any) => (
+                                            <div key={item.method} className="flex justify-between items-center px-1">
+                                                <span className="capitalize">{item.method.toLowerCase().replace('_', ' ')}</span>
+                                                <div className="flex items-center space-x-8">
+                                                    <span className="text-muted-foreground text-[10px]">{item.count} bills</span>
+                                                    <span className="font-bold w-24 text-right">{formatCurrency(item.amount)}</span>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+
                                 {/* Section 3: Cash In-Out */}
                                 <div className="space-y-3">
                                     <h3 className="font-black text-blue-600 border-b pb-1 uppercase tracking-wider">{t('cashFlowSection')}</h3>
