@@ -447,25 +447,26 @@ export default function POSPage() {
                                 {/* Section 1: POS Sales */}
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-black text-[#3b82f6] border-b pb-2 uppercase tracking-wide">{t('posSection')}</h3>
-                                    <div className="space-y-2.5">
+                                    <div className="space-y-3">
                                         <div className="flex justify-between items-center font-bold">
                                             <span className="text-zinc-800">{t('posSales')}</span>
                                             <div className="flex items-center">
                                                 <span className="text-zinc-400 text-[11px] font-black uppercase tracking-tighter mr-6">{shiftData.pos?.count} BILLS</span>
-                                                <span className="w-28 text-right text-lg">{formatCurrency(shiftData.pos?.total || 0)}</span>
+                                                <span className="w-28 text-right text-lg text-[#3b82f6]">{formatCurrency(shiftData.pos?.total || 0)}</span>
                                             </div>
                                         </div>
-                                        <div className="flex justify-between items-center text-zinc-500 font-medium">
-                                            <span>{t('totalDiscount')}</span>
-                                            <span className="w-28 text-right">-{formatCurrency(shiftData.pos?.discount || 0)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center text-zinc-500 font-medium pb-2">
-                                            <span>{t('avgBill')}</span>
-                                            <span className="w-28 text-right">{formatCurrency(shiftData.pos?.avg || 0)}</span>
-                                        </div>
-                                        <div className="flex justify-between items-center pt-3 border-t font-black text-[#3b82f6] text-xl">
-                                            <span>{t('saleAfterDisc')}</span>
-                                            <span className="w-28 text-right">฿{Number(shiftData.pos?.afterDiscount || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+
+                                        {/* POS Payment Breakdown */}
+                                        <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
+                                            {shiftData.pos?.breakdown?.map((item: any) => (
+                                                <div key={item.method} className="flex justify-between items-center text-[13px] font-medium text-zinc-500">
+                                                    <span className="capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
+                                                    <div className="flex items-center">
+                                                        <span className="text-[10px] uppercase mr-4">{item.count} bills</span>
+                                                        <span className="w-24 text-right">{formatCurrency(item.amount)}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>
@@ -473,13 +474,26 @@ export default function POSPage() {
                                 {/* Section 2: Room Revenue */}
                                 <div className="space-y-4">
                                     <h3 className="text-lg font-black text-[#10b981] border-b pb-2 uppercase tracking-wide">{t('roomSection')}</h3>
-                                    <div className="space-y-2.5">
+                                    <div className="space-y-3">
                                         <div className="flex justify-between items-center font-bold text-[#10b981]">
-                                            <span className="text-zinc-800 tracking-tight">roomRevenue</span>
+                                            <span className="text-zinc-800 tracking-tight">Room Revenue</span>
                                             <div className="flex items-center">
                                                 <span className="text-zinc-400 text-[11px] font-black uppercase tracking-tighter mr-6">{shiftData.room?.count} TRANS</span>
                                                 <span className="w-28 text-right text-lg">฿{Number(shiftData.room?.total || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                             </div>
+                                        </div>
+
+                                        {/* Room Payment Breakdown */}
+                                        <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
+                                            {shiftData.room?.breakdown?.map((item: any) => (
+                                                <div key={item.method} className="flex justify-between items-center text-[13px] font-medium text-emerald-600/70">
+                                                    <span className="capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
+                                                    <div className="flex items-center">
+                                                        <span className="text-[10px] uppercase mr-4">{item.count} bills</span>
+                                                        <span className="w-24 text-right">{formatCurrency(item.amount)}</span>
+                                                    </div>
+                                                </div>
+                                            ))}
                                         </div>
                                     </div>
                                 </div>

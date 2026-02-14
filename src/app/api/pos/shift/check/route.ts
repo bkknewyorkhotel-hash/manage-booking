@@ -44,14 +44,28 @@ export async function GET(request: Request) {
 
         const shift = openShift as any
 
+        // Helper to get payment breakdown
+        const getBreakdown = (items: any[], methodField: string, amountField: string) => {
+            const stats: Record<string, { count: number, amount: number }> = {}
+            items.forEach(item => {
+                const method = item[methodField] || 'OTHER'
+                const amount = Number(item[amountField] || 0)
+                if (!stats[method]) stats[method] = { count: 0, amount: 0 }
+                stats[method].count += 1
+                stats[method].amount += amount
+            })
+            return Object.entries(stats).map(([method, data]) => ({ method, ...data }))
+        }
+
         // Calculate real-time stats for the open shift
         // POS Sales
-        const posTotal = shift.Orders.filter((o: any) => o.status === 'COMPLETED').reduce((sum: number, o: any) => sum + Number(o.total), 0)
-        const posCash = shift.Orders.filter((o: any) => o.status === 'COMPLETED' && o.paymentMethod === 'CASH').reduce((sum: number, o: any) => sum + Number(o.total), 0)
+        const completedOrders = shift.Orders.filter((o: any) => o.status === 'COMPLETED')
+        const posTotal = completedOrders.reduce((sum: number, o: any) => sum + Number(o.total), 0)
+        const posBreakdown = getBreakdown(completedOrders, 'paymentMethod', 'total')
 
         // Room Revenue (Payments)
         const roomTotal = shift.Payments.reduce((sum: number, p: any) => sum + Number(p.amount), 0)
-        const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+        const roomBreakdown = getBreakdown(shift.Payments, 'method', 'amount')
 
         // Deposits (e.g. Key Deposit)
         const depositTotal = shift.Deposits.reduce((sum: number, d: any) => sum + Number(d.amount), 0)
@@ -67,43 +81,34 @@ export async function GET(request: Request) {
         const txIn = shift.CashTransactions.filter((t: any) => t.type === 'INCOME').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
         const txOut = shift.CashTransactions.filter((t: any) => t.type === 'EXPENSE').reduce((sum: number, t: any) => sum + Number(t.amount), 0)
 
-        const cashIn = txIn
-        const cashOut = txOut
-
-        // Payment Breakdown (Combined POS + Room + Deposit)
-        const paymentStats: Record<string, { count: number, amount: number }> = {}
-        const updatePaymentStats = (method: string, amount: number) => {
-            if (!paymentStats[method]) paymentStats[method] = { count: 0, amount: 0 }
-            paymentStats[method].count += 1
-            paymentStats[method].amount += amount
+        // All Payment Methods combined for the overall breakdown
+        const allPaymentsBreakdownMap: Record<string, { count: number, amount: number }> = {}
+        const updateAllPayments = (method: string, amount: number) => {
+            if (!allPaymentsBreakdownMap[method]) allPaymentsBreakdownMap[method] = { count: 0, amount: 0 }
+            allPaymentsBreakdownMap[method].count += 1
+            allPaymentsBreakdownMap[method].amount += amount
         }
+        completedOrders.forEach((o: any) => updateAllPayments(o.paymentMethod, Number(o.total)))
+        shift.Payments.forEach((p: any) => updateAllPayments(p.method, Number(p.amount)))
+        shift.Deposits.forEach((d: any) => updateAllPayments(d.method, Number(d.amount)))
 
-        shift.Orders.filter((o: any) => o.status === 'COMPLETED').forEach((o: any) => updatePaymentStats(o.paymentMethod, Number(o.total)))
-        shift.Payments.forEach((p: any) => updatePaymentStats(p.method, Number(p.amount)))
-        shift.Deposits.forEach((d: any) => updatePaymentStats(d.method, Number(d.amount)))
-
-        // Sectioned Payment Breakdown
-        const cashBreakdown = Object.entries(paymentStats)
+        const cashBreakdown = Object.entries(allPaymentsBreakdownMap)
             .filter(([method]) => method === 'CASH')
             .map(([method, data]) => ({ method, ...data }))
-        const nonCashBreakdown = Object.entries(paymentStats)
+        const nonCashBreakdown = Object.entries(allPaymentsBreakdownMap)
             .filter(([method]) => method !== 'CASH')
             .map(([method, data]) => ({ method, ...data }))
 
-        const cashTotalPay = cashBreakdown.reduce((sum, item) => sum + item.amount, 0)
-        const nonCashTotalPay = nonCashBreakdown.reduce((sum, item) => sum + item.amount, 0)
+        const cashTotalPay = cashBreakdown.reduce((sum: number, item: any) => sum + item.amount, 0)
+        const nonCashTotalPay = nonCashBreakdown.reduce((sum: number, item: any) => sum + item.amount, 0)
 
-        // Totals
+        // Totals for drawer calculation
+        const posCash = completedOrders.filter((o: any) => o.paymentMethod === 'CASH').reduce((sum: number, o: any) => sum + Number(o.total), 0)
+        const roomCash = shift.Payments.filter((p: any) => p.method === 'CASH').reduce((sum: number, p: any) => sum + Number(p.amount), 0)
+
         const totalSales = posTotal + roomTotal
-        const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + cashIn) - cashOut
+        const cashSales = Number(shift.startCash || 0) + (posCash + roomCash + txIn) - txOut
         const otherSales = (posTotal - posCash) + (roomTotal - roomCash) + depositOther - refundOther
-
-        const posOrderCount = shift.Orders.filter((o: any) => o.status === 'COMPLETED').length
-        const totalDiscount = 0
-        const posSaleAfterDisc = posTotal - totalDiscount
-        const posAvgBill = posOrderCount > 0 ? (posTotal / posOrderCount) : 0
-
-        const roomCount = shift.Payments.length
 
         return NextResponse.json({
             ...openShift,
@@ -111,17 +116,16 @@ export async function GET(request: Request) {
                 // Section 1: POS Sales
                 pos: {
                     total: posTotal,
-                    count: posOrderCount,
-                    avg: posAvgBill,
-                    discount: totalDiscount,
-                    afterDiscount: posSaleAfterDisc
+                    count: completedOrders.length,
+                    breakdown: posBreakdown
                 },
                 // Section 2: Room Revenue
                 room: {
                     total: roomTotal,
-                    count: roomCount
+                    count: shift.Payments.length,
+                    breakdown: roomBreakdown
                 },
-                // Categorized Payments
+                // Categorized Payments (Overall Breakdown at bottom)
                 payments: {
                     cash: {
                         list: cashBreakdown,
@@ -135,24 +139,18 @@ export async function GET(request: Request) {
                 // Section 3: Cash In-Out
                 cashFlow: {
                     startCash: Number(shift.startCash || 0),
-                    cashIn: cashIn,
-                    cashOut: cashOut,
+                    cashIn: txIn,
+                    cashOut: txOut,
                     netCash: cashSales,
                     totalRevenue: totalSales
                 },
-                // Other existing data for backward compatibility
+                // Metadata
                 posTotal,
                 roomTotal,
-                cashIn,
-                cashOut,
                 totalSales,
                 cashSales,
                 otherSales,
-                orderCount: posOrderCount + roomCount + shift.Deposits.length,
-                paymentBreakdown: paymentStats,
-                totalDiscount,
-                saleAfterDisc: totalSales - totalDiscount,
-                avgBill: (posOrderCount + roomCount) > 0 ? (totalSales / (posOrderCount + roomCount)) : 0,
+                paymentBreakdown: allPaymentsBreakdownMap,
                 vat: 0,
                 serviceCharge: 0
             }
