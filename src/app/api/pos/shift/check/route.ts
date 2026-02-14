@@ -133,7 +133,8 @@ export async function GET(request: Request) {
         // Detailed Transactions - use CashTransactions directly as it already includes labeled deposits/refunds
         const detailedTransactions = shift.CashTransactions.map((t: any) => ({
             label: t.description || t.category || (t.type === 'INCOME' ? 'Cash In' : 'Cash Out'),
-            amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount)
+            amount: t.type === 'EXPENSE' ? -Number(t.amount) : Number(t.amount),
+            type: t.type
         }))
 
         const totalPaymentCount = completedOrders.length + shift.Payments.length + shift.Deposits.length

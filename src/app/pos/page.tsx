@@ -534,13 +534,20 @@ export default function POSPage() {
                                             <span>{t('cashInDrawer')}</span>
                                             <span>{Number(shiftData.cashFlow?.cashIn || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
+                                        {/* Income Transactions */}
+                                        {shiftData.cashFlow?.transactions?.filter((t: any) => t.amount !== 0 && t.type === 'INCOME').map((tx: any, idx: number) => (
+                                            <div key={idx} className="flex justify-between items-center text-zinc-500 italic text-[13px]">
+                                                <span className="pl-4">{tx.labelKey ? t(tx.labelKey) : tx.label}</span>
+                                                <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
+                                            </div>
+                                        ))}
+
                                         <div className="flex justify-between items-center text-zinc-400">
                                             <span>{t('cashOutDrawer')}</span>
                                             <span>{Number(shiftData.cashFlow?.cashOut || 0).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
                                         </div>
-
-                                        {/* Detailed Transactions - Hidden if amount is zero */}
-                                        {shiftData.cashFlow?.transactions?.filter((t: any) => t.amount !== 0).map((tx: any, idx: number) => (
+                                        {/* Expense Transactions */}
+                                        {shiftData.cashFlow?.transactions?.filter((t: any) => t.amount !== 0 && t.type === 'EXPENSE').map((tx: any, idx: number) => (
                                             <div key={idx} className="flex justify-between items-center text-zinc-500 italic text-[13px]">
                                                 <span className="pl-4">{tx.labelKey ? t(tx.labelKey) : tx.label}</span>
                                                 <span className="font-bold">{tx.amount.toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 })}</span>
