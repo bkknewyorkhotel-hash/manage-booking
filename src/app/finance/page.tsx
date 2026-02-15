@@ -123,6 +123,36 @@ export default function FinancePage() {
         )
     }
 
+    // Lock screen if shift is owned by another user
+    if (activeShift && user && activeShift.userId !== user.id) {
+        return (
+            <Shell>
+                <div className="flex flex-col items-center justify-center h-[calc(100vh-200px)] space-y-6 text-center">
+                    <div className="w-24 h-24 bg-yellow-100 text-yellow-600 rounded-full flex items-center justify-center shadow-inner">
+                        <svg className="h-14 w-14" viewBox="0 0 20 20" fill="currentColor">
+                            <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                        </svg>
+                    </div>
+                    <div className="max-w-md space-y-2">
+                        <h2 className="text-3xl font-black text-foreground">กะถูกล็อค</h2>
+                        <p className="text-muted-foreground">
+                            กะนี้ถูกเปิดโดยพนักงานคนอื่น - คุณไม่สามารถเข้าถึงข้อมูลการเงินได้
+                        </p>
+                        <p className="text-sm text-zinc-400 pt-2">
+                            กรุณาไปที่หน้า POS เพื่อเปิดกะใหม่
+                        </p>
+                    </div>
+                    <button
+                        onClick={() => window.location.href = '/pos'}
+                        className="px-8 py-3 bg-primary text-white font-bold rounded-2xl shadow-lg shadow-primary/20 hover:scale-105 transition-all"
+                    >
+                        ไปที่ POS
+                    </button>
+                </div>
+            </Shell>
+        )
+    }
+
     return (
         <Shell>
             <header className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b pb-6">
