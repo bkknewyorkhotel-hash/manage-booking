@@ -24,7 +24,7 @@ interface CartItem extends Product {
 export default function POSPage() {
     const { t } = useTranslation()
     const { showToast } = useToast()
-    const { user } = useAuth()
+    const { user, refreshUser } = useAuth()
     const [products, setProducts] = useState<Product[]>([])
     const [cart, setCart] = useState<CartItem[]>([])
     const [search, setSearch] = useState('')
@@ -44,7 +44,12 @@ export default function POSPage() {
     const [isCartOpen, setIsCartOpen] = useState(false) // Mobile cart toggle
     const [closingCash, setClosingCash] = useState('')
 
-    // 1. Check for Active Shift on Load
+    // 1. Refresh user context on mount to ensure correct user after login
+    useEffect(() => {
+        refreshUser()
+    }, [])
+
+    // 2. Check for Active Shift on Load
     useEffect(() => {
         checkActiveShift()
     }, [])
