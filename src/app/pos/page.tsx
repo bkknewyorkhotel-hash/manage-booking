@@ -275,24 +275,50 @@ export default function POSPage() {
 
     return (
         <Shell>
-            {/* Warning: Shift opened by another user */}
-            {activeShift && user && activeShift.userId !== user.id && (
-                <div className="bg-yellow-50 border-l-4 border-yellow-400 p-4 mb-4 print:hidden">
-                    <div className="flex items-center">
-                        <div className="flex-shrink-0">
-                            <svg className="h-5 w-5 text-yellow-400" viewBox="0 0 20 20" fill="currentColor">
-                                <path fillRule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clipRule="evenodd" />
-                            </svg>
+            {/* Lock Screen: Shift opened by another user */}
+            {activeShift && user && activeShift.userId !== user.id ? (
+                <div className="flex items-center justify-center h-[calc(100vh-100px)]">
+                    <div className="w-full max-w-md p-8 bg-card border-2 border-yellow-400 rounded-3xl shadow-2xl space-y-6">
+                        <div className="text-center space-y-4">
+                            <div className="mx-auto w-16 h-16 bg-yellow-100 rounded-full flex items-center justify-center">
+                                <svg className="h-10 w-10 text-yellow-600" viewBox="0 0 20 20" fill="currentColor">
+                                    <path fillRule="evenodd" d="M5 9V7a5 5 0 0110 0v2a2 2 0 012 2v5a2 2 0 01-2 2H5a2 2 0 01-2-2v-5a2 2 0 012-2zm8-2v2H7V7a3 3 0 016 0z" clipRule="evenodd" />
+                                </svg>
+                            </div>
+                            <div>
+                                <h2 className="text-2xl font-black text-zinc-800">{t('shiftLocked') || 'กะถูกล็อค'}</h2>
+                                <p className="text-sm text-zinc-500 mt-2">
+                                    {t('shiftLockedMessage') || 'กะนี้ถูกเปิดโดยพนักงานคนอื่น กรุณาเปิดกะใหม่เพื่อเริ่มทำงาน'}
+                                </p>
+                            </div>
                         </div>
-                        <div className="ml-3">
-                            <p className="text-sm font-medium text-yellow-800">
-                                กะนี้ถูกเปิดโดยพนักงานคนอื่น - กรุณาระวังในการปิดกะ
-                            </p>
+                        <div className="space-y-3">
+                            <div className="space-y-1.5 text-left">
+                                <label className="text-[10px] font-black uppercase text-muted-foreground ml-1">{t('startingCash')}</label>
+                                <input
+                                    type="number"
+                                    placeholder="0.00"
+                                    className="w-full h-12 px-4 rounded-xl border bg-background font-mono text-lg font-bold focus:ring-2 focus:ring-primary/20 outline-none"
+                                    value={startingCash}
+                                    onChange={(e) => setStartingCash(e.target.value)}
+                                />
+                            </div>
+                            <button
+                                onClick={handleOpenShift}
+                                disabled={isProcessing}
+                                className="w-full py-4 bg-primary text-white font-black rounded-2xl shadow-lg shadow-primary/20 hover:scale-[1.02] transition-all disabled:opacity-50"
+                            >
+                                {isProcessing ? t('processing') : t('openNewShift') || 'เปิดกะใหม่'}
+                            </button>
                         </div>
                     </div>
                 </div>
-            )}
-            <div className="flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative print:hidden">
+            ) : null}
+
+            <div className={cn(
+                "flex flex-col lg:flex-row h-[calc(100vh-80px)] md:h-[calc(100vh-100px)] gap-4 md:gap-6 pb-20 lg:pb-0 relative print:hidden",
+                activeShift && user && activeShift.userId !== user.id && "hidden"
+            )}>
                 {/* Left: Product Catalog */}
                 <div className="flex-1 flex flex-col space-y-3 md:space-y-4 min-h-0">
                     <div className="flex flex-col md:flex-row gap-3 bg-card p-3 md:p-4 rounded-xl border shadow-sm">
