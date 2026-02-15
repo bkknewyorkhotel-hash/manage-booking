@@ -3,10 +3,12 @@
 import React, { useState } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from '@/lib/LanguageContext'
+import { useAuth } from '@/lib/AuthContext'
 import { Lock, User, Globe } from 'lucide-react'
 
 export default function LoginPage() {
     const { lang, setLang, t } = useTranslation()
+    const { refreshUser } = useAuth()
     const [username, setUsername] = useState('')
     const [password, setPassword] = useState('')
     const [error, setError] = useState('')
@@ -24,6 +26,7 @@ export default function LoginPage() {
             })
 
             if (res.ok) {
+                await refreshUser()
                 router.push('/dashboard')
             } else {
                 setError('Invalid username or password')
