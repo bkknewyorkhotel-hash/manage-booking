@@ -7,18 +7,45 @@ export async function POST(request: Request) {
         const body = await request.json()
         const { userId, startCash } = body
 
-        // Check if user already has an open shift (optional, but good practice)
-        const existingShift = await prisma.shift.findFirst({
-            where: {
-                userId,
-                status: 'OPEN'
-            }
+        // Find ANY open shift on this terminal/system (not just user's shift)
+        const existingOpenShift = await prisma.shift.findFirst({
+            where: { status: 'OPEN' },
+            orderBy: { startTime: 'desc' }
         })
 
-        if (existingShift) {
-            return NextResponse.json({ error: 'User already has an open shift' }, { status: 400 })
+        // Auto-close previous shift if exists (graceful handover)
+        if (existingOpenShift) {
+            // Calculate totals for auto-closed shift
+            const orders = await prisma.posOrder.findMany({
+                where: {
+                    shiftId: existingOpenShift.id,
+                    status: 'COMPLETED'
+                }
+            })
+
+            const payments = await prisma.payment.findMany({
+                where: { shiftId: existingOpenShift.id }
+            })
+
+            const posTotal = orders.reduce((sum, order) => sum + Number(order.total), 0)
+            const roomTotal = payments.reduce((sum, payment) => sum + Number(payment.amount), 0)
+            const totalSales = posTotal + roomTotal
+
+            await prisma.shift.update({
+                where: { id: existingOpenShift.id },
+                data: {
+                    endTime: new Date(),
+                    endCash: existingOpenShift.startCash, // Assume no change (user forgot to count)
+                    totalSales: Number(totalSales),
+                    status: 'CLOSED'
+                }
+            })
+
+            // Log this action for audit trail
+            console.warn(`[SHIFT HANDOVER] Auto-closed shift ${existingOpenShift.id} (opened by user ${existingOpenShift.userId}) when user ${userId} opened new shift`)
         }
 
+        // Create new shift for current user
         const newShift = await prisma.shift.create({
             data: {
                 userId,
