@@ -285,6 +285,7 @@ export function NewBookingModal({ isOpen, onClose, onSuccess }: NewBookingModalP
                                         <option value="BANK_TRANSFER">Bank Transfer (โอนเงิน)</option>
                                         <option value="CARD">Credit/Debit Card</option>
                                         <option value="QR">QR PromptPay</option>
+                                        <option value="ONLINE">Payment Online (ชำระเงินออนไลน์)</option>
                                     </select>
                                 </div>
                             </div>

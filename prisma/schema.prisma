@@ -325,6 +325,7 @@ enum PaymentMethod {
   BANK_TRANSFER
   CARD
   QR
+  ONLINE
   ROOM_CHARGE
 }
 

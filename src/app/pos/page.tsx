@@ -444,7 +444,7 @@ export default function POSPage() {
                             <span className="text-primary">{formatCurrency(total)}</span>
                         </div>
 
-                        <div className="grid grid-cols-2 gap-2 md:gap-3">
+                        <div className="grid grid-cols-3 gap-2 md:gap-3">
                             <button
                                 onClick={() => initiateCheckout('CASH')}
                                 disabled={cart.length === 0 || isProcessing}
@@ -458,8 +458,16 @@ export default function POSPage() {
                                 disabled={cart.length === 0 || isProcessing}
                                 className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-blue-500 text-white rounded-xl md:rounded-2xl hover:bg-blue-600 transition-colors disabled:opacity-50 shadow-md shadow-blue-500/20 active:scale-95"
                             >
-                                <CreditCard size={20} className="mb-0.5 md:mb-1 md:size-6" />
+                                <QrCode size={20} className="mb-0.5 md:mb-1 md:size-6" />
                                 <span className="text-[10px] md:text-xs font-bold uppercase">{t('qrPay')}</span>
+                            </button>
+                            <button
+                                onClick={() => initiateCheckout('ONLINE')}
+                                disabled={cart.length === 0 || isProcessing}
+                                className="flex flex-col items-center justify-center p-2.5 md:p-3 bg-indigo-500 text-white rounded-xl md:rounded-2xl hover:bg-indigo-600 transition-colors disabled:opacity-50 shadow-md shadow-indigo-500/20 active:scale-95"
+                            >
+                                <Wallet size={20} className="mb-0.5 md:mb-1 md:size-6" />
+                                <span className="text-[10px] md:text-xs font-bold uppercase">{t('online')}</span>
                             </button>
                         </div>
 
@@ -542,7 +550,11 @@ export default function POSPage() {
                                         <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
                                             {shiftData.pos?.breakdown?.map((item: any) => (
                                                 <div key={item.method} className="flex justify-between items-center text-[13px] font-medium text-zinc-500">
-                                                    <span className="capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
+                                                    <span className="capitalize">
+                                                        {item.method.toLowerCase() === 'qr_pay' ? 'Qr' :
+                                                            item.method.toLowerCase() === 'online' ? t('online') :
+                                                                item.method.toLowerCase().replace('_', ' ')}
+                                                    </span>
                                                     <div className="flex items-center">
                                                         <span className="text-[10px] uppercase mr-4">{item.count} bills</span>
                                                         <span className="w-24 text-right">{formatCurrency(item.amount)}</span>
@@ -569,7 +581,11 @@ export default function POSPage() {
                                         <div className="space-y-2 pl-4 border-l-2 border-zinc-100">
                                             {shiftData.room?.breakdown?.map((item: any) => (
                                                 <div key={item.method} className="flex justify-between items-center text-[13px] font-medium text-emerald-600/70">
-                                                    <span className="capitalize">{item.method.toLowerCase() === 'qr_pay' ? 'Qr' : item.method.toLowerCase().replace('_', ' ')}</span>
+                                                    <span className="capitalize">
+                                                        {item.method.toLowerCase() === 'qr_pay' ? 'Qr' :
+                                                            item.method.toLowerCase() === 'online' ? t('online') :
+                                                                item.method.toLowerCase().replace('_', ' ')}
+                                                    </span>
                                                     <div className="flex items-center">
                                                         <span className="text-[10px] uppercase mr-4">{item.count} bills</span>
                                                         <span className="w-24 text-right">{formatCurrency(item.amount)}</span>
