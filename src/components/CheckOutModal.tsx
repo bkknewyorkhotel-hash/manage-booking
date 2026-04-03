@@ -75,11 +75,16 @@ export function CheckOutModal({
     }
 
     const handleRefundChange = (depositId: string, value: string) => {
-        setRefunds(prev => prev.map(r =>
-            r.depositId === depositId
-                ? { ...r, amount: value === '' ? 0 : Number(value) }
-                : r
-        ))
+        setRefunds(prev => prev.map(r => {
+            if (r.depositId === depositId) {
+                const newAmount = value === '' ? '' : Number(value)
+                return { 
+                    ...r, 
+                    amount: typeof newAmount === 'number' && newAmount > r.originalAmount ? r.originalAmount : newAmount 
+                }
+            }
+            return r
+        }))
     }
 
     return (

@@ -179,10 +179,16 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                 // 1. Process refunds if any
                 if (refunds && Array.isArray(refunds)) {
                     for (const r of refunds) {
+                        const existingDeposit = await tx.deposit.findUnique({ where: { id: r.depositId } })
+                        if (!existingDeposit) continue
+
+                        const requestedRefund = Number(r.amount)
+                        const refundAmount = requestedRefund > Number(existingDeposit.amount) ? Number(existingDeposit.amount) : requestedRefund
+
                         const deposit = await tx.deposit.update({
                             where: { id: r.depositId },
                             data: {
-                                refundedAmount: Number(r.amount),
+                                refundedAmount: refundAmount,
                                 refundedAt: new Date(),
                                 refundShiftId: activeShift.id,
                                 status: 'REFUNDED'
@@ -190,13 +196,13 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                         })
 
                         // NEW: Create Cash Transaction for refund record
-                        if (deposit.method === 'CASH' && Number(r.amount) > 0) {
+                        if (deposit.method === 'CASH' && refundAmount > 0) {
                             await tx.cashTransaction.create({
                                 data: {
                                     type: 'EXPENSE',
                                     category: 'REFUND',
                                     description: `คืนมัดจำห้อง ${booking.Rooms.map(r => r.Room?.roomNo).join(', ')} (${booking.bookingNo})`,
-                                    amount: Number(r.amount),
+                                    amount: refundAmount,
                                     referenceNo: booking.bookingNo,
                                     shiftId: activeShift.id
                                 }
