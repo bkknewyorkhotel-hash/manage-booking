@@ -26,15 +26,17 @@ export function CheckOutModal({
     const heldDeposits = stay?.Deposits?.filter((d: any) => d.status === 'HELD') || []
 
     useEffect(() => {
-        if (heldDeposits.length > 0) {
+        if (isOpen) {
             setRefunds(heldDeposits.map((d: any) => ({
                 depositId: d.id,
                 amount: Number(d.amount),
                 originalAmount: Number(d.amount),
                 method: d.method
             })))
+        } else {
+            setRefunds([])
         }
-    }, [booking])
+    }, [booking, isOpen])
 
     if (!isOpen || !booking) return null
 

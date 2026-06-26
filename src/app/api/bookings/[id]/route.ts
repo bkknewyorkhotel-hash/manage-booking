@@ -179,8 +179,11 @@ export async function PATCH(request: Request, context: { params: Promise<{ id: s
                 // 1. Process refunds if any
                 if (refunds && Array.isArray(refunds)) {
                     for (const r of refunds) {
-                        const existingDeposit = await tx.deposit.findUnique({ where: { id: r.depositId } })
-                        if (!existingDeposit) continue
+                        const existingDeposit = await tx.deposit.findUnique({
+                            where: { id: r.depositId },
+                            include: { Stay: true }
+                        })
+                        if (!existingDeposit || existingDeposit.Stay.bookingId !== id) continue
 
                         const requestedRefund = Number(r.amount)
                         const refundAmount = requestedRefund > Number(existingDeposit.amount) ? Number(existingDeposit.amount) : requestedRefund

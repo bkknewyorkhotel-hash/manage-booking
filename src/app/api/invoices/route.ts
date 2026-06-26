@@ -25,7 +25,7 @@ export async function POST(request: Request) {
                     }
                 },
                 Deposits: {
-                    where: { status: 'RECEIVED' }
+                    where: { status: 'HELD' }
                 }
             }
         })
